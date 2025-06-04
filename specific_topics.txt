@@ -1,11 +1,11 @@
 0/1 knapsack problem
 01 knapsack problem
-10 gb/ 
+10 gb/ s
 1064 nm
-18s rrna
+18 rrna
 1db compression point
-28s rrna
-2d discrete wavelet transform
+28 rrna
+2d discrete wavelet transforms
 2d model
 2d video
 3axis accelerometer
@@ -16,7 +16,7 @@
 3d graphic
 3d imaging
 3d integrated circuit
-3d meshe
+3d mesh
 3d model retrieval
 3d object recognition
 3d object retrieval
@@ -35,7 +35,7 @@
 3gpp
 3gpp lte
 3rd generation partnership project
-40 gb/
+40 gb/s
 4g
 4g mobile communication system
 6lowpan
@@ -43,7 +43,7 @@
 802.11 network
 802.11e
 802.15.4
-8bit microcontroller
+8bit microcontrollers
 aac
 aadl
 aal
@@ -58,7 +58,7 @@ abstract syntax
 abstracting and indexing
 ac coefficient
 academic achievement
-academic librarie
+academic library
 acceleration data
 acceleration measurement
 acceleration sensor
@@ -69,7 +69,7 @@ access category
 access control decision
 access control scheme
 access permission
-access policie
+access policy
 access right
 access router
 access technology
@@ -90,8 +90,8 @@ acoustic array
 acoustic channel
 acoustic communication
 acoustic doppler current profiler
+acoustic echo
 acoustic echo cancellation
-acoustic echoe
 acoustic emission signal
 acoustic environment
 acoustic equipment
@@ -108,7 +108,7 @@ acoustic source
 acoustic source localization
 acoustic surface wave filter
 acoustic transducer
-acoustic variables control
+acoustic variable control
 acoustic wave scattering
 acoustic wave transmission
 acoustic wave velocity measurement
@@ -118,7 +118,7 @@ acquisition process
 acquisition system
 acquisition time
 actinomadura
-actinomycetes and related organism
+actinomycete and related organism
 action language
 action selection
 action sequence
@@ -151,7 +151,7 @@ ada programming language
 adaboost algorithm
 adaboost learning
 adam
-adams software
+adam software
 adaptive architecture
 adaptive array
 adaptive backstepping
@@ -201,7 +201,7 @@ additive white gaussian noise channel
 address translation
 adjacent channel
 adjacent channel interference
-adjacent vertice
+adjacent vertex
 adjoint method
 admission control
 admission control algorithm
@@ -245,8 +245,8 @@ agentoriented software engineering
 agglomerative hierarchical clustering
 aggregate signature
 aggregation scheme
-agile approache
-agile methodologie
+agile approach
+agile methodology
 agile practice
 agile process
 agrammatism
@@ -275,7 +275,6 @@ alamouti code
 alcatel
 alert correlation
 algan
-algan/gan
 algebraic attack
 algebraic degree
 algebraic immunity
@@ -291,6 +290,7 @@ alloptical network
 alloptical signal processing
 alloptical switching
 allozyme
+allozymes
 alma
 alpsm
 altitude control
@@ -313,7 +313,6 @@ analog integrated circuit
 analog multiplier
 analog network coding
 analog signal
-analytic hierarchie
 analytic hierarchy
 analytic network process
 analytic signal
@@ -325,7 +324,7 @@ ancillary service
 android application
 android platform
 anechoic chamber
-anfi
+anfis
 angle estimation
 angular rate
 ann
@@ -342,8 +341,8 @@ anonymous communication
 anonymous communication system
 answer extraction
 answer set
-answer set semantic
-answering querie
+answer set semantics
+answering query
 ant system
 antenna design
 antenna diversity
@@ -357,9 +356,9 @@ antenna radiation pattern
 antenna reflector
 antenna selection
 antenna system
-anti viru
+anti virus
 anticyclone
-antiforensic
+antiforensics
 antijamming
 antimalware
 antiphishing
@@ -377,12 +376,12 @@ appearance model
 appearance modeling
 application engineering
 application execution
+application in subject area
 application layer multicast
 application mapping
 application server
 applicationlayer multicast
-applications in subject area
-applied mathematic
+applied mathematics
 approximate dynamic programming
 approximate inference
 approximate string matching
@@ -394,16 +393,15 @@ ar application
 ar system
 arbitrary switching
 arcanobacterium
-architectural analysi
+architectural analysis
 architectural guideline
 architectural knowledge exploiting
 architectural knowledge modeling
 architectural knowledge reuse
 architectural knowledge sharing
 architectural model
-architectural strategie
 architectural strategy
-architectural synthesi
+architectural synthesis
 architectural technical debt
 architecturally significant requirement
 architecture design
@@ -415,24 +413,24 @@ architecture knowledge modeling
 architecture knowledge reuse
 architecture knowledge sharing
 architecture maintenance
-architecture performance analysi
-architecture supporting activitie
+architecture performance analysis
+architecture supporting activity
 architecture technical debt
 architecture testing
 architecture viewpoint
 architecturebased testing
 architecturesupporting activity
 archstudio
-arcuate fasciculu
+arcuate fasciculus
 area overhead
 argon laser
 argumentation framework
-argumentation semantic
+argumentation semantics
 argumentation system
 arithmetic coding
 array antenna
 array gain
-array geometrie
+array geometry
 array multiplier
 array signal processing
 arrayed waveguide grating
@@ -450,9 +448,9 @@ aspectj
 aspectorientation
 aspectoriented software
 aspectoriented software development
-asphere
-aspheric
+aspheres
 aspheric surface
+aspherics
 assembly planning
 assembly task
 assignment problem
@@ -492,10 +490,10 @@ attributebased encryption
 attributed graph
 auction mechanism
 audio
-audio analysi
+audio analysis
 audio application
 audio classification
-audio codec
+audio codecs
 audio compression
 audio content
 audio data
@@ -524,10 +522,8 @@ authentication server
 authorization
 auto stereoscopic
 autobiographical memory
-autoencoder
-autofocu
-automata
-automata theory computability and decidability
+autoencoders
+autofocus
 automated debugging
 automated guided vehicle
 automated manufacturing system
@@ -559,6 +555,8 @@ automatic translation
 automatic transmission
 automatic vehicle identification
 automatic verification
+automaton
+automaton theory computability and decidability
 automobile engine
 automotive engine
 autonomic management
@@ -619,8 +617,8 @@ backstepping method
 backstepping technique
 backup path
 bacterial chromosome
-bacteroide
-bagofvisualword
+bacteroides
+bagofvisualwords
 bam neural network
 ban logic
 band selection
@@ -666,11 +664,11 @@ beamforming algorithm
 beamforming technique
 beamsteering
 bearing fault
-bearing fault diagnosi
-behavioral synthesi
+bearing fault diagnosis
+behavioral synthesis
 belief propagation algorithm
 belief propagation decoding
-benders decomposition
+bender decomposition
 bessel beam
 bessel function
 best approximation
@@ -684,7 +682,6 @@ bibliographic data
 bibliographic record
 bibliographic retrieval system
 bicmid
-bidding strategie
 bidding strategy
 bidirectional associative memory
 bidirectional language model
@@ -694,7 +691,7 @@ bilateral control
 bilateral teleoperation
 bilinear map
 bilingual
-bilingual corpora
+bilingual corpus
 bilingual dictionary
 bilingualism
 bin packing
@@ -720,7 +717,7 @@ binocular rivalry
 binocular stereo
 binocular stereo vision
 bioassessment
-biocommunication
+biocommunications
 biofeedback
 biological network
 biomedical signal
@@ -741,8 +738,8 @@ biomimetic material
 bionlp
 biorthogonal
 biotic index
-biotic indice
 bipartite matching
+bipartite matchings
 biped walking
 biped walking robot
 bipedal locomotion
@@ -763,7 +760,7 @@ bitinterleaved coded modulation
 bitplane
 bitrate reduction
 bitrate saving
-bitstream
+bitstreams
 black hole attack
 blackboard
 blackbox optimization
@@ -784,7 +781,7 @@ blind signature scheme
 blind source extraction
 blind user
 blind watermarking
-block boundarie
+block boundary
 block diagonalization
 block length
 block motion estimation
@@ -799,13 +796,14 @@ bold signal
 boltzmann machine
 bomb
 bone stress
-boolean formulae
+boolean formula
 boolean network
 boolean operation
 boolean satisfiability
 boosting algorithm
 border gateway protocol
 botnet
+botnets
 boundary conditioning
 boundary integral
 boundary scan
@@ -813,7 +811,7 @@ boundary value
 bounded model checking
 bounded treewidth
 bounding volume
-bounding volume hierarchie
+bounding volume hierarchy
 box and line
 bp algorithm
 bp artificial neural network
@@ -841,12 +839,11 @@ broadband access network
 broadband beamforming
 broadband isdn
 broadband wireless access
-broadband wireless accesss
 broadcast
 broadcast algorithm
 broadcast encryption
 broadcast encryption scheme
-broadcast new
+broadcast news
 broadcast protocol
 broadcasting algorithm
 broadcasting antenna
@@ -854,9 +851,9 @@ broadcasting scheme
 brodatz
 broker
 broker pattern
+bs
 bspline curve
 bspline surface
-bss
 budget
 budworm
 buffer capacity
@@ -864,9 +861,9 @@ buffer circuit
 buffer insertion
 buffer management
 buffer overflow
+bug question
 bug tracking system
 bugfixing
-bugs question
 building automation
 building automation system
 building energy performance
@@ -877,7 +874,7 @@ buried object
 burst assembly
 burst loss
 busbased
-business activitie
+business activity
 business analyst
 business decision
 business environment
@@ -887,7 +884,7 @@ business intelligence system
 business logic
 business modeling
 business partner
-business process analysi
+business process analysis
 business process design
 business process execution
 business process management system
@@ -903,6 +900,7 @@ butterworth filter
 bytecode
 byzantine failure
 byzantine fault tolerance
+c education
 c program
 c++
 c4.5 algorithm
@@ -918,7 +916,7 @@ cache block
 cache coherence
 cache coherence protocol
 cache design
-cache hierarchie
+cache hierarchy
 cache management
 cache miss
 cache partitioning
@@ -931,6 +929,7 @@ cad model
 cad system
 cad tool
 cad/cam
+cad/cams
 call admission
 call blocking probability
 call dropping probability
@@ -939,7 +938,7 @@ camera phone
 camera pose estimation
 camshift
 camshift algorithm
-can bu
+can bus
 cancer susceptibility
 candidate generation
 candidate solution
@@ -963,7 +962,7 @@ carbide tool
 carrier
 carrier aggregation
 carrier ethernet
-carrier frequencie
+carrier frequency
 carrier sense
 carrier sense multiple access with collision avoid
 carrier sensing
@@ -972,7 +971,7 @@ cartesian genetic programming
 cascade classifier
 cascading failure
 case representation
-casebased reasoning approache
+casebased reasoning approach
 catalogue identifier
 cathode ray tube
 caucasoid race
@@ -990,7 +989,6 @@ cell loss probability
 cell phone
 cellular
 cellular array
-cellular automaton
 cellular automaton model
 cellular manufacturing
 cellular manufacturing system
@@ -1003,7 +1001,7 @@ centralized architecture
 centralized scheduling
 centroidal voronoi tessellation
 centromere
-cepstral analysi
+cepstral analysis
 cepstral feature
 certificate authority
 certificate management
@@ -1012,17 +1010,18 @@ certificatebased
 certificateless cryptography
 certificateless public key cryptography
 certificateless signature
-certification authoritie
+certification authority
 cesium alloy
 cfar
 cfar detection
 cfo
 chalcogenide
+chalcogenides
 challenge response
 cham
 chanceconstrained
 change detection algorithm
-change impact analysi
+change impact analysis
 channel assignment problem
 channel assignment scheme
 channel characteristic
@@ -1039,7 +1038,7 @@ channel gain
 channel impulse response
 channel interference
 channel inversion
-channel matrice
+channel matrix
 channel measurement
 channel modeling
 channel selection
@@ -1104,7 +1103,7 @@ chromosomes, plant
 chuas circuit
 cim
 circle detection
-circuit analysi
+circuit analysis
 circuit modeling
 circuit oscillation
 circuit simulator
@@ -1160,7 +1159,7 @@ clock tree
 clockjitter
 clone detection
 closed form solution
-closed itemset
+closed itemsets
 closed loop control
 closedform solution
 closedloop signal
@@ -1172,7 +1171,6 @@ cloud computing service
 cloud data
 cloud environment
 cloud infrastructure
-cloud securitie
 cloud security
 cloud service
 cloud service provider
@@ -1189,7 +1187,6 @@ cluster system
 cluster validation
 cluster validity
 cluster validity index
-cluster validity indice
 clusterbased routing
 clustered wireless sensor network
 clusterhead node
@@ -1200,13 +1197,12 @@ clustering protocol
 clustering quality
 clustering scheme
 clutch
-clutche
 clutter background
 clutter suppression
 cma
 cmmi
 cmos analog integrated circuit
-cmosmem
+cmosmems
 cmp
 cnc
 cnc machine tool
@@ -1250,11 +1246,11 @@ coefficient of determination
 coercive force
 cognitive architecture
 cognitive disability
-cognitive informatic
+cognitive informatics
 cognitive map
 cognitive network
-cognitive processe
-cognitive radio technologie
+cognitive process
+cognitive radio technology
 cognitive science
 cognitive wireless network
 cohengrossberg neural network
@@ -1264,11 +1260,11 @@ coherent signal
 cohnkanade database
 coil
 coinduction
-cointegration analysi
+cointegration analysis
 cold start
 collaboration network
-collaborative activitie
-collaborative learning activitie
+collaborative activity
+collaborative learning activity
 collaborative learning environment
 collaborative optimization
 collaborative software
@@ -1313,16 +1309,16 @@ comb filter
 combination forecasting
 combination rule
 combinational circuit
-combinator
 combinatorial algorithm
 combinatorial auction
 combinatorial problem
+combinators
 combined cycle power plant
 combining classifier
 combining technique
 commercial bank
 commercial building
-common criteria
+common criterion
 common fixed point
 common lyapunov function
 common object request broker architecture
@@ -1333,8 +1329,8 @@ commonsense knowledge
 commonsense knowledge base
 communicating sequential process
 communication aid
-communication aids for disabled
-communication aids for nonvocal person
+communication aid for disabled
+communication aid for nonvocal person
 communication bandwidth
 communication constraint
 communication delay
@@ -1342,7 +1338,6 @@ communication model
 communication network
 communication protocol
 communication robot
-communities of practice
 community detection algorithm
 community of practice
 comp
@@ -1364,13 +1359,12 @@ complex adaptive system
 complex dynamical network
 complex network theory
 complex product
-complex querie
+complex query
 complex question
 complex service
 complex software system
 complex target
 complexity class
-complexity classe
 complexity decreasing
 complexity metric
 complexity result
@@ -1383,7 +1377,7 @@ component behavior
 component composition
 component integration
 component model
-component model semantic
+component model semantics
 component repository
 component selection
 componentandconnector
@@ -1411,17 +1405,17 @@ computability
 computation independent model
 computation overhead
 computation tree logic
-computational electromagnetic
+computational electromagnetics
 computational photography
 computational power
 computational resource
 compute unified device architecture
-computed tomographie
+computed tomography
 computed torque control
 computer aided
 computer aided geometric design
 computer aided logic design
-computer aided network analysi
+computer aided network analysis
 computer aided process planning
 computer arithmetic
 computer assisted
@@ -1442,9 +1436,9 @@ computer programming theory
 computer resource
 computer resource management
 computer science course
-computer science curricula
-computer systems programming multiprocessing pro
-computer systems programmingmultiprocessing prog
+computer science curriculum
+computer system programming multiprocessing pro
+computer system programmingmultiprocessing prog
 computer vision application
 computeraided detection
 computeraided diagnosis system
@@ -1452,7 +1446,7 @@ computerassisted language learning
 computers, microprocessor medical application
 computersupported collaborative learning
 computing cluster
-computing curricula
+computing curriculum
 computing education
 computing environment
 computing infrastructure
@@ -1475,7 +1469,6 @@ concurrent transaction
 condition
 condition attribute
 condition number
-conditional probabilitie
 conditional probability
 conduction aphasia
 conduction band
@@ -1490,7 +1483,6 @@ conflict detection
 conflicting objective
 conformance checking
 conformance testing
-confusion matrice
 confusion matrix
 congenial access control
 congestion
@@ -1499,24 +1491,23 @@ congestion control algorithm
 congestion control mechanism
 congestion game
 congestion window
-conjunctive querie
-connected component analysi
+conjunctive query
+connected component analysis
 connected graph
 connected healthcare
 connection admission control
 consensus protocol
-conservation genetic
+conservation genetics
 conservation of energy resource
-conservation statu
+conservation status
 conserve energy
 conserved sequence
-consistency analysi
+consistency analysis
 consistency checking
 consistencychecking
 constant bit rate
 constant factor approximation
-constant moduli
-constant modulu
+constant modulus
 constantfactor approximation algorithm
 constitutive modeling
 constrained problem
@@ -1571,7 +1562,7 @@ continuous time markov chain
 continuous time model
 continuous wave laser
 continuous wave radar
-continuous wavelet transform
+continuous wavelet transforms
 continuously variable transmission
 continuum structure
 contourlet coefficient
@@ -1606,7 +1597,7 @@ conventionalpi controller
 convergence, ocular
 conversion loss
 convolutional coding
-convolutional encoder
+convolutional encoders
 convolutional neural network
 convolutive mixture
 cooperative computing
@@ -1626,6 +1617,7 @@ coordinated beamforming
 coordinated multi point
 coordination mechanism
 coprocessor
+coprocessors
 core asset
 core binding factor alpha 2 subunit
 core node
@@ -1636,11 +1628,11 @@ corner point
 corona radiata
 corporate governance
 correction method
-correlated equilibria
+correlated equilibrium
 correlated noise
 correlated source
 correlation algorithm
-correlation propertie
+correlation property
 correlation theory
 corrosion prevention
 corrupted image
@@ -1649,7 +1641,6 @@ corundum
 cosine function
 cosmic microwave background
 cost saving
-costs saving
 costutility
 coupling coefficient
 coupling efficiency
@@ -1658,7 +1649,7 @@ course design
 courseware
 covariance function
 covariance matrix adaptation
-covariance matrix adaptation evolution strategie
+covariance matrix adaptation evolution strategy
 covariance matrix estimation
 coverage area
 covert channel
@@ -1696,7 +1687,7 @@ crossover operator
 crossphase modulation
 crosssite scripting
 crosstalk noise
-crossterm
+crossterms
 crossvalidation
 crowding distance
 crt
@@ -1709,8 +1700,9 @@ cryptographic key
 cryptographic primitive
 cryptology
 cryptosystem
+cryptosystems
 crystal oscillator
-cs education
+cs
 cscl
 csharp
 csi
@@ -1718,9 +1710,8 @@ csi feedback
 csma
 csma/ca
 csp
-css
 cst microwave studio
-csystem
+csystems
 ct data
 cubic b spline
 cubic spline
@@ -1761,7 +1752,7 @@ cutting temperature
 cyber crime
 cyber foraging
 cyber threat
-cyberattack
+cyberattacks
 cybercrime
 cyberforaging
 cycle accurate
@@ -1770,7 +1761,7 @@ cyclostationary
 cylinder pressure
 cytochrome p450 2c19
 cytochrome p450 2c9
-cytogenetic analysi
+cytogenetic analysis
 cytophagaceae
 da
 dac
@@ -1783,7 +1774,7 @@ dark current
 darwin
 dash
 data abstraction
-data analytic
+data analytics
 data anonymization
 data association problem
 data augmentation
@@ -1813,7 +1804,7 @@ data management
 data management system
 data manifold
 data mart
-data matrice
+data matrix
 data mining process
 data packet
 data packet dropout
@@ -1834,7 +1825,7 @@ data symbol
 data transmission packet switching
 data transmission rate
 data transmissionpacket switching
-data utilitie
+data utility
 data warehouse system
 data warehousing
 database image
@@ -1842,7 +1833,6 @@ database management
 database management system
 database schema
 database search
-database searche
 dataintensive application
 datalog
 datalog program
@@ -1854,7 +1844,7 @@ dbr
 dbr laser
 dc coefficient
 dc generator
-dc servomotor
+dc servomotors
 dct domain
 dct transform
 de algorithm
@@ -1870,7 +1860,7 @@ debugging process
 debugging tool
 decentralized detection
 decimation filter
-decision analysi
+decision analysis
 decision attribute
 decision diagram
 decision feedback
@@ -1913,12 +1903,12 @@ defeasible logic
 defeasible reasoning
 defected ground structure
 deflection routing
-defocu
+defocus
 defocus blur
 defocusing
 degraded image
 degree centrality
-dehalococcoide
+dehalococcoides
 delay and jitter
 delay and sum
 delay dependent
@@ -1935,7 +1925,7 @@ delay system
 delay testing
 delay tolerant
 delay tolerant networking
-delaydependent criteria
+delaydependent criterion
 delaydependent robust stability
 delaydependent stability
 delayed neural network
@@ -1953,25 +1943,27 @@ demonstration
 dempster
 dempstershafer theory of evidence
 demultiplexer
+demultiplexers
 demultiplexing
 dendrogram
+dendrograms
 denial of service attack
 denialofservice
 denialofservice attack
 denoise
 denoising algorithm
-denoising auto encoder
-denoising autoencoder
+denoising auto encoders
+denoising autoencoders
 denoising technique
-denotational semantic
+denotational semantics
 dense disparity map
-dense matrice
+dense matrix
 density evolution
 deontic
 deontic logic
 deoxyribonucleases, type ii sitespecific
 dependability
-dependence analysi
+dependence analysis
 dependency parser
 dependency tree
 dependent type
@@ -2012,6 +2004,7 @@ detecting object
 detection accuracy
 detection algorithm
 detection and tracking
+detection of moving object
 detection problem
 detectivity
 detector array
@@ -2019,16 +2012,15 @@ detector circuit
 deteriorating job
 determination coefficient
 deterministic
-deterministic automata
-deterministic finite automata
+deterministic automaton
+deterministic finite automaton
 deterministic model
 deterministic routing
-development processe
-development strategie
+development process
 development strategy
 device architecture
 device driver
-devop
+devops
 dexterous hand
 dexterous manipulation
 dfa
@@ -2053,15 +2045,14 @@ difference image
 difference scheme
 differencefrequency generation
 different frequency
-differential cryptanalysi
+differential cryptanalysis
 differential detection
-differential fault analysi
+differential fault analysis
 differential group delay
 differential inclusion
 differential operator
 differential phase shift keying
 differential phaseshift keying
-differential privacie
 differential privacy
 differentiated service
 diffie hellman
@@ -2079,9 +2070,9 @@ digital audio
 digital audio broadcasting
 digital audio watermarking
 digital beam forming
-digital breast tomosynthesi
+digital breast tomosynthesis
 digital cinema
-digital cmo
+digital cmos
 digital collection
 digital communication
 digital communication systemsvoice/data integrat
@@ -2094,17 +2085,15 @@ digital hologram
 digital holographic microscopy
 digital home
 digital identity
-digital image forensic
+digital image forensics
 digital image processing
 digital image processing technique
 digital image watermarking
-digital imaging and communication in medicine
-digital imaging and communications in medicine
-digital imaging and communications in medicine (di
+digital imaging and communication in medicine (di
 digital information
 digital investigation
 digital mammogram
-digital media
+digital medium
 digital micromirror device
 digital object
 digital photography
@@ -2121,8 +2110,8 @@ digitaltoanalog converter
 digraph
 dijkstra
 dijkstras algorithm
-dilatometer
-dimensional synthesi
+dilatometers
+dimensional synthesis
 dimensionality reduction algorithm
 dimensionality reduction method
 dimensionality reduction technique
@@ -2130,7 +2119,7 @@ dinger equation
 dinsar
 diode laser
 diodepumped
-diplexer
+diplexers
 dipole array
 direct link
 direct sequence
@@ -2147,7 +2136,7 @@ directive antenna
 directivity
 dirty paper coding
 dirtypaper coding
-disabilitie
+disability
 disabled people
 discernibility
 discrete cosine
@@ -2161,7 +2150,7 @@ discrete hartley transform
 discrete particle swarm optimization
 discrete particle swarm optimization algorithm
 discrete random variable
-discrete sine transform
+discrete sine transforms
 discrete system
 discrete time linear system
 discrete time markov chain
@@ -2174,13 +2163,13 @@ disjoint path
 disjunctive logic program
 disk array
 disparity
-dispersion propertie
+dispersion property
 display system
-display technologie
+display technology
 disruption tolerant network
 distance education and telelearning
 distance learning
-distinguisher
+distinguishers
 distinguishing attack
 distorted image
 distortion measure
@@ -2245,12 +2234,12 @@ dna polymorphism
 doa estimation algorithm
 doa estimation method
 doctoral education
-document analysi
+document analysis
 document categorization
 document classification
 document clustering
 document frequency
-document image analysi
+document image analysis
 document image processing
 document processing
 document representation
@@ -2266,6 +2255,7 @@ domain name system
 domain specific modeling
 domain theory
 domainspecific modeling
+domainspecific ontology
 dominance relation
 dominance, ocular
 dominancebased rough set approach
@@ -2304,16 +2294,16 @@ dualtree
 dualtree complex wavelet
 dublin core
 dvb
-dvbrc
+dvbrcs
 dvbt
 dvbt2
-dvf
+dvfs
 dvhop
 dwdm
 dwell time
 dwt
 dwt coefficient
-dyadic greens function
+dyadic green function
 dynamic background
 dynamic bandwidth allocation
 dynamic bayesian network
@@ -2325,13 +2315,13 @@ dynamic inversion
 dynamic language
 dynamic load balancing
 dynamic logic
-dynamic mechanical analysi
+dynamic mechanical analysis
 dynamic network topology
 dynamic optimization problem
 dynamic output feedback controller
 dynamic partial reconfiguration
 dynamic power management
-dynamic program analysi
+dynamic program analysis
 dynamic random access memory
 dynamic security
 dynamic service composition
@@ -2343,7 +2333,7 @@ dynamic spectrum allocation
 dynamic spectrum management
 dynamic spectrum sharing
 dynamic surface control
-dynamic topologie
+dynamic topology
 dynamic traffic
 dynamic voltage and frequency scaling
 dynamic walking
@@ -2382,7 +2372,7 @@ edge map
 edge node
 edge point
 edge weight
-edgeset
+edgesets
 edi
 edm
 education technology
@@ -2391,7 +2381,7 @@ educational model
 educational motion picture
 educational reform
 edutainment
-eeg analysi
+eeg analysis
 eeg classification
 eeg recording
 effective index
@@ -2410,13 +2400,13 @@ egomotion
 egomotion estimation
 ehr
 eigen decomposition
-eigen vector
 eigenface
-eigenvalue analysi
+eigenfaces
+eigenvalue analysis
+eigenvalue and eigenvectors
 eigenvalue decomposition
 eigenvalue problem
-eigenvalues and eigenvector
-einfrastructure
+einfrastructures
 eit
 elastic deformation
 elearning application
@@ -2424,7 +2414,7 @@ elearning material
 elearning system
 elearning technology
 elearning tool
-electret
+electrets
 electric appliance
 electric attenuator
 electric automobile
@@ -2437,7 +2427,7 @@ electric industry
 electric network analyzer
 electric power
 electric power consumption
-electric power industrie
+electric power industry
 electric propulsion
 electric sensing device
 electric wiring
@@ -2460,7 +2450,7 @@ electroencephalographic signal
 electroencephalography
 electromagnetic
 electromagnetic actuator
-electromagnetic analysi
+electromagnetic analysis
 electromagnetic bandgap structure
 electromagnetic coupling
 electromagnetic device
@@ -2471,7 +2461,7 @@ electromagnetic force
 electromagnetic interference
 electromagnetic launcher
 electromagnetic problem
-electromagnetic propertie
+electromagnetic property
 electromagnetic scattering
 electromagnetic shielding
 electromagnetic simulation
@@ -2483,7 +2473,7 @@ electromagnetic wave transmission
 electromechanical coupling
 electromechanical impedance
 electromechanical system
-electron ga
+electron gas
 electron holography
 electron microscope tomography
 electron tomography
@@ -2499,7 +2489,7 @@ electronic product code
 electronic record
 electronic service
 electronic system
-electrooptic modulator
+electrooptic modulators
 electrooptical device
 electrostatic actuation
 electrostatic force
@@ -2518,13 +2508,11 @@ embedded computing
 embedded device
 embedded image
 embedded linux
-embedded memorie
 embedded memory
 embedded microcontroller
 embedded platform
 embedded processor
 embedded system design
-embedded systems design
 embedded technology
 embedded watermark
 embedded web server
@@ -2545,9 +2533,9 @@ emotion expression
 emotion model
 emotional expression
 emotional speech
-empirical analysi
+empirical analysis
 emptiness problem
-encoder
+encoders
 encrypted data
 encryption system
 encryption technique
@@ -2562,7 +2550,7 @@ endtoend path
 energy awareness
 energy constraint
 energy consumption model
-energy crisi
+energy crisis
 energy efficient routing
 energy harvesting device
 energy harvesting system
@@ -2571,7 +2559,7 @@ energy optimization
 energy resolution
 energy saving
 energy scavenging
-energy supplie
+energy supply
 energy transfer process
 energy use
 energyaware routing
@@ -2581,7 +2569,7 @@ energybased model
 energyconserving
 energyconstrained
 energyefficient
-energyplu
+energyplus
 enforcement mechanism
 engine control
 engine performance
@@ -2594,7 +2582,7 @@ engineering design process
 engineering drawing
 engineering research
 engineering structure
-english as a second language
+english a a second language
 english sentence
 english teaching
 enhancement technique
@@ -2649,8 +2637,8 @@ erbium doped fiber amplifier
 erbium doped fiber laser
 erdoped
 eresearch
-ergodic
 ergodic capacity
+ergodics
 ergonomic design
 erlang
 erp implementation
@@ -2667,18 +2655,19 @@ error resilience
 error vector magnitude
 errorprone channel
 errorresilient
+es
 eservice
+eservices
 esprit
 esprit algorithm
-ess
 essential boundary condition
 estimation method
 estimation of distribution algorithm
 estream
-etalon
+etalons
 ethereum
 ethernet network
-ethernet switche
+ethernet switch
 ethnic difference
 ethnic group
 ethnicity
@@ -2691,7 +2680,7 @@ evaluation modeling
 evaluation of cal system
 evaluation system
 evanescent wave
-event calculu
+event calculus
 event log
 event related desynchronization
 evidential reasoning
@@ -2711,6 +2700,7 @@ exact algorithm
 exact inference
 excimer
 excimer laser
+excimers
 excitation source
 excited state absorption
 execution environment
@@ -2720,7 +2710,7 @@ existence and uniqueness
 existence of solution
 existence result
 exit chart
-exitchart
+exitcharts
 expansion method
 expectation propagation
 expected profit
@@ -2743,13 +2733,14 @@ extended state observer
 extensible stylesheet language
 extension field
 extracting information
-extranet
+extranets
 extreme learning machine
 extremely large telescope
 extrinsic information
 extrinsic information transfer chart
 eye detection
 eye image
+f pulse
 f region
 faam
 fabryperot
@@ -2772,7 +2763,7 @@ face representation
 face tracking
 facebook
 facial action coding system
-facial expression analysi
+facial expression analysis
 facial feature detection
 facial feature extraction
 facial identification
@@ -2781,10 +2772,10 @@ facial surface
 facilitating condition
 facility management
 facsimile
+fact device
 factor graph
 factorization algorithm
 factorization method
-facts device
 fading parameter
 fahp
 failed node
@@ -2891,7 +2882,7 @@ filter coefficient
 filtering error
 filtering problem
 financial market
-financial time serie
+financial time series
 financing, government
 fingerprint classification
 fingerprint database
@@ -2901,13 +2892,12 @@ fingerprint matching
 fingerprint recognition system
 fingerprint segmentation
 fingerprint verification
-finite automaton
 finite difference technique
 finite element software
 finite field arithmetic
 finite impulse response filter
 finite model theory
-finite state automata
+finite state automaton
 finite structure
 finite volume scheme
 finite volume technique
@@ -2923,13 +2913,13 @@ first person shooter
 first principal component
 firstorder formula
 firstorder statistic
-fisher discriminant analysi
+fisher discriminant analysis
 fitness evaluation
 fitness function
-fiveaxi
+fiveaxis
 fiveaxis machining
 fixed point arithmetic
-fixed prioritie
+fixed priority
 fixed priority scheduling
 fixed wing
 fixedpoint arithmetic
@@ -2967,6 +2957,7 @@ floating point
 floatingpoint arithmetic
 flooding attack
 fluence
+fluences
 fluid model
 fluid simulation
 fluidized bed combustion
@@ -2990,7 +2981,7 @@ forecasting technique
 foreground detection
 foreground region
 foreground segmentation
-forensic analysi
+forensic analysis
 forensic investigation
 forensic tool
 forgery attack
@@ -2999,21 +2990,21 @@ formal approach
 formal concept
 formal framework
 formal grammar
-formal languages and automata theory
+formal language and automaton theory
 formal learning
 formal modeling
 formal modelling
 formal ontology
 formal proof
-formal semantic
+formal semantics
 formal specification language
 format conversion
 formation control
 fortran 77
 fortran 90
 fortran code
-forward and inverse kinematic
-forward kinematic
+forward and inverse kinematics
+forward kinematics
 forward problem
 forward security
 forwarding algorithm
@@ -3033,10 +3024,11 @@ fpga chip
 fpga design
 fpga device
 fpgabased implementation
+fpgas
 fpgrowth algorithm
 fptree
 fr4 substrate
-fractional calculu
+fractional calculus
 fractional differential equation
 fractional frequency reuse
 fractionalorder controller
@@ -3053,16 +3045,16 @@ free riding
 free spectral range
 free surface
 free text
-freerider
+freeriders
 freespace optical link
-freeweighting matrice
+freeweighting matrix
 freight transport
 freight transportation
-frequencie
+frequency
 frequency control
 frequency conversion
 frequency divider
-frequency domain approache
+frequency domain approach
 frequency estimator
 frequency hopping spread spectrum
 frequency measurement
@@ -3077,10 +3069,9 @@ frequencydomain method
 frequencydoubling
 frequencymodulated continuous wave
 frequencyselective channel
-frequent closed itemset
+frequent closed itemsets
 frequent item
 frontal face
-fs pulse
 fsm
 fso
 ft
@@ -3099,24 +3090,23 @@ fully homomorphic encryption
 fully polynomial time approximation scheme
 function
 function approximation
-function approximator
+function approximators
 function point
-function point analysi
-functional dependencie
+function point analysis
 functional dependency
 functional language
 functional program
 functional programming language
 functional suitability
-functor
+functors
 fundamental solution
-fusedsilica capillarie
+fusedsilica capillary
 fusion algorithm
 fusion image
 fusion performance
 fusion process
 fusion rule
-fusion strategie
+fusion strategy
 fusion system
 fusion technique
 fusobacteria
@@ -3126,7 +3116,7 @@ fuzzy association rule
 fuzzy classification
 fuzzy classifier
 fuzzy clustering algorithm
-fuzzy clustering analysi
+fuzzy clustering analysis
 fuzzy cmeans algorithm
 fuzzy cognitive map
 fuzzy comprehensive evaluation method
@@ -3151,17 +3141,17 @@ fuzzy random variable
 fuzzy rulebased classifier
 fuzzy simulation
 fuzzy sliding mode control
-fuzzy time serie
+fuzzy time series
 fuzzy vault
 fuzzyneural
 fuzzypid control
 fvc2002
 gaas substrate
-gaas/algaa
+gaas/algaas
 gabor feature
 gabor filter bank
 gabor filtering
-gabor wavelet transform
+gabor wavelet transforms
 gait cycle
 gait feature
 gait planning
@@ -3170,7 +3160,7 @@ galileo signal
 gallium compound
 galois connection
 galois field
-game analysi
+game analysis
 game based learning
 game designer
 game development
@@ -3185,7 +3175,6 @@ gamification
 gaming experience
 gan hemt
 gas engine
-gas laser
 gasoline engine
 gate oxide
 gate sizing
@@ -3212,7 +3201,7 @@ gaussian white noise
 gear
 gear manufacture
 gear transmission
-gemmatimonadete
+gemmatimonadetes
 gender classification
 gender recognition
 gene assignment
@@ -3228,6 +3217,7 @@ generalized hough transform
 generalized likelihoodratio test
 generalized multiprotocol label switching
 generalized sidelobe canceller
+generalized sidelobe cancellers
 generalized stochastic petri net
 generalpurpose computing
 generative adversarial network
@@ -3241,7 +3231,7 @@ genetic database
 genetic drift
 genetic fitness
 genetic fuzzy system
-genetic loci
+genetic locus
 genetic network programming
 genetic operator
 genetic speciation
@@ -3270,14 +3260,14 @@ geostrophic flow
 germplasm
 gesture interface
 gesture recognition system
-ghz frequencie
+ghz frequency
+gi application
+gi technology
 gibbs distribution
 gibbs sampler
 gibbs sampling
 gigabit ethernet
 girth
-gis application
-gis technology
 glacial environment
 glacial refugia
 glass ceramic
@@ -3303,16 +3293,17 @@ gnutella
 goal model
 goalconditioned reinforcement learning
 goalconditioned rl
-goaloriented requirements engineering
+goaloriented requirement engineering
 good put
 governing equation
 government digitalization
 gpr
 gps positioning
 gps satellite
-gps/in
+gps/ins
 gpu implementation
 gpu programming
+gpus
 grace
 graded index
 gradient method
@@ -3322,7 +3313,7 @@ grammar induction
 grammatical evolution
 grammatical inference
 granger causality test
-granulometrie
+granulometries
 granulometry
 graph algorithm
 graph anomaly detection
@@ -3331,9 +3322,10 @@ graph coloring problem
 graph construction
 graph cut
 graph embedding
+graph embeddings
 graph grammar
 graph layout
-graph matching
+graph matchings
 graph neural network
 graph property prediction
 graph rewriting
@@ -3344,12 +3336,11 @@ graphbased method
 graphbased model
 graphbased representation
 graphic card
+graphic processor
 graphical modeling
 graphical password
 graphical processing unit
 graphical representation
-graphics card
-graphics processor
 graphmatching algorithm
 graphrag
 grasp
@@ -3368,7 +3359,7 @@ grey number
 grey prediction
 grey prediction model
 grey relation
-grey relational analysi
+grey relational analysis
 grey relational grade
 grey theory
 grid application
@@ -3383,7 +3374,6 @@ grid scheduler
 grid scheduling
 grid security
 grid service
-grid technologie
 grid technology
 grid user
 grid workflow
@@ -3416,11 +3406,11 @@ gui testing
 guidance system
 guide star
 guided mode
-gwa
-gyrator
+gwas
+gyrators
 gyro sensor
 h control
-h.264 encoder
+h.264 encoders
 h.264 standard
 h.264 video
 h.264 video coding
@@ -3460,7 +3450,7 @@ handover decision
 handover process
 handover scheme
 handsfree
-handwriting analysi
+handwriting analysis
 handwritten character
 handwritten chinese character
 handwritten digit
@@ -3501,7 +3491,7 @@ hashing
 hbase
 hbt
 hca
-hdf
+hdfs
 hdtv
 head pose
 head pose estimation
@@ -3534,7 +3524,7 @@ heterogeneous sensor network
 heterogeneous wireless sensor network
 heteroplasmy
 heterozygosity loss
-heuristic approache
+heuristic approach
 heuristic evaluation
 heuristic search algorithm
 heuristic search method
@@ -3548,7 +3538,7 @@ hidden terminal
 hidden terminal problem
 hidden unit
 hiding capacity
-hierarchical cluster analysi
+hierarchical cluster analysis
 hierarchical clustering algorithm
 hierarchical clustering method
 hierarchical dirichlet process
@@ -3593,7 +3583,7 @@ highdimensional data
 highdimensional feature space
 highefficiency video coding
 higher education institution
-higher frequencie
+higher frequency
 higher order logic
 higherorder function
 higherorder logic
@@ -3614,7 +3604,6 @@ hispanic american
 histogram modification
 histogram of oriented gradient
 histogram shifting
-histograms of oriented gradient
 historical biogeography
 historical document
 hitting time
@@ -3622,7 +3611,7 @@ hmd
 hmi
 hmipv6
 hmm model
-hmmbased speech synthesi
+hmmbased speech synthesis
 hoare logic
 hog
 hole mobility
@@ -3639,7 +3628,7 @@ home automation system
 home gateway
 home networking
 homogeneous network
-homomorphicencryption
+homomorphicencryptions
 homotopy method
 homotopy perturbation method
 honeynet
@@ -3657,7 +3646,7 @@ household appliance
 hownet
 hpc
 hpc cluster
-hplane
+hplanes
 hsv color space
 html document
 html page
@@ -3675,14 +3664,14 @@ human face detection
 human face recognition
 human facial expression
 human factor
-human factors research
+human factor research
 human genome
 human hand
 human identification
 human locomotion
 human machine interaction
 human mobility
-human motion analysi
+human motion analysis
 human motion capture
 human motion data
 human motion recognition
@@ -3703,15 +3692,14 @@ humanrobot communication
 humanrobot cooperation
 humanrobot interface
 hurst parameter
-hv
-hybrid automata
+hvs
 hybrid automaton
 hybrid cloud
 hybrid evolutionary algorithm
 hybrid genetic algorithm
 hybrid learning
 hybrid logic
-hybrid metaheuristic
+hybrid metaheuristics
 hybrid optimization algorithm
 hybrid particle swarm optimization algorithm
 hybrid pso
@@ -3719,18 +3707,18 @@ hybrid recommendation
 hybrid recommender system
 hybrid zone
 hydrophone
+hydrophones
 hyperbolic equation
-hyperchao
+hyperchaos
 hyperchaotic
 hyperchaotic system
 hypercube network
 hyperledger
 hyperlink
 hypermedia
-hyperspectral image analysi
+hyperspectral image analysis
 hyperspectral image classification
 hyperspectral image processing
-hyperspectral imagerie
 hyperspectral imaging system
 hyperspectral sensor
 hyperspectral unmixing
@@ -3810,7 +3798,7 @@ image indexing
 image matching algorithm
 image noise
 image pair
-image patche
+image patch
 image projection
 image quality metric
 image reconstruction algorithm
@@ -3822,7 +3810,7 @@ image retrieval system
 image scrambling
 image search engine
 image segmentation algorithm
-image semantic
+image semantics
 image sequence
 image sharing
 image steganography
@@ -3839,7 +3827,7 @@ imaging radar
 imf
 imitation learning
 immersive virtual environment
-impact analysi
+impact analysis
 impedance control
 impedance controller
 impedance mismatch
@@ -3861,7 +3849,7 @@ impulsive system
 ims learning design
 imu
 in
-ina
+inas
 inas quantum dot
 inas/gasb
 inbreeding depression
@@ -3875,14 +3863,15 @@ incomplete information system
 incompressible
 incompressible fluid
 incompressible navier stokes equation
-incompressible navierstoke
+incompressible navierstokes
 incompressible navierstokes equation
 incremental clustering
 incremental development
+index of biotic integrity
 index structure
 index weight
 indirect illumination
-indium antimonide
+indium antimonides
 individual classifier
 individual learning
 individual privacy
@@ -3893,11 +3882,11 @@ indoor navigation
 indoor navigation system
 indoor positioning system
 indoor propagation
-induced subgraph
+induced subgraphs
 industrial automation
 industrial automation system
 industrial design
-industrial electronic
+industrial electronics
 industrial ethernet
 industrial manipulator
 industrial relation
@@ -3917,7 +3906,7 @@ informal learning
 information acquisition
 information asset
 information assurance
-information communications technology
+information communication technology
 information content
 information diffusion
 information exchange
@@ -3934,11 +3923,10 @@ information propagation
 information quality
 information retrieval technology
 information security management
-information security policie
+information security policy
 information sharing
 information system architecture
 information system development
-information systems development
 information technology investment
 information theoretic security
 information theory communication channel
@@ -3949,9 +3937,9 @@ infrared detection
 infrared imagery
 infrared sensor
 infrared thermography
-infrastructure as a service
+infrastructure a a service
 infrastructure service
-ingaa
+ingaas
 ingan
 ingan/gan
 initial alignment
@@ -3962,7 +3950,7 @@ initialboundary value problem
 injection locked
 innetwork data aggregation
 innetwork management
-innovative technologie
+innovative technology
 inprocess
 input feature
 input impedance
@@ -3974,7 +3962,7 @@ insecure network
 insider attack
 instantaneous amplitude
 instantaneous frequency estimation
-institutional repositorie
+institutional repository
 instruction cache
 instruction scheduling
 instructional design
@@ -3984,25 +3972,25 @@ insurance, pharmaceutical service
 integer factorization
 integer linear program
 integer order
-integral inequalitie
+integral inequality
 integral sliding mode
 integral sliding mode control
 integrality gap
 integrated data
 integrated luminosity
 integrated network
-integrated services digital network
+integrated service digital network
 integrity monitoring
 intellectual property core
-intelligence analysi
+intelligence analysis
 intelligence analyst
 intelligent automotive solution
 intelligent controller
 intelligent decision support system
-intelligent fault diagnosi
+intelligent fault diagnosis
 intelligent home
 intelligent material
-intelligent mechatronic
+intelligent mechatronics
 intelligent sensor
 intelligent servicing
 intelligent software agent
@@ -4027,8 +4015,8 @@ interactive tabletop
 intercarrier interference
 intercell interference coordination
 intercluster communication
-interconnect
 interconnected power system
+interconnects
 interdomain traffic
 interest point
 interesting rule
@@ -4048,7 +4036,7 @@ interferometric sar
 interferometric synthetic aperture radar
 interlayer prediction
 interleaver
-interleaving
+interleavings
 intermediate node
 intermediate representation
 intermittent connectivity
@@ -4092,10 +4080,10 @@ intrusion prevention system
 intuitionistic fuzzy number
 inventory cost
 inventory level
-inventory policie
-inverse analysi
+inventory policy
+inverse analysis
 inverse document frequency
-inverse fast fourier transform
+inverse fast fourier transforms
 inverse heat conduction problem
 inverse kinematics problem
 inverse kinematics solution
@@ -4104,7 +4092,7 @@ inverse method
 inverse modeling
 inverse scattering
 inverse scattering problem
-inverse wavelet transform
+inverse wavelet transforms
 inverted pendulum model
 investment cost
 investment decision
@@ -4135,7 +4123,7 @@ ipv6 protocol
 ir image
 ir sensor
 irfpa
-iris biometric
+iris biometrics
 iris code
 iris localization
 iris pattern
@@ -4155,7 +4143,7 @@ isi
 isi channel
 iso/iec 15504
 iso/iec 9126i
-isogeometric analysi
+isogeometric analysis
 isomap
 isonymy
 isotropic material
@@ -4167,7 +4155,7 @@ it service management
 it service provider
 iterated conditional mode
 iterated local search
-iterated prisoners dilemma
+iterated prisoner dilemma
 iterative decoder
 iterative decoding algorithm
 iterative detection
@@ -4179,6 +4167,7 @@ itil
 iucn
 iucn red list
 jacobian
+jacobians
 japanese
 java application
 java card
@@ -4199,7 +4188,7 @@ jpeg
 jpeg 2000 standard
 jpeg image
 jpeg2000 compression
-jpegl
+jpegls
 judgment matrix
 justnoticeable difference
 jvm
@@ -4212,10 +4201,10 @@ kalman filter algorithm
 kalman filtering algorithm
 kaplan meier method
 kaplanmeiers estimate
-kerbero
+kerberos
 kernel based method
 kernel learning
-kernel matrice
+kernel matrix
 kernel parameter
 kernel trick
 kernelized reinforcement learning
@@ -4239,12 +4228,12 @@ keycompromise impersonation
 keyframe extraction
 keystream
 keystroke dynamic
-keyword querie
+keyword query
 keywordbased search
 kinect
 kinematic chain
 kinematic redundancy
-kinematics analysi
+kinematics analysis
 kinetic equation
 kmeans clustering algorithm
 kmeans clustering method
@@ -4261,8 +4250,8 @@ knowledge engineer
 knowledge exchange
 knowledge graph completion
 knowledge graph embedding
-knowledge graphs engineering
-knowledge graphs management
+knowledge graph engineering
+knowledge graph management
 knowledge management system
 knowledge reduction
 knowledge representation and reasoning
@@ -4273,7 +4262,7 @@ koala
 kohonen
 kohonen selforganizing map
 kripke model
-kripke semantic
+kripke semantics
 krylov subspace method
 kuroshio
 l2 cache
@@ -4284,15 +4273,15 @@ labeling scheme
 labor force
 ladder network
 lagrange multiplier method
-laicpm
+laicpms
 lamb wave
-lambda calculu
-lambdacalculu
+lambda calculus
+lambdacalculus
 lan
 land mobile radio cellular system
 land vehicle
-landmine
 landmine detection
+landmines
 lane detection
 lane marking
 language acquisition
@@ -4301,7 +4290,7 @@ language guessing
 language identification
 language model adaptation
 language pair
-laplacian eigenmap
+laplacian eigenmaps
 laplacian pyramid
 large aperture
 large binocular telescope
@@ -4340,10 +4329,10 @@ lateral control
 lathe
 layered
 layered manufacturing
-layered media
+layered medium
 layered pattern
 layout algorithm
-layout analysi
+layout analysis
 lazy evaluation
 lbt
 ldpc coding
@@ -4355,23 +4344,23 @@ leadfree
 leaky wave antenna
 lean
 learning agent
-learning automata
+learning automaton
 learning bayesian network
 learning design
 learning from demonstration
 learning game
 learning object metadata
-learning object repositorie
+learning object repository
 learning objective
 learning organization
 learning path
 learning preference
-learning technologie
 learning technology
 learning vector quantization
 least privilege
 least recently used
-leastsquares analysi
+least square support vector machine
+leastsquares analysis
 leaveoneout
 legacy application
 legacy code
@@ -4386,7 +4375,7 @@ level set segmentation
 levelset
 levelset evolution
 lexical resource
-lexical semantic
+lexical semantics
 lfm signal
 lfsr
 librarian
@@ -4407,7 +4396,7 @@ lighting condition
 likelihood ratio
 limited energy resource
 line drawing
-line spectral frequencie
+line spectral frequency
 linear acceleration
 linear antenna array
 linear array
@@ -4415,19 +4404,18 @@ linear canonical transform
 linear complexity
 linear control
 linear controller
-linear cryptanalysi
+linear cryptanalysis
 linear discretetime system
-linear discriminant
+linear discriminants
 linear dynamic system
 linear dynamical system
+linear equation
 linear fractional transformation
 linear genetic programming
 linear inverse problem
-linear matrice
 linear matrix
 linear matrix inequality approach
 linear matrix inequality technique
-linear matrixe
 linear minimum mean square error
 linear minimum meansquared error
 linear mixture
@@ -4436,7 +4424,7 @@ linear motor
 linear network
 linear network coding
 linear polarization
-linear precoder
+linear precoders
 linear predictive coding
 linear programming relaxation
 linear spectral unmixing
@@ -4449,25 +4437,25 @@ linear timeinvariant system
 linearly constrained minimum variance
 linearphase
 linguistic term
-link analysi
+link analysis
 link layer
 link prediction
 link scheduling
 link structure
 link utilization
 linked open data
-liquid crystal spatial light modulator
+liquid crystal spatial light modulators
 lisca
 listening test
 live migration
 live video streaming
-liveness propertie
+liveness property
 liver segmentation
 llm
 lm
-lmi
+lm algorithm
 lmi approach
-lms algorithm
+lmis
 load balancing algorithm
 load balancing problem
 load balancing strategy
@@ -4515,10 +4503,10 @@ locationbased information
 locationbased social network
 locomotion control
 lod score
-log analysi
+log analysis
 logic cell
 logic function
-logic synthesi
+logic synthesis
 logical design
 logistic map
 logistic regression
@@ -4572,9 +4560,9 @@ low signaltonoise ratio
 low snr
 lowdimensional manifold
 lowdimensional space
-lowenergy adaptive clustering hierarchie
+lowenergy adaptive clustering hierarchy
 lower and upper approximation
-lower frequencie
+lower frequency
 lowest common ancestor
 lowlevel image feature
 lowpass filtering
@@ -4582,7 +4570,7 @@ lowpower design
 lowprofile antenna
 lowrank adaptation
 lp relaxation
-lrwpan
+lrwpans
 lsb matching
 lsi
 lssvm
@@ -4599,7 +4587,6 @@ lvcsr
 lyapunov
 lyapunov equation
 lyapunov stability theorem
-lyapunov theorie
 lyapunov theory
 m sequence
 m2m
@@ -4632,14 +4619,14 @@ mail server
 maintenance activity
 maintenance process
 maintenance task
-malicious activitie
+malicious activity
 malicious attack
 malicious behavior
 malicious code
 malicious host
 malicious peer
 malicious software
-malware analysi
+malware analysis
 malware attack
 mamdani
 mammogram
@@ -4665,7 +4652,7 @@ map task
 mapmatching algorithm
 mapping algorithm
 mapreduce framework
-marginal
+marginals
 marine engine
 marine radar
 market participant
@@ -4702,8 +4689,8 @@ matching score
 material distribution
 material removal rate
 mathematical method
-mathematical techniques algebra
-mathematical techniques set theory
+mathematical technique algebra
+mathematical technique set theory
 matlab environment
 matlab program
 matlab simulation
@@ -4712,11 +4699,11 @@ matlabsimulink
 matrix factorization
 matrix theory
 matrix transformation
-maximal frequent itemset
+maximal frequent itemsets
 maximum degree
 maximum entropy model
 maximum lateness
-maximum likelihood analysi
+maximum likelihood analysis
 maximum likelihood decoding
 maximum likelihood detector
 maximum likelihood estimate
@@ -4724,12 +4711,12 @@ maximum likelihood estimator
 maximum likelihood linear regression
 maximum likelihood method
 maximum matching
+maximum matchings
 maximum mutual information
 maximum parsimony
 maximumlikelihood decoding
 maximumlikelihood detection
 maxmin ant system
-maxwells equation
 mbofdm
 mbofdm uwb
 mccdma system
@@ -4752,16 +4739,13 @@ meanshift segmentation
 measurement noise
 mechanical clock
 mechanical design
-mechanical energie
+mechanical energy
 mechanical product
 mechanical system
 mechanical vibration
 mechanization
 mechatronic system
-media access control
-media in education
-media stream
-medial axi
+medial axis
 median value
 mediawiki
 medical database
@@ -4774,9 +4758,21 @@ medical image segmentation
 medicare part d
 medium access
 medium access control layer
+medium in education
+medium stream
 meetinthemiddle
-meiosi
+meiosis
 melfrequency cepstral coefficient
+mem accelerometer
+mem deformable mirror
+mem design
+mem gyroscope
+mem inertial sensor
+mem mirror
+mem resonator
+mem sensor
+mem switch
+mem technology
 membership degree
 memetic
 memory access latency
@@ -4786,7 +4782,7 @@ memory allocation
 memory controller
 memory hierarchy
 memory interface
-memory latencie
+memory latency
 memory location
 memory management
 memory module
@@ -4795,17 +4791,7 @@ memory system
 memory technology
 memoryefficient finetuning
 memoryless
-mems accelerometer
-mems deformable mirror
-mems design
-mems gyroscope
-mems inertial sensor
-mems mirror
-mems resonator
-mems sensor
-mems switche
-mems technology
-memsdevice
+memsdevices
 menage
 menatetrenone
 mental retardation malformation syndrome
@@ -4814,11 +4800,10 @@ mesh mode
 mesh node
 mesh router
 mesh segmentation
-mesh topologie
 mesh topology
 meshfree
 meshfree method
-mesoscale eddie
+mesoscale eddy
 message authentication
 message authentication code
 message complexity
@@ -4837,7 +4822,7 @@ metaheuristic technique
 metal cutting
 metal detector
 metal gate
-metal insulator boundarie
+metal insulator boundary
 metal working tool
 metalearning
 metallorganic vapor phase epitaxy
@@ -4851,6 +4836,7 @@ method of fundamental solution
 metro network
 metropolishastings algorithm
 mfcc
+mi device
 mib
 micro and nano system
 micro assembly
@@ -4862,14 +4848,15 @@ micro milling
 micro mirror
 micro part
 micro robot
-micro robotic
-microactuator
+micro robotics
+microactuators
 microaggregation
 microbispora
-microblog
 microblogging
+microblogs
 microbolometer
 microcantilever
+microcantilevers
 microct
 microdata
 microelectricalmechanical system
@@ -4878,17 +4865,17 @@ microfabrication process
 microfabrication technique
 microkernel
 micromachined
-micromechanic
 micromechanical
 micromechanical model
+micromechanics
 micromobility
 microphone signal
 microprocessor
 microprogramming
-microring
 microring resonator
-microsatellite
+microrings
 microsatellite instability
+microsatellites
 microsoft kinect
 microsoft sql server
 microsoft window
@@ -4902,7 +4889,7 @@ microstructured fiber
 microstructured optical fiber
 microwave amplifier
 microwave link
-microwave photonic
+microwave photonics
 microwave signal
 mie scattering
 mih
@@ -4926,14 +4913,12 @@ minimum spanning tree problem
 minimum support
 mining association
 mining process
-mining software repositorie
+mining software repository
 minsum
 minsum algorithm
 minutia
-minutiae
-minutiae extraction
+minutia extraction
 mipv6
-mis device
 misadjustment
 misbehaving node
 missed detection
@@ -4956,6 +4941,8 @@ mmatrix
 mmic
 mmog
 mmorpg
+mmorpgs
+mo capacitor
 mobile ad hoc
 mobile agent security
 mobile agent technology
@@ -4997,14 +4984,14 @@ mobile service
 mobile service robot
 mobile sink
 mobile system
-mobile technologie
+mobile technology
 mobile terminal
 mobile web
 mobile wimax
 mobile wireless sensor network
 mobilelearning system
 mobilephone user
-mobility analysi
+mobility analysis
 mobility management protocol
 mobility management scheme
 mobility modeling
@@ -5012,6 +4999,7 @@ mobility pattern
 mobility support
 modal operator
 modal parameter
+mode of operation
 mode selection
 model automobile
 model checking algorithm
@@ -5027,26 +5015,25 @@ model to model transformation
 model validation
 model view controller
 model view controller pattern
-modelbased systems engineering
+modelbased system engineering
 modelbased testing
 modelchecking technique
 modeldriven software development
-modeling and analysi
+modeling and analysis
 modelling language
 modelocked
 modelocked laser
 modelocking
 models, economic
 models, educational
-modern logistic
-modes of operation
+modern logistics
 modified differential evolution
 modular exponentiation
 modular multiplication
-modular robotic
+modular robotics
 modulation and coding scheme
 modulo scheduling
-moem
+moems
 molecular beam
 molecular computing
 molecular system
@@ -5059,20 +5046,19 @@ monocular image
 monocular slam
 monopole
 monostatic
-monte carlo analysi
+monte carlo analysis
 monte carlo localization
 montgomery
 montgomery multiplication
 morlet wavelet
-morphodynamic
+morphodynamics
 morphological filter
 morphological filtering
 morphological operation
 morphological operator
-mos capacitor
 most significant bit
 mother wavelet
-motion analysi
+motion analysis
 motion blur
 motion capture data
 motion capture system
@@ -5093,7 +5079,7 @@ motion planning algorithm
 motion planning problem
 motion segmentation
 motion sequence
-motion synthesi
+motion synthesis
 motion vector field
 motion vector prediction
 motor disability
@@ -5142,7 +5128,7 @@ multiagent learning
 multiagent model
 multiagent reinforcement learning
 multiagent simulation
-multiagent technologie
+multiagent technology
 multiantenna
 multiantenna relay
 multiantenna system
@@ -5151,7 +5137,7 @@ multiband orthogonal frequency division multiplex
 multibaseline
 multibeam
 multibeam antenna
-multibit
+multibits
 multibody system
 multicarrier code division multiple access
 multicarrier codedivision multiple access
@@ -5177,16 +5163,16 @@ multiclass classification problem
 multiclass classifier
 multiclass problem
 multicomponent signal
-multicomputer
+multicomputers
 multicore machine
 multicore platform
-multicriteria decision analysi
+multicriteria decision analysis
 multicriteria decision making
 multidetector computed tomography
 multidimensional model
 multidisciplinary design optimization
 multifingered hand
-multifocu
+multifocus
 multifocus image
 multigraph
 multihop network
@@ -5199,7 +5185,7 @@ multihop wireless network
 multiinput multioutput
 multilabel
 multilabel classification
-multilayer perceptron
+multilayer perceptrons
 multimedia communication
 multimedia content
 multimedia courseware
@@ -5209,7 +5195,6 @@ multimedia interactive service
 multimedia session
 multimedia stream
 multimedia streaming
-multimedia technologie
 multimedia technology
 multimedia/hypermedia system
 multimodal ai
@@ -5285,7 +5270,6 @@ multiprocessing program
 multiprocessor
 multiprocessor platform
 multiprocessor system on chip
-multiprocessor systems on chip
 multiprocessorsystem
 multiprogramming
 multiresolution
@@ -5319,7 +5303,7 @@ multitier
 multitier application
 multiuser detector
 multiuser interference
-multiuser mimo downlink
+multiuser mimo downlinks
 multiuser mimo system
 multiuser scheduling
 multiuser system
@@ -5334,6 +5318,7 @@ multiview stereo
 multiview video
 multiwavelength
 multiwavelet
+multiwavelets
 mumimo
 mumimo system
 musculoskeletal disorder
@@ -5358,7 +5343,8 @@ mycological typing technique
 myeloidlymphoid leukemia protein
 myrinet
 n400
-naive baye
+na parallel benchmark
+naive bayes
 naive bayes classifier
 naive bayesian classifier
 nakagami fading
@@ -5369,24 +5355,23 @@ nand circuit
 nand flash
 nand flash memory
 nano electromechanical system
-nanomechatronic
-nanosystem
+nanomechatronics
+nanosystems
 narrow band interference
 narrowline width
-nas parallel benchmark
 nash bargaining solution
 national library of medicine
 natural deduction
 natural guide star
 natural language generation
 natural language interface
-natural language querie
+natural language query
 natural language question
 natural language text
 natural language understanding
 natural scene image
 natural scene statistic
-natural sciences computing
+natural science computing
 natural speech
 navigation accuracy
 navigation algorithm
@@ -5398,7 +5383,7 @@ nd: yag
 near field communication
 near field scanning optical microscopy
 nearest neighbor classification
-nearest neighbor querie
+nearest neighbor query
 nearest neighbor search
 nearinfrared imaging
 nearoptimal solution
@@ -5411,20 +5396,20 @@ negative selection algorithm
 negro
 neighborhood graph
 neighborhood structure
-nem
 nemo
+nems
 network address translation
-network analysi
+network analysis
 network analyzer
-network anomalie
+network anomaly
 network anomaly detection
 network attack
 network code
-network communitie
+network community
 network congestion
-network forensic
+network forensics
 network interface
-network latencie
+network latency
 network management system
 network monitoring
 network of workstation
@@ -5456,11 +5441,11 @@ neutral system
 neutral type
 new business model
 new physic
+newton method
 newtonian
 newtonian flow
 newtonian fluid
 newtonian liquid
-newtons method
 nextgen
 nextgeneration wireless network
 nexthop
@@ -5470,7 +5455,7 @@ ngram model
 nielsen
 nintendo wii
 nitrospirae
-nlm
+nlms
 nlms algorithm
 noc architecture
 noc design
@@ -5487,7 +5472,7 @@ noise control
 noise covariance matrix
 noise detection
 noise estimation
-noise intensitie
+noise intensity
 noise measurement
 noise power
 noise ratio
@@ -5515,20 +5500,20 @@ nonconvex
 noncooperative
 noncooperative game theory
 nondeterminism
-nondeterministic automata
+nondeterministic automaton
 nondeterministic finite automaton
 nondominated solution
 nondominated sorting
 nondominated sorting genetic algorithm
-nonequilibrium greens function
+nonequilibrium green function
 nonfragile
 nonfunctional requirement
 nongaussian
 nongaussian distribution
 nongaussian noise
-nonholonomic
 nonholonomic mobile robot
 nonholonomic system
+nonholonomics
 nonhomogeneous poisson process
 noninteractive
 nonlinear absorption
@@ -5567,15 +5552,15 @@ nonrigid image registration
 nonstationary data
 nonstationary environment
 nonstationary noise
-nonsubsampled contourlet transform
-nonuniform rational bspline
+nonsubsampled contourlet transforms
+nonuniform rational bsplines
 nonuniformity correction
 nonverbal behavior
 nonvolatile
 nonvolatile storage
 nonvolatility
 noreference
-normal basi
+normal basis
 normal behavior
 normalized cross correlation
 normalized crosscorrelation
@@ -5604,7 +5589,7 @@ numerical integration method
 numerical optimization
 numerical reconstruction
 numerical scheme
-numerical studie
+numerical study
 nurbs curve
 nurbs surface
 obfuscation
@@ -5630,7 +5615,7 @@ objectoriented language
 objectoriented programming language
 objectoriented software
 objectoriented system
-observability analysi
+observability analysis
 observation model
 observer
 observer design
@@ -5651,16 +5636,16 @@ odometry
 ofdm transmission
 ofdma system
 ofdma uplink
-offchip memorie
+offchip memory
 office worker
 offline algorithm
 offline handwritten
 offline password guessing attack
-offset frequencie
+offset frequency
 offset printing
 ogc
-oil recoverie
-olap querie
+oil recovery
+olap query
 oled display
 olsr
 olsr protocol
@@ -5671,8 +5656,8 @@ on chip interconnect
 on chip memory
 onbody
 onchip cache
-onchip interconnect
 onchip interconnection network
+onchip interconnects
 onchip network
 ondemand routing protocol
 one dimensional
@@ -5683,7 +5668,6 @@ onetime password
 oneway hash function
 onion routing
 online auction
-online communitie
 online community
 online conferencing
 online consumer
@@ -5698,7 +5682,7 @@ online product
 online scheduling
 online setting
 online shopping
-online social networking
+online social networkings
 online teaching
 online transaction processing
 online version
@@ -5731,7 +5715,7 @@ opengl
 openmp
 operating band
 operating frequency band
-operational modal analysi
+operational modal analysis
 operational profile
 operational trans conductance amplifier
 operon
@@ -5770,14 +5754,14 @@ optical line terminal
 optical measurement
 optical measurement system
 optical metrology
-optical microcavitie
+optical microcavities
 optical modulation
 optical network unit
 optical networking
 optical nonlinearity
 optical ofdm
 optical packet
-optical packet switche
+optical packet switch
 optical parametric amplifier
 optical phase conjugation
 optical scanner
@@ -5787,7 +5771,7 @@ optical surface
 optical switching
 optical test
 optical thin film
-optical transceiver
+optical transceivers
 optical transmission
 optical transmission system
 optical transport network
@@ -5803,18 +5787,16 @@ optimal design
 optimal design method
 optimal mechanism
 optimal path planning
-optimal policie
 optimal policy
 optimal power control
 optimal routing
-optimal strategie
 optimal strategy
 optimal structure
-optimal topologie
+optimal topology
 optimized evolution
 optimized link state routing
 optimizing compiler
-optoelectronic
+optoelectronics
 order of convergence
 order picking
 ordered binary decision diagram
@@ -5826,7 +5808,7 @@ organizational learning
 organizational memory
 orientation distribution function
 orientation field
-original meshe
+original mesh
 original signer
 orl face database
 orthogonal channel
@@ -5840,14 +5822,14 @@ orthogonality
 orthography
 osate
 oscillation frequency
-oscillistor
+oscillistors
 osgi
 ospf
 ota
-outage analysi
+outage analysis
 outage capacity
 outage performance
-outage probability analysi
+outage probability analysis
 outcrossing
 outerplanar graph
 outofdistribution detection
@@ -5861,11 +5843,11 @@ outputfeedback controller
 outputtracking
 over sampling ratio
 over segmentation
-overlapping communitie
+overlapping community
 overlay multicast
 overlay node
 overlay routing
-overlay topologie
+overlay topology
 p2p computing
 p2p environment
 p2p file sharing
@@ -5878,7 +5860,7 @@ packet delay
 packet drop
 packet filter
 packet filtering
-packet latencie
+packet latency
 packet loss probability
 packet loss rate
 packet loss ratio
@@ -5887,7 +5869,7 @@ packet processing
 packet scheduler
 packet scheduling
 packet scheduling algorithm
-packet switche
+packet switch
 packet transmission
 paging
 pairingbased cryptography
@@ -5924,11 +5906,11 @@ parallel text
 parallel version
 parallel virtual machine
 parallelism
-parallelization strategie
+parallelization strategy
 parallelizing
 parameter adaptation
 parameter learning
-parameter uncertaintie
+parameter uncertainty
 parameterefficient tuning
 parametric amplifier
 parametric oscillator
@@ -5948,7 +5930,7 @@ paretooptimal front
 paretooptimal set
 paretooptimal solution
 parity bit
-parity check matrice
+parity check matrix
 parse tree
 parsing
 parsing algorithm
@@ -5961,17 +5943,19 @@ partial order reduction
 partial product
 partial reconfiguration
 partial trisomy 9
-participating media
+participating medium
 particle beam injection
 particle filter algorithm
 particle filtering algorithm
-particle image velocimetrie
+particle image velocimetries
 particle method
 particle optic
 particle swarm optimization technique
 particle swarm optimizer
+particle swarm optimizers
 partitioned global address space
 parylene
+parylenes
 passage retrieval
 passive control
 passive dynamic walking
@@ -6001,14 +5985,14 @@ pattern classification
 pattern classification problem
 pattern language
 pattern matching algorithm
-pattern synthesi
+pattern synthesis
 payoff function
 pbl
 pcf
 pci express
 pcnn
 pcrdgge
-pcycle
+pcycles
 pdb
 peak signal to noise ratio
 peak signaltonoise ratio
@@ -6031,18 +6015,19 @@ peertopeer streaming
 peertopeer video streaming
 penalty function
 penalty parameter
-pentacene
+pentacenes
 people tracking
-people with disabilitie
+people with disability
 pepper noise
 perceived risk
 perceived value
 perceived video quality
-perceptual evaluation of speech qualitie
+perceptual evaluation of speech quality
 perceptual image quality
 perfect channel state information
 perfect forward secrecy
 perfect matching
+perfect matchings
 perfect reconstruction
 perfect secrecy
 perfectly matched layer
@@ -6056,10 +6041,11 @@ periodic surface
 periodic task
 permanent fault
 permittivity measurement
-persistent scatterer
+persistent scatterers
 persistent surveillance
 person identification
 person recognition
+person with disability
 personal area network
 personal data
 personal health record
@@ -6072,8 +6058,7 @@ personalized recommendation system
 personalized search
 personalized service
 personindependent
-persons with disabilitie
-perturbation analysi
+perturbation analysis
 perturbation method
 perturbation theory
 pervasive application
@@ -6083,11 +6068,10 @@ pervasive computing system
 pesq
 petri net model
 petrovgalerkin
-pharmacoeconomic
-pharmacogenomic
+pharmacoeconomics
+pharmacogenomics
 pharmacy education
 pharmacy student
-phase change memory
 phase correlation
 phase detector
 phase distortion
@@ -6113,15 +6097,15 @@ phone call
 phone recognition
 phonology
 photo detection
-photoacoustic
 photoacoustic imaging
 photoacoustic spectroscopy
 photoacoustic technique
 photoacoustic tomography
-photographic accessorie
+photoacoustics
+photographic accessory
 photon mapping
 photonic bandgap fiber
-photonic crystal cavitie
+photonic crystal cavity
 photonic crystal waveguide
 photonic integrated circuit
 photonic integration
@@ -6142,7 +6126,7 @@ physical network
 physical resource
 physicallayer network coding
 phytogeography
-pic microcontroller
+pic microcontrollers
 pickup
 pickup and delivery
 picocell
@@ -6163,13 +6147,13 @@ pilot symbol
 pim
 pin diode
 pinning control
+pipe and filter
 pipe lining
 pipeline architecture
 pipelined adc
 pipelined analogtodigital converter
 pipelined architecture
 pipelining
-pipes and filter
 pitch contour
 pitch detection
 pitch estimation
@@ -6184,7 +6168,7 @@ planar monopole antenna
 planar parallel manipulator
 planar robot
 planarity
-planctomycetale
+planctomycetales
 plane graph
 planetary gear
 planetlab
@@ -6194,7 +6178,7 @@ plant chromosome
 plasma interaction
 plastic bottle
 plastic optical fiber
-platform as a service
+platform a a service
 platform independent model
 platform specific model
 platformindependent model
@@ -6215,16 +6199,18 @@ pneumatic cylinder
 pneumatic drive
 pneumatic muscle
 pneumatic system
+po tagger
+po tagging
 pocketpc
 poincaru00e9 map
 point data
 point density
 point multiplication
+point of interest
 point target
 pointcut
-pointer analysi
-points of interest
-pointsto analysi
+pointer analysis
+pointsto analysis
 poisson noise
 poisson point process
 polar code
@@ -6246,12 +6232,12 @@ pollution attack
 polsar
 polyhedron attention mechanism
 polymer waveguide
-polynomial basi
+polynomial basis
 polynomial space
 polynomial time approximation scheme
 polynomial time complexity
 polynomialtime approximation algorithm
-polytopic uncertaintie
+polytopic uncertainty
 pomdp
 pon system
 population bottleneck
@@ -6262,27 +6248,25 @@ portable device
 portfolio management
 portfolio optimization
 portfolio selection problem
-pos tagger
-pos tagging
 pose parameter
 pose variation
-position analysi
+position analysis
 position controller
-positioning accuracie
+positioning accuracy
 positioning method
 positioning technique
-positioning technologie
+positioning technology
 positive region
 positive solution
 positiveunlabeled learning
 positron annihilation lifetime spectroscopy
 positron annihilation spectroscopy
-possibilistic cmean
+possibilistic cmeans
 post classification
-postcondition
+postconditions
 posterior distribution
 posterior probability
-postfilter
+postfilters
 postglacial
 postimplementation
 postsecondary education
@@ -6292,7 +6276,7 @@ potential customer
 potential field method
 potential game
 power allocation algorithm
-power allocation strategie
+power allocation strategy
 power analysis attack
 power constraint
 power consumed
@@ -6311,11 +6295,11 @@ power network
 power outage
 power saving mechanism
 power state
-power supplie
+power supply
 powerdelay product
 powerline communication
 powerscaling
-powertrain
+powertrains
 ppm
 practical teaching
 preceptorship
@@ -6334,7 +6318,7 @@ preemptive scheduling
 preference information
 preferential attachment
 prefetch
-prefetche
+prefetches
 prefix code
 preforming
 preimage attack
@@ -6374,7 +6358,7 @@ probabilistic model checking
 probabilistic modeling
 probabilistic routing
 probabilistic system
-probability densitie
+probability density
 probability distribution function
 probability of detection
 probability of false alarm
@@ -6414,7 +6398,7 @@ production management
 productivity increasing
 program comprehension
 program dependence graph
-program diagnostic
+program diagnostics
 program documentation
 program execution
 program generation
@@ -6478,12 +6462,9 @@ psychology computing
 psychophysical experiment
 pt
 public key certificate
-public key cryptosystem
-public librarie
 public library
 public switched telephone network
 public verifiability
-publickey cryptosystem
 publishsubscribe
 publishsubscribe system
 pullin
@@ -6492,8 +6473,8 @@ pulse amplifier
 pulse amplitude modulation
 pulse compression
 pulse coupled neural network
-pulse energie
-pulse repetition frequencie
+pulse energy
+pulse repetition frequency
 pulse shape
 pulse train
 pulse width
@@ -6504,7 +6485,7 @@ pump source
 purchase
 purchase intention
 pure nash equilibrium
-pushdown automata
+pushdown automaton
 pushdown system
 pv array
 pv system
@@ -6531,7 +6512,7 @@ qpsk modulation
 qr factorization
 qswitched
 quadratic assignment problem
-quadratic discriminant analysi
+quadratic discriminant analysis
 quadratic form
 quadratic lyapunov function
 quadratic programming problem
@@ -6548,9 +6529,8 @@ quality requirement
 quality scalability
 quantified boolean formula
 quantitative attribute
-quantitative genetic
+quantitative genetics
 quantitative trait locus mapping
-quantization
 quantization index modulation
 quantization parameter
 quantization scheme
@@ -6560,10 +6540,10 @@ quantizer
 quantum gate
 quantum machine learning
 quantum transport
-quantum well infrared photodetector
+quantum well infrared photodetectors
 quantum wire
 quantumbehaved particle swarm optimization
-quantumdot cellular automata
+quantumdot cellular automaton
 quasi phase matching
 quasicyclic
 quasicyclic ldpc code
@@ -6571,7 +6551,7 @@ query classification
 query containment
 query evaluation
 query execution
-query log analysi
+query log analysis
 query optimizer
 query performance
 query recommendation
@@ -6585,12 +6565,13 @@ question classification
 queue
 queue management
 queue size
-queueing analysi
+queueing analysis
 queueing delay
 queuing delay
 quikscat
-qvalue
+qvalues
 qvt
+r image
 race detection
 race difference
 rad
@@ -6624,10 +6605,9 @@ radiated emission
 radiating element
 radiation characteristic
 radiation hardening
-radio access technologie
+radio access technology
 radio channel
 radio environment
-radio frequencie
 radio frequency
 radio frequency identification device
 radio frequency interference
@@ -6638,7 +6618,7 @@ radio resource
 radio resource allocation
 radio resource management
 radio signal
-radio spectra
+radio spectrum
 radio station
 radio systems, diversity
 radio telephone
@@ -6650,6 +6630,7 @@ radiology department, hospital
 radiosity
 radiotherapy setup error
 radon transform
+radon transforms
 rag
 raid
 railtorail
@@ -6658,7 +6639,6 @@ rain rate
 rainfall data
 rainfall rate
 rake receiver
-random access memorie
 random access memory
 random access protocol
 random bit
@@ -6682,12 +6662,11 @@ random walk algorithm
 random walk method
 random walk model
 random walker
-random waypoint
+random waypoints
 randomized hough transform
 range estimation
 range expansion
 range measurement
-range querie
 range query
 range resolution
 range size
@@ -6727,11 +6706,11 @@ rayleighfading channel
 raytracing technique
 rbac model
 rbf network
-rc
 rc4
+rcs
 rdf data
 rdf graph
-reachability analysi
+reachability analysis
 reachability problem
 reaching law
 reaction diffusion equation
@@ -6830,7 +6809,7 @@ referencetracking
 reflectance measurement
 reflectarray
 reflectarray antenna
-reflection spectra
+reflection spectrum
 reflective semiconductor optical amplifier
 reflector antenna
 refractive index change
@@ -6867,7 +6846,7 @@ relation extraction
 relational algebra
 relational database management system
 relational learning
-relational querie
+relational query
 relational schema
 relational table
 relative reduction
@@ -6904,21 +6883,23 @@ replacement policy
 replanning
 replay attack
 replica placement
-replication strategie
+replication strategy
 replicator dynamic
 representation learning
 representational state transfer
 reproductive fitness
 reproductive isolation
-requirements document
-requirements engineer
-requirements engineering process
-requirements management
-requirements model
-requirements modeling
-requirements specification
-requirements traceability
-research support as topic
+requirement analysis
+requirement document
+requirement elicitation
+requirement engineer
+requirement engineering process
+requirement management
+requirement model
+requirement modeling
+requirement specification
+requirement traceability
+research support a topic
 reservoir computing
 residency education
 residual noise
@@ -6936,7 +6917,7 @@ resource sharing
 resourcebased view
 resourceconstrained
 response system
-responsetime analysi
+responsetime analysis
 responsivity
 restoration algorithm
 restoration method
@@ -6961,14 +6942,14 @@ reverberant environment
 reverberation chamber
 reverberation time
 reverse engineer
-reverse logistic
+reverse logistics
 reversible circuit
 reversible logic
 reversible watermarking
 reward function
 rf mem
 rf signal
-rf transceiver
+rf transceivers
 rfid application
 rfid authentication
 rfid middleware
@@ -6977,7 +6958,7 @@ rfid protocol
 rfid security
 rfid sensor
 rfid tag antenna
-rfmems switche
+rfmems switch
 rgb color space
 rgb image
 rgb space
@@ -6987,23 +6968,24 @@ ribosomal spacer dna
 rich internet application
 rician fading
 riemann solver
-riesz basi
-rights management
+riesz basis
+right management
 rigid registration
 rijndael
-ring cavitie
+ring cavity
 ring gage
 ring signature
 ring signature scheme
 ripple carry adder
 risc processor
 risk communication
-risks decreasing
+risk decreasing
 rlhf
+rls algorithm
 rna 28
 rna gene
 rna splice site
-rna, ribosomal, 5.8
+rna, ribosomal, 5.8s
 road segment
 roadside
 robot arm
@@ -7042,7 +7024,7 @@ robust filtering
 robust h control
 robust model predictive control
 robust performance
-robust stability analysi
+robust stability analysis
 robust stabilization
 robust tracking
 robust watermark
@@ -7052,18 +7034,17 @@ robustadaptive control
 role assignment
 role hierarchy
 rolebased
-roleplaying game
 rollback recovery
 roller bearing
 rolling bearing
 rolling element bearing
 room acoustic
 room impulse response
-rootkit
+rootkits
 rootmeansquare error of prediction
 rootmusic
 roseobacter
-rotor fluxe
+rotor flux
 rotor resistance
 rough set model
 round trip time
@@ -7078,21 +7059,20 @@ routing mechanism
 routing metric
 routing overhead
 routing path
-routing policie
+routing policy
 routing problem
 routing scalability
-routing strategie
+routing strategy
 routing table
-rs image
 rsa algorithm
-rto
+rtos
 rtp
-rts/ct
+rts/cts
 rtt
 ruby
 rule base
 rule based reasoning
-rule basi
+rule basis
 rule engine
 rule induction
 rule mining
@@ -7108,18 +7088,18 @@ runtime system
 runtime verification
 rup
 rwa
-s transform
+s transforms
 s3c2410
 sa algorithm
-saa
 saam
+saas
 saem
 safe city
 safety application
 safety critical application
 safety critical software
 safety message
-safety propertie
+safety property
 safetycritical system
 sagnac interferometer
 salt removal
@@ -7146,7 +7126,7 @@ satellite navigation
 satellite navigation system
 satellite relay system
 satellite system
-satisfiability modulo theorie
+satisfiability modulo theory
 satisfiability problem
 satisfying assignment
 satsolving
@@ -7156,14 +7136,14 @@ saving energy
 saw
 sbar
 sbox
-sboxe
+sboxes
 scada
 scalable coding
 scalable video
 scalable video streaming
 scalar multiplication
 scalar quantization
-scalar quantizer
+scalar quantizers
 scale factor
 scale invariant
 scale parameter
@@ -7189,9 +7169,8 @@ schema integration
 schema mapping
 schema matching
 scholarly communication
-scholarly ontologie
 scholarly ontology
-school admission criteria
+school admission criterion
 schur complement
 scientific computing
 scientific data
@@ -7217,7 +7196,7 @@ seamless mobility
 search behavior
 search pattern
 search process
-search querie
+search query
 search range
 search session
 search task
@@ -7237,8 +7216,9 @@ secret information
 secure computation
 secure group communication
 secure multicast
+secure multicasts
 secure software
-security analysi
+security analysis
 security and privacy issue
 security architecture
 security attack
@@ -7251,10 +7231,10 @@ security level
 security management
 security notion
 security pattern
-security requirements engineering
+security requirement engineering
 security risk
 security rule
-security vulnerabilitie
+security vulnerability
 segmentation evaluation
 segmentation performance
 segmentation quality
@@ -7276,7 +7256,7 @@ selfconfiguring
 selfdeployment
 selfdiffusion coefficient
 selfdual code
-selfinterference
+selfinterferences
 selfish node
 selfish routing
 selfmanaging
@@ -7306,10 +7286,10 @@ semantic search
 semantic search engine
 semantic security
 semantic service
-semantic social network analysi
+semantic social network analysis
 semantic web rule language
 semantic web service discovery
-semantic wiki
+semantic wikis
 semi active suspension
 semiblind
 semiblind channel estimation
@@ -7319,7 +7299,7 @@ semiconducting indium compound
 semiconducting indium gallium arsenide
 semiconducting indium phosphide
 semiconductor counter
-semiconductor insulator boundarie
+semiconductor insulator boundary
 semidefinite program
 semidefinite relaxation
 semifragile
@@ -7343,7 +7323,7 @@ sensor network application
 sensor web enablement
 sentence extraction
 sentence similarity
-sentiment analysi
+sentiment analysis
 sentiment classification
 separation of concern
 separation of duty
@@ -7370,6 +7350,7 @@ service component
 service contract
 service delivery
 service delivery platform
+service discovery
 service discovery protocol
 service execution
 service layer
@@ -7382,22 +7363,21 @@ service oriented system
 service overlay network
 service rate
 service requirement
-service robotic
+service robotics
 service time
 servicebased system
 serviceoriented computing
-services discovery
 servo control
 servo control system
 servo system
 servomechanism
-servomotor
+servomotors
 servovalve
 servqual
 session type
 set top box
 setpoint tracking
-severe disabilitie
+severe disability
 sex chromosome
 sgml
 sha1
@@ -7444,12 +7424,11 @@ shock resistance
 short message service
 short signature
 shortest path routing
-shorttime fourier transform
 shuttle radar topography mission
 sidelobe level
 sift descriptor
 sift feature
-sige hbt
+sige hbts
 sigmadelta modulation
 sign language recognition
 signal acquisition
@@ -7506,7 +7485,7 @@ single precision
 single robot
 single sensor
 singleagent
-singleaxi
+singleaxis
 singlecarrier transmission
 singlechip
 singlecore processor
@@ -7519,7 +7498,7 @@ singlethreaded
 singular configuration
 singular perturbation
 singularity
-singularity analysi
+singularity analysis
 singularly perturbed
 singularly perturbed system
 sink mobility
@@ -7561,6 +7540,7 @@ slotted aloha
 slow light
 slow start
 sm
+sm message
 sma actuator
 small antenna
 small file
@@ -7587,7 +7567,6 @@ smart textile
 smarthome system
 smartphone application
 smith predictor
-sms message
 smt system
 sn
 sna
@@ -7615,13 +7594,13 @@ social presence
 social relation
 social relationship
 social robot
-social robotic
+social robotics
 social search
 social software
 social tv
 social web
 societies, pharmaceutical
-socioeconomic statu
+socioeconomic status
 soft computing method
 soft decision decoding
 soft error rate
@@ -7643,7 +7622,7 @@ software defined radio
 software design pattern
 software developer
 software development method
-software development methodologie
+software development methodology
 software development organization
 software development practice
 software development team
@@ -7665,7 +7644,7 @@ software product quality
 software protection
 software quality assurance
 software quality control
-software quality criteria
+software quality criterion
 software quality framework
 software quality model
 software quality planning
@@ -7674,16 +7653,16 @@ software reengineering
 software rejuvenation
 software reliability growth model
 software reliability model
-software repositorie
+software repository
 software requirement
-software requirements specification
+software requirement specification
 software reusability
 software reuse
 software team
 software transactional memory
 software verification
 software visualization
-software vulnerabilitie
+software vulnerability
 soldered joint
 solid state drive
 solution accuracy
@@ -7703,11 +7682,11 @@ sound signal
 sound source localization
 sound source separation
 sound spectrography
-sound synthesi
+sound synthesis
 source address
 source and channel coding
 source channel coding
-source code analysi
+source code analysis
 source image
 source language
 source node
@@ -7723,10 +7702,10 @@ spam message
 spanning tree problem
 spare capacity
 sparql
-sparql querie
+sparql query
 sparse approximation
-sparse auto encoder
-sparse autoencoder
+sparse auto encoders
+sparse autoencoders
 sparse linear system
 sparse matrixvector multiplication
 sparse reconstruction
@@ -7741,20 +7720,19 @@ spatial correlation
 spatial data infrastructure
 spatial data mining
 spatial data warehouse
-spatial dataset
+spatial datasets
 spatial index
-spatial indice
 spatial join
 spatial learning
 spatial multiplexing
 spatial object
 spatial prediction
-spatial querie
+spatial query
 spatial query processing
 spatial resolution sr)
 spatial scalability
 spatial smoothing
-spatial variables control
+spatial variable control
 spatiotemporal database
 speaker adaptation
 speaker identification system
@@ -7762,9 +7740,9 @@ speaker localization
 speaker model
 speaker recognition system
 speaker verification system
-species inventory
+specie inventory
 specific absorption rate
-specific frequencie
+specific frequency
 speckle filtering
 speckle interferometry
 speckle noise
@@ -7779,18 +7757,18 @@ spectral clustering method
 spectral correlation
 spectral distortion
 spectral factorization
-spectral librarie
-spectral mixture analysi
+spectral library
+spectral mixture analysis
 spectral subtraction
 spectroscopic ellipsometry
 spectrum auction
 spectrum availability
 spectrum efficiency
 spectrum measurement
-speech codec
+speech codecs
 speech coder
 speech compression
-speech corpora
+speech corpus
 speech database
 speech dereverberation
 speech distortion
@@ -7846,7 +7824,7 @@ stability condition
 stability problem
 stabilizer
 stable model
-stable model semantic
+stable model semantics
 stable walking
 stackelberg
 stackelberg equilibrium
@@ -7867,14 +7845,14 @@ statespace explosion
 statespace modeling
 statespace reduction
 static analyzer
-static and dynamic analysi
+static and dynamic analysis
 static background
 static environment
 static noise margin
 static object
 static output feedback
-static program analysi
-static timing analysi
+static program analysis
+static timing analysis
 stationary distribution
 stationary noise
 stationary target
@@ -7885,8 +7863,8 @@ statistical machine translation system
 statistical multiplexing
 statistical relational learning
 statistical significance
-statistical static timing analysi
-statistical timing analysi
+statistical static timing analysis
+statistical timing analysis
 stator flux
 stbc
 steadystate visual evoked potential
@@ -7909,7 +7887,7 @@ stereo video
 stereo vision system
 stereolithography
 stereophonic broadcasting
-stereopsi
+stereopsis
 stereoscopic display
 stereoscopic video
 stereoscopic vision
@@ -7918,7 +7896,7 @@ stigmergy
 stimulated brillouin scattering
 stirmark
 stochastic
-stochastic analysi
+stochastic analysis
 stochastic approach
 stochastic approximation
 stochastic control
@@ -7938,11 +7916,10 @@ stochastic optimization
 stochastic optimization algorithm
 stochastic optimization problem
 stochastic petri net
-stochastic process
 stochastic resonance
 stochastic simulation
 stochastic stability
-stock indice
+stock index
 stock market prediction
 stock price prediction
 stock return
@@ -7952,7 +7929,7 @@ stokes vector
 storage device
 storage format
 storage management
-storage media
+storage medium
 storage node
 storage overhead
 storage resource
@@ -7978,7 +7955,7 @@ stream processing
 stream processing system
 streaming application
 streaming data
-streaming media
+streaming medium
 streaming server
 streaming service
 streaming video
@@ -7995,7 +7972,7 @@ structural damage
 structural damage detection
 structural health
 structural health monitoring system
-structural operational semantic
+structural operational semantics
 structural response
 structural system
 structural topology optimization
@@ -8006,7 +7983,7 @@ structured p2p
 structured p2p network
 structured p2p system
 structured peertopeer
-structured querie
+structured query
 structured query language
 structurefrommotion
 structuring element
@@ -8017,14 +7994,16 @@ student learning outcome
 student performance
 style sheet
 subaperture
+subapertures
 subarray
+subarrays
 subband decomposition
 subcarrier allocation
 subcarrier and power allocation
 subcarrier assignment
-subchannel
 subchannel allocation
-subinterval
+subchannels
+subintervals
 subject heading
 subjective listening test
 subjective quality
@@ -8045,6 +8024,7 @@ subsurface structure
 subthreshold swing
 subtraction technique
 subtyping
+subtypings
 subwavelength
 successive approximation register
 successive cancellation
@@ -8060,7 +8040,7 @@ super resolution algorithm
 super resolution imaging
 superframe
 superior longitudinal bundle
-superlattice
+superlattices
 superlinear convergence
 supermarket
 superpeer
@@ -8125,7 +8105,7 @@ symbolic regression
 symbolic verification
 symmetric encryption
 symmetric key
-symmetric matrice
+symmetric matrix
 synchronization error
 synchronization protocol
 synchronization scheme
@@ -8134,7 +8114,7 @@ synchronous dataflow
 synchronous sequential circuit
 synchronous system
 synset
-syntactic analysi
+syntactic analysis
 syntactic feature
 syntactic information
 syntactic parsing
@@ -8148,45 +8128,45 @@ synthetic aperture sonar
 synthetic data
 synthetic speech
 sysml
+system architecting
 system architecture
+system biology
 system call
-system dynamics model
+system design
+system dynamic model
 system f
 system generator
+system integration
 system level design
 system level simulation
-system nonlinearitie
+system nonlinearities
 system of linear equation
 system of ordinary differential equation
 system on chip design
 system quality
 system requirement
 system testing
+system thinking
 system under test
 system usability
 systemlevel design
 systemlevel modeling
 systemonachip
-systems architecting
-systems biology
-systems design
-systems integration
-systems of linear equation
-systems thinking
 systolic architecture
 systolic array
+t fuzzy
 t s model
 tabu search algorithm
 tacit knowledge
-tactics for availability
-tactics for cyber foraging
-tactics for cyberforaging
-tactics for energy efficiency
-tactics for interoperability
-tactics for modifiability
-tactics for performance
-tactics for security
-tactics for testability
+tactic for availability
+tactic for cyber foraging
+tactic for cyberforaging
+tactic for energy efficiency
+tactic for interoperability
+tactic for modifiability
+tactic for performance
+tactic for security
+tactic for testability
 tactile information
 tactile sensation
 tactile sensor
@@ -8256,7 +8236,7 @@ teaching programming
 teaching reform
 teaching style
 teaching system
-technical analysi
+technical analysis
 technical indicator
 technology enhanced learning
 technology innovation
@@ -8266,7 +8246,7 @@ technologyenhanced learning
 telecommunication control
 telecommunication links, microwave
 telecommunication systems, satellite relay
-telecommunication technologie
+telecommunication technology
 teleconference
 teleconferencing
 telecontrol equipment
@@ -8279,8 +8259,8 @@ telephone network
 telephone service
 telepresence
 teleradiology
-telerobotic
 telerobotic system
+telerobotics
 telesurgery
 television equipment
 television interference
@@ -8302,7 +8282,6 @@ temporal correlation
 temporal database
 temporal frequency
 temporal operator
-temporal propertie
 temporal property
 temporal scalability
 tennessee eastman process
@@ -8311,8 +8290,8 @@ terahertz time domain spectroscopy
 term frequency
 term weighting
 terminal sliding mode control
-termination analysi
-ternary content addressable memorie
+termination analysis
+ternary content addressable memory
 terrestrial laser scanner
 terrestrial laser scanning
 terrestrial network
@@ -8332,7 +8311,7 @@ test sample
 test set
 test vector
 testability
-testability analysi
+testability analysis
 testdata volume
 texas instrument
 text classification method
@@ -8355,7 +8334,7 @@ textindependent speaker identification
 textto3d generation
 texttoimage generation
 texttoimage model
-texttospeech synthesi
+texttospeech synthesis
 texttospeech system
 textual data
 textual entailment
@@ -8368,12 +8347,12 @@ thermal modeling
 thermalannealing
 thin plate spline
 third generation partnership project
-third party logistic
+third party logistics
 thirty meter telescope
 thread level parallelism
 threadlevel parallelism
 three axis accelerometer
-three degrees of freedom
+three degree of freedom
 three dimensional integrated circuit
 threedimensional modeling
 threeparty
@@ -8388,7 +8367,7 @@ thresholding algorithm
 thresholding method
 thresholding technique
 thulium
-thztd
+thztds
 ti: sapphire laser
 tidal flow
 tidal inlet
@@ -8400,7 +8379,7 @@ time delay estimation
 time delaying
 time discretization
 time division duplex
-time frequencie
+time frequency
 time frequency domain
 time integration
 time multiplexed
@@ -8410,7 +8389,7 @@ time to digital converter
 time variation
 time varying parameter
 time window
-timed automata
+timed automaton
 timed petri net
 timed system
 timedelay estimation
@@ -8441,21 +8420,21 @@ tool geometry
 tool life
 tool path generation
 tool support
-tooth contact analysi
+tooth contact analysis
 tooth profile
 tooth surface
 top management support
 topic model
 topological charge
 topological optimization
-topological propertie
+topological property
 topological structure
 topology control
 topology control algorithm
 topology optimization method
 torque converter
 torque ripple
-toru
+torus
 total completion time
 total energy consumption
 total power
@@ -8475,15 +8454,13 @@ tracking problem
 tracking process
 tracking system
 trade
-tradeoff analysi
+tradeoff analysis
 trading rule
 trading system
 traditional clustering
-traffic anomalie
-traffic densitie
-traffic grooming
+traffic anomaly
+traffic density
 traffic identification
-traffic matrice
 traffic matrix
 traffic network
 traffic trace
@@ -8505,14 +8482,13 @@ transaction processing system
 transceiver design
 transcoder
 transconductance amplifier
-transconductor
+transconductors
 transcription factor runx1
 transfer learning
 transferable belief model
 transform coding
 transform domain
 transform method
-transformation matrice
 transformation matrix
 transformation optic
 transformation rule
@@ -8523,9 +8499,8 @@ transition system
 transitionedge sensor
 translation process
 translation system
-transmission capacitie
 transmission capacity
-transmission opportunitie
+transmission opportunity
 transmission power
 transmission power control
 transmission range
@@ -8547,18 +8522,18 @@ transportation personnel
 trapping set
 travel time prediction
 traveling wave solution
-tree automata
+tree automaton
 tree language
-treebank
+treebanks
 treemap
+treemaps
 trellis coded modulation
 trelliscoded modulation
 triangle inequality
 triangle mesh
-triangle meshe
 triaxial accelerometer
 trilateration
-triphone
+triphones
 triple modular redundancy
 trmm
 trojan
@@ -8569,11 +8544,10 @@ trust management system
 trust modeling
 trust negotiation
 trust relationship
-trusted third partie
+trusted third party
 truthful mechanism
-ts fuzzy
 tsv
-tts system
+tt system
 tunable laser
 tuned mass damper
 tuning method
@@ -8585,15 +8559,15 @@ turning process
 tutoring system
 tv channel
 tv service
-two dimensional electron ga
+two dimensional electron gas
 two microphone
-two photon processe
+two photon process
 two source
 two wavelength
-twodimensional cellular automata
+twodimensional cellular automaton
 twodimensional modeling
 twodimensional photonic crystal
-twograph
+twographs
 twopoint boundary value problem
 twotier network
 twoway relay channel
@@ -8604,7 +8578,7 @@ type error
 type inference
 type safety
 type strain
-type synthesi
+type synthesis
 type2 fuzzy logic system
 type2 fuzzy system
 typechecking
@@ -8627,7 +8601,7 @@ ultra wideband antenna
 ultra wideband communication system
 ultra wideband impulse radio
 ultra wideband radar
-ultrafast phenomena
+ultrafast phenomenon
 ultrahigh frequency
 ultrashort impulse signal
 ultrashort laser pulse
@@ -8658,16 +8632,17 @@ uml modeling
 uml profile
 uml sequence diagram
 uml state machine
+umls
 unconstrained optimization
 unconstrained optimization problem
 uncooled
 underactuated system
 underactuation
-undergraduate curricula
+undergraduate curriculum
 understandability
 underwater acoustic network
 underwater acoustic sensor network
-underwater ballistic
+underwater ballistics
 underwater channel
 underwater communication
 underwater construction
@@ -8676,7 +8651,7 @@ underwater image
 underwater imaging
 underwater network
 underwater robot
-underwater robotic
+underwater robotics
 underwater sensor
 underwater structure
 underwater wireless sensor network
@@ -8696,7 +8671,7 @@ unit selection
 universal background model
 universal design
 universal joint
-university librarie
+university library
 university sector
 unknown environment
 unknown input
@@ -8711,7 +8686,6 @@ unscented kalman filtering
 unscented particle filter
 unscented transformation
 unstructured mesh
-unstructured meshe
 unstructured p2p
 unstructured p2p network
 unstructured peertopeer
@@ -8733,7 +8707,6 @@ usability evaluation method
 usability method
 usability problem
 usability requirement
-usability studie
 usability study
 usability test
 usage data
@@ -8779,15 +8752,15 @@ uwb signal
 uwb transmitter
 v2v
 v2v communication
-valid inequalitie
+valid inequality
 validity index
 value function approximation
 value iteration
 value network
 value proposition
 van der pol oscillator
-varactor
 varactor diode
+varactors
 variability management
 variability model
 variability modeling
@@ -8798,10 +8771,10 @@ variable ordering
 variable speed transmission
 variable structure
 variable structure controller
-variational approache
+variational approach
 variational approximation
-variational auto encoder
-variational autoencoder
+variational auto encoders
+variational autoencoders
 variational bayesian
 variational inference
 variational iteration method
@@ -8815,7 +8788,7 @@ vcsel
 vecsel
 vector data
 vector network analyzer
-vector quantizer
+vector quantizers
 vector space model
 vehicle adhoc network
 vehicle control
@@ -8824,7 +8797,7 @@ vehicle image
 vehicle license plate
 vehicle mobility
 vehicle navigation
-vehicle parts and equipment
+vehicle part and equipment
 vehicle routing problem with time window
 vehicle to grid
 vehicle tracking
@@ -8834,6 +8807,7 @@ vehicular environment
 velocimetry
 venture capital
 vergence
+vergences
 verifiable secret sharing
 verification and validation
 verification method
@@ -8855,7 +8829,7 @@ very largescale integration
 vhdl
 vhdl language
 vibration data
-vibration energie
+vibration energy
 vibration energy harvesting
 vibration monitoring
 vibrotactile
@@ -8867,6 +8841,7 @@ video application
 video browsing
 video classification
 video codec
+video codecs
 video coder
 video coding scheme
 video coding standard
@@ -8901,7 +8876,7 @@ videosurveillance application
 videotranscoding
 view maintenance
 view selection
-view synthesi
+view synthesis
 viewdependent
 viewpoint
 viral marketing
@@ -8909,7 +8884,6 @@ virtual agent
 virtual and augmented reality
 virtual classroom
 virtual cluster
-virtual communitie
 virtual community
 virtual control
 virtual human
@@ -8919,7 +8893,7 @@ virtual lab
 virtual laboratory
 virtual learning
 virtual learning environment
-virtual librarie
+virtual library
 virtual link
 virtual machine technology
 virtual network embedding
@@ -8932,7 +8906,7 @@ virtual scene
 virtual space
 virtual view
 virtualization layer
-virtualization technologie
+virtualization technology
 virtualized environment
 virtualized resource
 virus propagation
@@ -8941,7 +8915,7 @@ viscous fluid
 visible image
 vision aid
 vision algorithm
-visual analysi
+visual analysis
 visual attention model
 visual clutter
 visual cryptography scheme
@@ -8961,11 +8935,11 @@ visual secret sharing
 visual servo control
 visual similarity
 visual slam
-visual stimulu
+visual stimulus
 visual surveillance
 visual surveillance system
-visual vocabularie
-visualization and analysi
+visual vocabulary
+visualization and analysis
 visually impaired people
 visuallyimpaired user
 vitamin k 2
@@ -8975,8 +8949,8 @@ vliw processor
 vlsi architecture
 vlsi design
 vlsi implementation
-vocaltract
-vocoder
+vocaltracts
+vocoders
 vod
 voice activity detection
 voice activity detector
@@ -9029,7 +9003,6 @@ waveform distortion
 wavefront correction
 waveguide junction
 waveguides, optical
-wavelength assignment
 wavelength channel
 wavelength conversion
 wavelength converter
@@ -9038,14 +9011,15 @@ wavelength routing
 wavelength selection
 wavelength shift
 wavelength tuning
-wavelet basi
+wavelet basis
 wavelet denoising
 wavelet domain
 wavelet filter bank
 wavelet function
-wavelet packet analysi
+wavelet packet analysis
 wavelet packet decomposition
 wavelet packet transform
+wavelet packet transforms
 wavelet shrinkage
 wavelet threshold
 wavelet thresholding
@@ -9067,7 +9041,7 @@ wearable technology
 weather radar
 weather satellite
 web 2.0 application
-web 2.0 technologie
+web 2.0 technology
 web accessibility
 web application development
 web application security
@@ -9097,7 +9071,7 @@ web personalization
 web programming
 web resource
 web search engine
-web search querie
+web search query
 web searching
 web security
 web server
@@ -9110,9 +9084,10 @@ web usage
 webbased application
 webbased education
 webbased learning
-webgi
+webgis
 webgl
 weblog
+weblogs
 websearching
 weibull
 weibull model
@@ -9123,7 +9098,7 @@ weighted finitestate transducer
 weighted graph
 weighted sumrate
 welding robot
-well founded semantic
+well founded semantics
 wet etching
 whispering gallery mode
 white gaussian noise
@@ -9149,13 +9124,14 @@ wifi signal
 wignerville distribution
 wii remote
 wiki
+wikis
 wimax standard
 wimax technology
 wimedia
 wind forcing
-windows ce
-windows vista
-windows xp
+window ce
+window vista
+window xp
 winner determination
 wired and wireless
 wireless
@@ -9174,7 +9150,6 @@ wireless multicast
 wireless network coding
 wireless relay network
 wireless sensor node
-wireless technology
 wireless transceiver
 wireless video streaming
 wireless video transmission
@@ -9186,6 +9161,7 @@ wlan system
 wmn
 word alignment
 word embedding
+word embeddings
 word image
 word learning
 word processing
@@ -9199,7 +9175,7 @@ work environment
 workflow net
 workflow pattern
 workpiece material
-workspace analysi
+workspace analysis
 worldwide interoperability for microwave access
 worm
 worm detection
@@ -9209,25 +9185,26 @@ wormhole attack
 wormhole routing
 wormhole switching
 worst case response time
-worstcase execution time analysi
+worstcase execution time analysis
 wrapper approach
 write operation
 writer identification
 wsn application
+wsns
 xacml
 xadl
 xilinx fpga
 xml file
 xml format
 xml processing
-xml querie
+xml query
 xml query processing
 xml retrieval
 xml schema
 xml technology
 xml tree
 xpath
-xpath querie
+xpath query
 xquery
 xray computed tomography
 xray intensifying screen
