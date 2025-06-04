@@ -5,6 +5,13 @@ import urllib.parse
 from collections import defaultdict
 import re
 import networkx as nx
+from nltk.stem import WordNetLemmatizer
+
+import nltk
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+
+lemmatizer = WordNetLemmatizer()
 
 df = pd.read_csv("Documents/CSO.3.4.1.csv", header = None)
 df.columns = ["super_topic_uri", "predicate", "sub_topic_uri"]
@@ -19,8 +26,9 @@ def extract_topic(uri):
         topics = topics.strip().lower().strip(">")
         topics = re.sub(r"\s+", " ", topics).strip()
 
-        if topics.endswith("s") and not topics.endswith("ss"):
-            topics = topics[:-1]
+        words = topics.split()
+        lemmatized = [lemmatizer.lemmatize(word, pos = 'n') for word in words]
+        topics = " ".join(lemmatized)
 
         return topics
     return None
@@ -34,18 +42,10 @@ G = nx.DiGraph()
 for _, row in df.iterrows():
     G.add_edge(row["super_topic"], row["sub_topic"])
 
-precise = [node for node in G.nodes if G.out_degree(node) == 0 or G.out_degree(node) <= 2]
-
-specific_topics = []
-for node in G.nodes:
-    if precise:
-        specific_topics.append(node)
-
-specific_topics = sorted(set(specific_topics))
-
-print(f"General topics: {list(specific_topics)}")
-print(f"Total general topics: {len(specific_topics)}")
+leaves = [node for node in G.nodes if G.out_degree(node) == 0 or G.out_degree(node) <= 2]
 
 with open("specific_topics.txt", "w") as f:
-    for topic in sorted(specific_topics):
+    for topic in sorted(leaves):
         f.write(topic + "\n")
+
+print(f"Total specific (leaf) topics: {len(leaves)}")
