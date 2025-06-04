@@ -34,11 +34,11 @@ G = nx.DiGraph()
 for _, row in df.iterrows():
     G.add_edge(row["super_topic"], row["sub_topic"])
 
-leaves = [node for node in G.nodes if G.out_degree(node) == 0]
+precise = [node for node in G.nodes if G.out_degree(node) == 0 or G.out_degree(node) <= 2]
 
 specific_topics = []
 for node in G.nodes:
-    if G.out_degree(node) == 0 or G.out_degree(node) <= 2:
+    if precise:
         specific_topics.append(node)
 
 specific_topics = sorted(set(specific_topics))
