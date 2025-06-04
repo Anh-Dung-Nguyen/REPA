@@ -20,13 +20,13 @@ db = client[DB_NAME]
 
 logging.basicConfig(
     format="%(asctime)s - [%(levelname)s] %(message)s",
-    level=logging.INFO
+    level = logging.INFO
 )
 
 with open("specific_topics.txt", "r") as f:
     specific_topics = set(line.strip().lower() for line in f if line.strip())
 
-batch_queue = Queue(maxsize=QUEUE_MAXSIZE)
+batch_queue = Queue(maxsize = QUEUE_MAXSIZE)
 insert_lock = Lock() 
 
 def chunked_cursor(cursor, size):
@@ -61,7 +61,7 @@ def worker(worker_id):
         if filtered_docs:
             with insert_lock:
                 try:
-                    db[TARGET_COLLECTION].insert_many(filtered_docs, ordered=False)
+                    db[TARGET_COLLECTION].insert_many(filtered_docs, ordered = False)
                 except Exception as e:
                     logging.error(f"[Worker-{worker_id}] Insert error: {e}")
 
@@ -69,7 +69,7 @@ def worker(worker_id):
         logging.info(f"[Worker-{worker_id}] processed a batch of size {len(batch)}")
 
 def producer():
-    cursor = db[SOURCE_COLLECTION].find({}, no_cursor_timeout=True).batch_size(BATCH_SIZE)
+    cursor = db[SOURCE_COLLECTION].find({}, no_cursor_timeout = True).batch_size(BATCH_SIZE)
     try:
         for batch in chunked_cursor(cursor, BATCH_SIZE):
             batch_queue.put(batch)
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     workers = []
     for i in range(NUM_WORKERS):
-        t = Thread(target=worker, args=(i,))
+        t = Thread(target = worker, args = (i,))
         t.start()
         workers.append(t)
 
