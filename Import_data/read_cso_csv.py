@@ -33,19 +33,38 @@ def extract_topic(uri):
         return topics
     return None
 
-df["super_topic"] = df["super_topic_uri"].apply(extract_topic)
-df["sub_topic"] = df["sub_topic_uri"].apply(extract_topic)
+def build_graph(csv_path):
+    df = pd.read_csv(csv_path, header=None, names=["super_topic_uri", "predicate", "sub_topic_uri"])
+    df["super_topic"] = df["super_topic_uri"].apply(extract_topic)
+    df["sub_topic"] = df["sub_topic_uri"].apply(extract_topic)
+    df = df.dropna(subset=["super_topic", "sub_topic"])
 
-df = df.dropna(subset = ["super_topic", "sub_topic"])
+    G = nx.DiGraph()
+    for _, row in df.iterrows():
+        G.add_edge(row["super_topic"], row["sub_topic"])
+    return G
 
-G = nx.DiGraph()
-for _, row in df.iterrows():
-    G.add_edge(row["super_topic"], row["sub_topic"])
+def find_specific_topics(G, max_out_degree=2):
+    return sorted([
+        node for node in G.nodes
+        if G.out_degree(node) <= max_out_degree
+    ])
 
-leaves = [node for node in G.nodes if G.out_degree(node) == 0 or G.out_degree(node) <= 2]
+def export_topics(topics, filename):
+    with open(filename, "w", encoding="utf-8") as f:
+        for topic in topics:
+            f.write(topic + "\n")
+    print(f"{len(topics)} specific topics written to {filename}")
 
-with open("specific_topics.txt", "w") as f:
-    for topic in sorted(leaves):
-        f.write(topic + "\n")
+def main():
+    csv_path = "Documents/CSO.3.4.1.csv"
+    print("Building topic graph...")
+    G = build_graph(csv_path)
 
-print(f"Total specific (leaf) topics: {len(leaves)}")
+    print("Finding specific topics...")
+    specific_topics = find_specific_topics(G)
+
+    export_topics(specific_topics, "specific_topics.txt")
+
+if __name__ == "__main__":
+    main()
