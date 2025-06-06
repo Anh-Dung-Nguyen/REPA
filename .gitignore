@@ -2,3 +2,4 @@ contratkey
 contratkey.pub
 Documents/*.jsonl
 Documents/*.zip
+node_modules
