@@ -29,6 +29,60 @@ router.get("/", async (req, res) => {
 
 /**
  * @swagger
+ * /papers_with_annotations/latest_paper_title/{authorId}:
+ *   get:
+ *     tags:
+ *       - Papers with annotations
+ *     summary: Get latest paper title by authorId
+ *     parameters:
+ *       - in: path
+ *         name: authorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The author ID to search papers for
+ *     responses:
+ *       200:
+ *         description: Latest paper title found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 title:
+ *                   type: string
+ *                   example: "Ontology-based model for trusted critical site supervision in FUSE-IT"
+ *       404:
+ *         description: No papers found for the author
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get("/latest_paper_title/:authorId", async (req, res) => {
+  try {
+    const db = getDB();
+    const authorId = req.params.authorId;
+
+    const latestPaper = await db.collection("papers_with_annotations")
+      .find({ "authors.authorId": authorId })
+      .sort({ updated: -1 })
+      .limit(1)
+      .project({ _id: 0, title: 1})
+      .next();
+
+    if (!latestPaper) {
+      return res.status(404).json({ error: "No papers found for this author" });
+    }
+
+    res.json({ title: latestPaper.title });
+  } catch (error) {
+    console.error("Error fetching latest paper title:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * @swagger
  * /papers_with_annotations/{corpus_id}:
  *     get:
  *         tags:
