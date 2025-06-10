@@ -29,6 +29,37 @@ router.get("/", async (req, res) => {
 
 /**
  * @swagger
+ * /papers/count:
+ *     get:
+ *         tags:
+ *             - Papers
+ *         summary: Get the total number of papers
+ *         responses:
+ *             200:
+ *                 description: Total number of papers
+ *                 content:
+ *                   application/json:
+ *                     schema:
+ *                       type: object
+ *                       properties:
+ *                         totalPapers:
+ *                           type: integer
+ *                           example: 120
+ */
+
+router.get("/count", async (req, res) => {
+    try {
+        const db = getDB();
+        const totalPapers = await db.collection("papers").countDocuments();
+        res.json({totalPapers});
+    } catch (error) {
+        console.error("Error fetching paper count:", error);
+        res.status(500).json({error: "Internal server error"});
+    }
+});
+
+/**
+ * @swagger
  * /papers/{corpus_id}:
  *     get:
  *         tags:
