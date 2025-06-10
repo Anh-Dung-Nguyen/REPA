@@ -1,5 +1,6 @@
 const express = require("express");
 const { connectToDB, getDB } = require('./db');
+const cors = require("cors");
 
 const authorsRouter = require("./routers/authors");
 const papersRouter = require("./routers/papers");
@@ -14,6 +15,7 @@ const setupSwagger = require('./swagger');
 
 const app = express();
 
+app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json());
 
 app.use("/authors", authorsRouter);               
