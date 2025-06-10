@@ -29,6 +29,37 @@ router.get("/", async (req, res) => {
 
 /**
  * @swagger
+ * /annotated_papers/count:
+ *     get:
+ *         tags:
+ *             - Annotated papers
+ *         summary: Get the total number of annotated papers
+ *         responses:
+ *             200:
+ *                 description: Total number of annotated papers
+ *                 content:
+ *                   application/json:
+ *                     schema:
+ *                       type: object
+ *                       properties:
+ *                         totalAnnotatedPapers:
+ *                           type: integer
+ *                           example: 120
+ */
+
+router.get("/count", async (req, res) => {
+    try {
+        const db = getDB();
+        const totalAnnotatedPapers = await db.collection("annotated_papers").countDocuments();
+        res.json({ totalAnnotatedPapers });
+    } catch (err) {
+        console.error("Error fetching author count:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+/**
+ * @swagger
  * /annotated_papers/{corpus_id}:
  *     get:
  *         tags:
