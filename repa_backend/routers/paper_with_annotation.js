@@ -120,4 +120,57 @@ router.get("/:corpus_id", async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /papers_with_annotations/url/{corpusid}:
+ *   get:
+ *     tags:
+ *       - Papers with annotations
+ *     summary: Get paper URL by corpusid
+ *     parameters:
+ *       - in: path
+ *         name: corpusid
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The Corpus ID to retrieve the paper URL for
+ *     responses:
+ *       200:
+ *         description: Paper URL found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 corpusid:
+ *                   type: integer
+ *                   example: 199000349
+ *                 url:
+ *                   type: string
+ *                   example: "https://www.semanticscholar.org/paper/78dc9426d7ac0d652aaf3dc1ace1250214375ce0"
+ *       404:
+ *         description: No paper found for the given corpusid
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get("/url/:corpusid", async (req, res) => {
+  try {
+    const db = getDB();
+    const corpusId = parseInt(req.params.corpusid, 10);
+
+    const paper = await db.collection("papers_with_annotations")
+      .findOne({ corpusid: corpusId }, { projection: { _id: 0, corpusid: 1, url: 1 } });
+
+    if (!paper) {
+      return res.status(404).json({ error: "No paper found for the given corpusid" });
+    }
+
+    res.json(paper);
+  } catch (err) {
+    console.error("Error fetching paper URL by corpusid:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
