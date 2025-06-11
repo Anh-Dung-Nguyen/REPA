@@ -6,6 +6,10 @@ from collections import defaultdict
 import re
 import networkx as nx
 from nltk.stem import WordNetLemmatizer
+from pymongo import MongoClient
+
+DB_NAME = "research_db"
+COLLECTION_NAME = "specific_topics"
 
 import nltk
 nltk.download('wordnet')
@@ -56,6 +60,19 @@ def export_topics(topics, filename):
             f.write(topic + "\n")
     print(f"{len(topics)} specific topics written to {filename}")
 
+def export_to_mongodb(topics, db_name=DB_NAME, collection_name=COLLECTION_NAME, uri="mongodb://localhost:27017/"):
+    client = MongoClient(uri)
+    db = client[db_name]
+    collection = db[collection_name]
+    
+    collection.delete_many({})
+
+    documents = [{"topic": topic} for topic in topics]
+    collection.insert_many(documents)
+    
+    print(f"{len(topics)} specific topics exported to MongoDB collection '{collection_name}' in database '{db_name}'")
+
+
 def main():
     csv_path = "Documents/CSO.3.4.1.csv"
     print("Building topic graph...")
@@ -65,6 +82,7 @@ def main():
     specific_topics = find_specific_topics(G)
 
     export_topics(specific_topics, "specific_topics.txt")
+    export_to_mongodb(specific_topics)
 
 if __name__ == "__main__":
     main()
