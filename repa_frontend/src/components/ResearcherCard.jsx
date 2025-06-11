@@ -28,6 +28,10 @@ const ResearcherCard = ({researcher, onViewDetails, onCompare}) => (
                 <p className = "text-sm text-gray-600">Citation count</p>
                 <p className = "text-lg font-bold text-orange-600">{researcher.citationcount}</p>
             </div>
+            <div className = "text-center">
+                <p className = "text-sm text-gray-600">Number of Co-authors</p>
+                <p className = "text-lg font-bold text-purple-600">{researcher.unique_coauthors_count}</p>
+            </div>
         </div>
 
         <p className = "text-sm text-gray-700 mb-4">
