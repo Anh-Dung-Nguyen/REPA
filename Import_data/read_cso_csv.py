@@ -17,7 +17,7 @@ nltk.download('omw-1.4')
 
 lemmatizer = WordNetLemmatizer()
 
-df = pd.read_csv("Documents/CSO.3.4.1.csv", header = None)
+df = pd.read_csv("Input/CSO.3.4.1.csv", header = None)
 df.columns = ["super_topic_uri", "predicate", "sub_topic_uri"]
 
 def extract_topic(uri):
@@ -74,7 +74,7 @@ def export_to_mongodb(topics, db_name=DB_NAME, collection_name=COLLECTION_NAME, 
 
 
 def main():
-    csv_path = "Documents/CSO.3.4.1.csv"
+    csv_path = "Input/CSO.3.4.1.csv"
     print("Building topic graph...")
     G = build_graph(csv_path)
 
