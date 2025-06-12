@@ -1,5 +1,5 @@
 contratkey
 contratkey.pub
-Documents/*.jsonl
-Documents/*.zip
+*.jsonl
+*.zip
 node_modules
