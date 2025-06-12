@@ -9,9 +9,9 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['research_db']
 
 collections = {
-    'Documents/authors.jsonl': db['authors'],
-    'Documents/D3_annotated_papers.jsonl': db['annotated_papers'],
-    'Documents/papers.jsonl': db['papers']
+    'Input/authors.jsonl': db['authors'],
+    'Input/D3_annotated_papers.jsonl': db['annotated_papers'],
+    'Input/papers.jsonl': db['papers']
 }
 
 def import_jsonl_to_mongo(filepath, collection, batch_size = 1000):
