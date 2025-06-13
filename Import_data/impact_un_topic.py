@@ -106,7 +106,7 @@ class CSOImpactCalculator:
             try:
                 descendants = len(nx.descendants(self.graph, parent))
                 influence = np.log(descendants + 1)
-                max_influence = max(max_influence, influence)
+                max_influence = max(max_influence, influence)  # Un seul parent très influent peut suffire à rendre un sujet pertinent -> évite que des petits parents diluent l’impact du grand
             except:
                 influence = 0.1
                 max_influence = max(max_influence, influence)
@@ -129,12 +129,15 @@ class CSOImpactCalculator:
         
         depth = self.calculate_depth(topic)
         specialization_score = min(np.log(depth + 1) / np.log(20), 1.0) # Plus un topic est profond, plus il est spécialisé
+                                                                        # On suppose que profondeur max typique = 20
         
         parent_influence = self.get_parent_influence(topic)
-        max_influence = 15 
+        #  15 est probablement une valeur empirique : basée sur l’observation que les influence log(descendants) atteignent rarement au-delà de 15 dans leur graphe.
+        max_influence = 15
         influence_score = min(parent_influence / max_influence, 1.0) # Plus les parents ont d’impact ou ont beaucoup de descendants, plus le score monte.
         
         semantic_density = self.calculate_semantic_density(topic)
+        # 10 est un seuil empirique raisonnable dans une ontologie comme CSO.
         max_density = 10 
         density_score = min(semantic_density / max_density, 1.0) # Plus un sujet a d’équivalents et de contributions, plus il est dense sémantiquement.
         
