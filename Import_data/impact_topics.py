@@ -1,110 +1,82 @@
-import pandas as pd
+from impact_un_topic import CSOTopicImpactCalculator
 import numpy as np
 import networkx as nx
-from impact_un_topic import CSOImpactCalculator
-from itertools import combinations
 
-class MultiTopicImpactCalculator:
-    def __init__(self, cso_calculator):
-        self.cso_calc = cso_calculator
-        self.graph = cso_calculator.graph
-        self.reverse_graph = cso_calculator.reverse_graph
-        self.equivalents = cso_calculator.equivalents
-        self.contributions = cso_calculator.contributions
+class TopicGroupImpactCalculator:
+    def __init__(self, csocalculator):
+        self.cso = csocalculator
+        self.alpha = self.cso.alpha
+        self.beta = self.cso.beta
+        self.gamma = self.cso.gamma
 
-    def calculate_topic_overlap(self, topics):
-        if len(topics) <= 1:
+    def compute_internal_cohesion(self, topics):
+        n = len(topics)
+
+        if n < 2:
             return 0.0
 
-        descendants_sets = []
-        for topic in topics:
-            if topic in self.graph:
-                descendants = set(nx.descendants(self.graph, topic))
-                descendants.add(topic)
-                descendants_sets.append(descendants)
-            else:
-                descendants_sets.append({topic})
+        total_similarity = 0.0
+        count = 0
 
-        intersection = set.intersection(*descendants_sets)
-        union = set.union(*descendants_sets)
+        for i in range(n):
+            for j in range(i + 1, n):
+                t1, t2 = topics[i], topics[j]
+                if t1 in self.cso.graph.nodes() and t2 in self.cso.graph.nodes():
+                    sim = self.cso.calculate_lin_similarity(t1, t2)
+                    total_similarity += sim
+                    count += 1
 
-        return len(intersection) / len(union) if union else 0.0
+        return total_similarity / count if count > 0 else 0.0
 
-    def calculate_semantic_coherence(self, topics):
-        if len(topics) <= 1:
-            return 1.0
+    def compute_group_impact(self, topics):
+        valid_topics = [t for t in topics if t in self.cso.graph.nodes()]
+        n = len(valid_topics)
+        m = self.cso.graph.number_of_nodes()
+        
+        if n == 0:
+            return {'error': 'Aucun topic valide dans le groupe.'}
+        
+        if n == 1:
+            topic = valid_topics[0]
+            reference_topics = list(self.cso.specific_topics.intersection(set(self.cso.graph.nodes())))[:m]
+            impact = self.cso.calculate_impact_factor(topic, reference_topics)
+            return impact
 
-        scores = []
-        for t1, t2 in combinations(topics, 2):
-            direct = 1.0 if (t1 in self.graph and t2 in self.graph.successors(t1)) or \
-                             (t2 in self.graph and t1 in self.graph.successors(t2)) else 0.0
+        depths = [self.cso.calculate_depth(t) for t in valid_topics]
+        max_depth = max(self.cso.depth_cache.values()) if self.cso.depth_cache else 1
+        mean_depth_score = np.mean([d / max_depth for d in depths]) if max_depth > 0 else 0
 
-            equivalent = 1.0 if t2 in self.equivalents.get(t1, []) else 0.0
+        influences = [self.cso.calculate_influence_score(t) for t in valid_topics]
+        max_infl = max(self.cso.influence_cache.values()) if self.cso.influence_cache else 1
+        mean_influence_score = np.mean([i / max_infl for i in influences]) if max_infl > 0 else 0
 
-            contribution = 0.5 if t2 in self.contributions.get(t1, []) or \
-                                   t1 in self.contributions.get(t2, []) else 0.0
+        cohesion_score = self.compute_internal_cohesion(valid_topics)
 
-            try:
-                distance = nx.shortest_path_length(self.graph.to_undirected(), t1, t2)
-                dist_score = 1.0 / (distance + 1)
-            except:
-                dist_score = 0.0
-
-            scores.append(max(direct, equivalent, contribution, dist_score))
-
-        return np.mean(scores) if scores else 0.0
-
-    def calculate_coverage_breadth(self, topics):
-        visited = set()
-        for topic in topics:
-            queue = [topic]
-            while queue:
-                current = queue.pop(0)
-                if current in visited:
-                    continue
-                visited.add(current)
-                queue.extend(self.reverse_graph.get(current, []))
-
-        total_nodes = self.graph.number_of_nodes()
-        return min(len(visited) / total_nodes, 1.0) if total_nodes else 0.0
-
-    def calculate_multi_topic_impact(self, topics, weights=None):
-        if not topics:
-            return {'final_impact': 0.0}
-
-        if weights is None:
-            weights = {
-                'individual_weight': 0.5,
-                'overlap_penalty_weight': 0.2,
-                'coherence_bonus_weight': 0.2,
-                'coverage_bonus_weight': 0.1
-            }
-
-        impacts = [self.cso_calc.calculate_impact_factor(t) for t in topics]
-        base = np.mean(impacts)
-
-        overlap = self.calculate_topic_overlap(topics)
-        coherence = self.calculate_semantic_coherence(topics)
-        coverage = self.calculate_coverage_breadth(topics)
-
-        final = (
-            base * weights['individual_weight'] +
-            coherence * weights['coherence_bonus_weight'] +
-            coverage * weights['coverage_bonus_weight'] -
-            overlap * weights['overlap_penalty_weight']
+        impact_factor = (
+            self.alpha * mean_depth_score +
+            self.beta * mean_influence_score +
+            self.gamma * cohesion_score
         )
 
-        return {'final_impact': max(0.0, min(1.0, final))}
+        return {
+            'group_topics': valid_topics,
+            'depth_score': mean_depth_score,
+            'influence_score': mean_influence_score,
+            'semantic_cohesion': cohesion_score,
+            'impact_factor': impact_factor
+        }
 
 if __name__ == "__main__":
-    calculator = CSOImpactCalculator(
-        csv_file_path="Input/CSO.3.4.1.csv",
-        specific_topics_file="Output/specific_topics.txt"
+    calculator = CSOTopicImpactCalculator(
+        csv_file_path = "Input/CSO.3.4.1.csv",
+        specific_topics_file = "Output/specific_topics.txt"
     )
-    calculator.load_data()
 
-    multi_calc = MultiTopicImpactCalculator(calculator)
+    group_calculator = TopicGroupImpactCalculator(calculator)
 
-    topics = ["ahp method", "analytic hierarchy", "index weight"]
-    result = multi_calc.calculate_multi_topic_impact(topics)
-    print(f"Impact final: {result['final_impact']:.4f}")
+    topics = ["chromosome translocation 18"]
+    result = group_calculator.compute_group_impact(topics)
+    
+    print("\nRésultat du facteur d'impact du groupe :")
+    for key, value in result.items():
+        print(f"{key}: {value}")
