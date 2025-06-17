@@ -222,12 +222,13 @@ class CSOTopicImpactCalculator:
         return influence
     
     def calculate_semantic_weight(self, topic_id, reference_topics):
+        n = self.graph.number_of_nodes()
         if not reference_topics:
             if self.specific_topics:
-                reference_topics = list(self.specific_topics.intersection(set(self.graph.nodes())))[:20]
+                reference_topics = list(self.specific_topics.intersection(set(self.graph.nodes())))[:n]
             else:
                 sorted_topics = sorted(self.centrality_cache.items(), key = lambda x: x[1], reverse = True)
-                reference_topics = [t[0] for t in sorted_topics[:20]]
+                reference_topics = [t[0] for t in sorted_topics[:n]]
         
         if not reference_topics:
             return 0.0
@@ -261,22 +262,14 @@ class CSOTopicImpactCalculator:
         )
         
         is_specific = topic_id in self.specific_topics
-        if is_specific:
-            impact_factor *= 1.1
         
         return {
             'topic_id': topic_id,
             'topic_label': topic_id.replace('_', ' ').title(),
-            'depth': depth,
             'depth_score': depth_score,
             'influence_score': influence_score,
             'semantic_score': semantic_score,
-            'impact_factor': impact_factor,
-            'frequency': self.frequency_cache.get(topic_id, 0),
-            'centrality': self.centrality_cache.get(topic_id, 0),
-            'is_specific_topic': is_specific,
-            'equivalents_count': len(self.equivalents.get(topic_id, [])),
-            'contributions_count': len(self.contributions.get(topic_id, []))
+            'impact_factor': impact_factor
         }
     
     def rank_topics_by_impact(self, topic_ids=None, top_k=10, specific_topics_only=False):
