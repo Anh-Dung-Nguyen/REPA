@@ -7,6 +7,7 @@ import MetricCard from './components/MetricCard';
 import FieldCard from './components/FieldCard';
 import ResearcherCard from './components/ResearcherCard';
 import ResearcherDetail from './components/ResearcherDetail';
+import TopResearchFieldsChart from './components/TopResearchFieldChart';
 import { Users, BookOpen, BookIcon, LayoutDashboard, User2, Paperclip } from 'lucide-react';
 
 function App() {
@@ -22,6 +23,34 @@ function App() {
   });
   const [searchResults, setSearchResults] = useState([]);
   const [currentTab, setCurrentTab] = useState("Overview");
+  const [topFieldsData, setTopFieldsData] = useState([]);
+  const [authors, setAuthors] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const AUTHORS_PER_PAGE = 51;
+
+  useEffect(() => {
+    const fetchTopFields = async () => {
+      try {
+        const res = await axios.get('http://localhost:8000/specific_topics/topic_author_counts');
+
+        const sortedTop50 = res.data
+        .map(item => ({
+          name: item.topic,          
+          researchers: item.count 
+        }))
+        .sort((a, b) => b.researchers - a.researchers)
+        .slice(0, 10);
+
+      setTopFieldsData(sortedTop50);
+
+      } catch (error) {
+        console.error("Error fetching top research fields:", error);
+      }
+    };
+
+    fetchTopFields();
+  }, []);
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
@@ -94,6 +123,30 @@ function App() {
   };
 
   useEffect(() => {
+    const fetchPaginatedAuthors = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get("http://localhost:8000/authors", {
+          params: {
+            page: currentPage,
+            limit: AUTHORS_PER_PAGE
+          }
+        });
+        setAuthors(res.data.authors);
+        setTotalPages(res.data.totalPages);
+      } catch (error) {
+        console.error("Error fetching paginated authors:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentTab === "Researchers" && !searchTerm) {
+      fetchPaginatedAuthors();
+    }
+  }, [currentTab, currentPage, searchTerm]);
+
+  useEffect(() => {
     const fetchStats = async() => {
       try {
         const researcher = await axios.get('http://localhost:8000/authors/count');
@@ -147,28 +200,34 @@ function App() {
       </div>
       <main className = 'container mx-auto px-4 py-6'>
         {currentTab === "Overview" && (
-          <div className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
-            <MetricCard 
-              title = "Total Researchers" 
-              value = {researcherStats.totalResearchers}
-              icon = {Users}
-              color = "#3B82F6"/>
-            <MetricCard 
-              title = "Total Papers" 
-              value = {researcherStats.totalPapers}
-              icon = {BookOpen}
-              color = "#10B981"/>
-            <MetricCard 
-              title = "Total Annotated Papers" 
-              value = {researcherStats.totalAnnotatedPapers}
-              icon = {BookIcon}
-              color = "#8B5CF6"/>
-            <MetricCard 
-              title = "Total Specific Topics" 
-              value = {researcherStats.totalSpecificTopics}
-              icon = {Paperclip}
-              color = "#ffA500"/>
-          </div>
+          <>
+            <div className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
+              <MetricCard 
+                title = "Total Researchers" 
+                value = {researcherStats.totalResearchers}
+                icon = {Users}
+                color = "#3B82F6"/>
+              <MetricCard 
+                title = "Total Papers" 
+                value = {researcherStats.totalPapers}
+                icon = {BookOpen}
+                color = "#10B981"/>
+              <MetricCard 
+                title = "Total Annotated Papers" 
+                value = {researcherStats.totalAnnotatedPapers}
+                icon = {BookIcon}
+                color = "#8B5CF6"/>
+              <MetricCard 
+                title = "Total Specific Topics" 
+                value = {researcherStats.totalSpecificTopics}
+                icon = {Paperclip}
+                color = "#ffA500"/>
+            </div>
+
+            {topFieldsData.length > 0 && (
+              <TopResearchFieldsChart fieldsData = {topFieldsData} />
+            )}
+          </>
         )}
             
         {currentTab === "Researchers" && (
@@ -185,16 +244,52 @@ function App() {
               </div>
             )}
 
-            {!loading && searchResults.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {searchResults.map((author) => (
-                  <ResearcherCard
-                    key = {author.authorid}
-                    researcher = {author}
-                    onViewDetails = {handleViewDetails}
-                    onCompare = {handleCompare}
-                  />
-                ))}
+            {!loading && (
+              <>
+                {searchResults.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                    {searchResults.map((author) => (
+                      <ResearcherCard
+                        key = {author.authorid}
+                        researcher = {author}
+                        onViewDetails = {handleViewDetails}
+                        onCompare = {handleCompare}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                    {authors.map((author) => (
+                      <ResearcherCard
+                        key = {author.authorid}
+                        researcher = {author}
+                        onViewDetails = {handleViewDetails}
+                        onCompare = {handleCompare}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+            {!loading && !searchTerm && authors.length > 0 && (
+              <div className = "flex justify-center mt-8 space-x-4">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled = {currentPage === 1}
+                  className = {`px-4 py-2 rounded-md ${currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                >
+                  Previous
+                </button>
+                <span className = "self-center text-gray-700">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick = {() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled = {currentPage === totalPages}
+                  className = {`px-4 py-2 rounded-md ${currentPage === totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                >
+                  Next
+                </button>
               </div>
             )}
           </>
