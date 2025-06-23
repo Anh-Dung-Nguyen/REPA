@@ -15,16 +15,33 @@ const { getDB } = require("../db");
  */
 
 router.get("/", async (req, res) => {
-    try {
-        const db = getDB();
-        const authors = await db.collection("authors")
-        .find({}, { projection: { _id: 0 } })
-        .toArray();
-        res.json(authors);
-    } catch (err) {
-        console.error("Error fetching authors:", err);
-        res.status(500).json({ error: "Internal server error" });
-    }
+  try {
+    const db = getDB();
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 51;
+    const skip = (page - 1) * limit;
+
+    const authors = await db.collection("authors")
+      .find({}, { projection: { _id: 0 } })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    const total = await db.collection("authors").estimatedDocumentCount();
+
+    res.json({
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      authors
+    });
+
+  } catch (err) {
+    console.error("Error fetching authors:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 /**
