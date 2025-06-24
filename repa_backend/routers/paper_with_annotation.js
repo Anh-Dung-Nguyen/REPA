@@ -29,6 +29,60 @@ router.get("/", async (req, res) => {
 
 /**
  * @swagger
+ * /papers_with_annotations/citation_count:
+ *     get:
+ *         tags:
+ *             - Papers with annotations
+ *         summary: Get number of citation by paper with annotation
+ *         responses:
+ *             200:
+ *                 description: Number of citation by paper with annotation
+ *                 content:
+ *                     application/json:
+ *                         schema:
+ *                             type: object
+ *                             properties:
+ *                                 corpusid:
+ *                                     type: int
+ *                                     example: 66
+ *                                 title:
+ *                                     type: string
+ *                                     example: Machine Learning
+ *                                 citationcount:
+ *                                     type: int
+ *                                     example: 5
+ */
+
+router.get('/citation_count', async (req,res) => {
+    try {
+        const db = getDB();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 100;
+        const skip = (page -1) * limit;
+
+        const cursor = db.collection("papers_with_annotations")
+            .find({citationcount: {$ne: null}}, {projection: {corpusid: 1, title: 1, citationcount: 1, _id: 0}})
+            .skip(skip)
+            .limit(limit);
+
+        const papers_with_annotations = await cursor.toArray();
+        const total = await db.collection("papers_with_annotations").countDocuments({citationcount: {$ne: null}});
+
+        res.json({
+            page,
+            limit,
+            totalPages: Math.ceil(total/limit),
+            totalResults: total,
+            results: papers_with_annotations
+        });
+    } catch (error) {
+        console.error("Error fetching citation: ", error);
+        res.status(500).json({error: "Internal server error"});
+    }
+});
+
+/**
+ * @swagger
  * /papers_with_annotations/latest_paper_title/{authorId}:
  *   get:
  *     tags:
