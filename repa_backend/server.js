@@ -16,7 +16,7 @@ const setupSwagger = require('./swagger');
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 app.use("/authors", authorsRouter);               
