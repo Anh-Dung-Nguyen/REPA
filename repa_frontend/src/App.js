@@ -7,6 +7,8 @@ import MetricCard from './components/MetricCard';
 import FieldCard from './components/FieldCard';
 import ResearcherCard from './components/ResearcherCard';
 import ResearcherDetail from './components/ResearcherDetail';
+import HIndexRankingTable from './components/HIndexRankingTable';
+import PaperRankingTable from './components/PaperRankingTable';
 import TopResearchFieldsChart from './components/TopResearchFieldChart';
 import { Users, BookOpen, BookIcon, LayoutDashboard, User2, Paperclip } from 'lucide-react';
 
@@ -167,6 +169,36 @@ function App() {
     fetchStats();
   }, []);
 
+  const [hindexAuthor, setHindexAuthor] = useState([]);
+
+  useEffect(() => {
+    const fetchHindex = async() => {
+      try {
+        const hindex = await axios.get('http://localhost:8000/authors/hindex');
+        setHindexAuthor(hindex.data.results || []);
+      } catch (error) {
+        console.error("Error fetching h-index: ", error);
+      }
+    };
+
+    fetchHindex();
+  }, []);
+
+  const [citationPaper, setCitationPaper] = useState([]);
+
+  useEffect(() => {
+    const fetchCitation = async() => {
+      try {
+        const citation = await axios.get('http://localhost:8000/papers_with_annotations/citation_count');
+        setCitationPaper(citation.data.results || []);
+      } catch (error) {
+        console.error("Error fetching citation: ", error);
+      }
+    };
+
+    fetchCitation();
+  }, []);
+
   return (
     <div>
       <Header />
@@ -224,8 +256,31 @@ function App() {
                 color = "#ffA500"/>
             </div>
 
-            {topFieldsData.length > 0 && (
-              <TopResearchFieldsChart fieldsData = {topFieldsData} />
+            {(topFieldsData.length > 0 || hindexAuthor.length > 0 || citationPaper.length > 0) && (
+              <div className = "flex flex-col lg:flex-row gap-6 mb-6">
+                {/* Left: Top Research Fields Chart */}
+                {topFieldsData.length > 0 && (
+                  <div className = "w-full lg:w-1/2">
+                    <div className = "bg-white shadow-md rounded-lg p-4 h-full">
+                      <TopResearchFieldsChart fieldsData = {topFieldsData} height = {400} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Right: Tables stacked vertically */}
+                <div className = "w-full lg:w-1/2 flex flex-col gap-6">
+                  {hindexAuthor.length > 0 && (
+                    <div className = "h-[300px] overflow-y-auto bg-white shadow-md rounded-lg p-4">
+                      <HIndexRankingTable data = {hindexAuthor} />
+                    </div>
+                  )}
+                  {citationPaper.length > 0 && (
+                    <div className = "h-[300px] overflow-y-auto bg-white shadow-md rounded-lg p-4">
+                      <PaperRankingTable data = {citationPaper} />
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </>
         )}
