@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import './index.css';
 import axios from 'axios';
+import Footer from './components/Footer';
 import Header from './components/Header';
 import SearchBar from './components/SearchBar';
 import MetricCard from './components/MetricCard';
@@ -355,6 +356,9 @@ function App() {
             <FieldCard />
           </div>
         )}
+
+        {currentTab === "About"}
+        {currentTab === "Contact"}
       </main>
 
       {selectedResearcher && Array.isArray(selectedResearchTitle) && (
@@ -365,6 +369,7 @@ function App() {
           handleTitle={handleTitle}
         />
       )}
+      <Footer/>
     </div>      
   );
 }
