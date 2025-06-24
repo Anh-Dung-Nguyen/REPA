@@ -297,6 +297,58 @@ router.get("/search", async (req, res) => {
 
 /**
  * @swagger
+ * /authors/hindex:
+ *     get:
+ *         tags:
+ *             - Authors
+ *         summary: Get number of hindex by author
+ *         responses:
+ *             200:
+ *                 description: Number of hindex by author
+ *                 content:
+ *                   application/json:
+ *                     schema:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                           example: Nguyen Anh Dung
+ *                         h-index:
+ *                           type: int
+ *                           example: 25
+ */
+
+router.get('/hindex', async (req, res) => {
+    try {
+        const db = getDB();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 100;
+        const skip = (page - 1) * limit;
+
+        const cursor = db.collection("authors")
+            .find({ hindex: { $ne: null } }, { projection: { name: 1, hindex: 1, _id: 0 } })
+            .skip(skip)
+            .limit(limit);
+
+        const authors = await cursor.toArray();
+
+        const total = await db.collection("authors").countDocuments({ hindex: { $ne: null } });
+
+        res.json({
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+            totalResults: total,
+            results: authors
+        });
+    } catch (err) {
+        console.error("Error fetching author h-indexes:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+/**
+ * @swagger
  * /authors/{author_id}:
  *     get:
  *         tags:
