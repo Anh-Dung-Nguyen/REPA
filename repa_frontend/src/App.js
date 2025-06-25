@@ -37,7 +37,7 @@ function App() {
       try {
         const res = await axios.get('http://localhost:8000/specific_topics/topic_author_counts');
 
-        const sortedTop50 = res.data
+        const sortedTop50 = res.data.topics
         .map(item => ({
           name: item.topic,          
           researchers: item.count 
@@ -200,175 +200,263 @@ function App() {
     fetchCitation();
   }, []);
 
+  const [hasFetchedAuthors, setHasFetchedAuthors] = useState(false);
+  useEffect(() => {
+    const fetchPaginatedAuthors = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get("http://localhost:8000/authors", {
+          params: {
+            page: currentPage,
+            limit: AUTHORS_PER_PAGE
+          }
+        });
+        setAuthors(res.data.authors);
+        setTotalPages(res.data.totalPages);
+        setHasFetchedAuthors(true);
+      } catch (error) {
+        console.error("Error fetching paginated authors:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (
+      currentTab === "Researchers" &&
+      !searchTerm &&
+      (!hasFetchedAuthors || authors.length === 0)
+    ) {
+      fetchPaginatedAuthors();
+    }
+  }, [currentTab, currentPage, searchTerm, hasFetchedAuthors, authors.length]);
+
+  const [fieldsData, setFieldsData] = useState([]);
+  const [fieldsPage, setFieldsPage] = useState(1);
+  const [fieldsTotalPages, setFieldsTotalPages] = useState(1);
+  const FIELDS_PER_PAGE = 60;
+
+  useEffect(() => {
+    const fetchFields = async() => {
+      if (currentTab !== "Research Fields") return;
+
+      try {
+        setLoading(true);
+        const res = await axios.get('http://localhost:8000/specific_topics/topic_author_counts', {
+          params: {
+            page: fieldsPage,
+            limit: FIELDS_PER_PAGE
+          }
+        });
+
+        setFieldsData(res.data.topics);
+        setFieldsTotalPages(res.data.totalPages);
+      } catch (error){
+        console.error("Error fetching research fields: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFields();
+  }, [currentTab, fieldsPage]);
+
   return (
-    <div>
+    <div className = 'flex flex-col min-h-screen'>
       <Header />
-      {/* Tab Selector */}
-      <div className="container mx-auto px-4 pt-6">
-        <div className = "bg-white rounded-lg shadow-md mb-6">
-          <div className = 'flex border-b border-gray-200'>
-            <button
-              onClick={() => setCurrentTab('Overview')}
-              className={`flex items-center gap-2 px-4 py-2 rounded mx-auto ${currentTab === 'Overview' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50': 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
-            >
-              <LayoutDashboard size = {18} />
-              <strong>Overview</strong>
-            </button>
-            <button
-              onClick={() => setCurrentTab('Researchers')}
-              className={`flex items-center gap-2 px-4 py-2 rounded mx-auto ${currentTab === 'Researchers' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50': 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
-            >
-              <User2 size = {18}/>
-              <strong>Researchers</strong>
-            </button>
-            <button
-              onClick={() => setCurrentTab('Research Fields')}
-              className={`flex items-center gap-2 px-4 py-2 rounded mx-auto ${currentTab === 'Research Fields' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50': 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
-            >
-              <BookOpen size = {18}/>
-              <strong>Research Fields</strong>
-            </button>
+      <div className = 'flex-grow'>
+        {/* Tab Selector */}
+        <div className="container mx-auto px-4 pt-6">
+          <div className = "bg-white rounded-lg shadow-md mb-6">
+            <div className = 'flex border-b border-gray-200'>
+              <button
+                onClick={() => setCurrentTab('Overview')}
+                className={`flex items-center gap-2 px-4 py-2 rounded mx-auto ${currentTab === 'Overview' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50': 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+              >
+                <LayoutDashboard size = {18} />
+                <strong>Overview</strong>
+              </button>
+              <button
+                onClick={() => setCurrentTab('Researchers')}
+                className={`flex items-center gap-2 px-4 py-2 rounded mx-auto ${currentTab === 'Researchers' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50': 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+              >
+                <User2 size = {18}/>
+                <strong>Researchers</strong>
+              </button>
+              <button
+                onClick={() => setCurrentTab('Research Fields')}
+                className={`flex items-center gap-2 px-4 py-2 rounded mx-auto ${currentTab === 'Research Fields' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50': 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}
+              >
+                <BookOpen size = {18}/>
+                <strong>Research Fields</strong>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <main className = 'container mx-auto px-4 py-6'>
-        {currentTab === "Overview" && (
-          <>
-            <div className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
-              <MetricCard 
-                title = "Total Researchers" 
-                value = {researcherStats.totalResearchers}
-                icon = {Users}
-                color = "#3B82F6"/>
-              <MetricCard 
-                title = "Total Papers" 
-                value = {researcherStats.totalPapers}
-                icon = {BookOpen}
-                color = "#10B981"/>
-              <MetricCard 
-                title = "Total Annotated Papers" 
-                value = {researcherStats.totalAnnotatedPapers}
-                icon = {BookIcon}
-                color = "#8B5CF6"/>
-              <MetricCard 
-                title = "Total Specific Topics" 
-                value = {researcherStats.totalSpecificTopics}
-                icon = {Paperclip}
-                color = "#ffA500"/>
-            </div>
+        <main className = 'container mx-auto px-4 py-6'>
+          {currentTab === "Overview" && (
+            <>
+              <div className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
+                <MetricCard 
+                  title = "Total Researchers" 
+                  value = {researcherStats.totalResearchers}
+                  icon = {Users}
+                  color = "#3B82F6"/>
+                <MetricCard 
+                  title = "Total Papers" 
+                  value = {researcherStats.totalPapers}
+                  icon = {BookOpen}
+                  color = "#10B981"/>
+                <MetricCard 
+                  title = "Total Annotated Papers" 
+                  value = {researcherStats.totalAnnotatedPapers}
+                  icon = {BookIcon}
+                  color = "#8B5CF6"/>
+                <MetricCard 
+                  title = "Total Specific Topics" 
+                  value = {researcherStats.totalSpecificTopics}
+                  icon = {Paperclip}
+                  color = "#ffA500"/>
+              </div>
 
-            {(topFieldsData.length > 0 || hindexAuthor.length > 0 || citationPaper.length > 0) && (
-              <div className = "flex flex-col lg:flex-row gap-6 mb-6">
-                {/* Left: Top Research Fields Chart */}
-                {topFieldsData.length > 0 && (
-                  <div className = "w-full lg:w-1/2">
-                    <div className = "bg-white shadow-md rounded-lg p-4 h-full">
-                      <TopResearchFieldsChart fieldsData = {topFieldsData} height = {400} />
+              {(topFieldsData.length > 0 || hindexAuthor.length > 0 || citationPaper.length > 0) && (
+                <div className = "flex flex-col lg:flex-row gap-6 mb-6">
+                  {/* Left: Top Research Fields Chart */}
+                  {topFieldsData.length > 0 && (
+                    <div className = "w-full lg:w-1/2">
+                      <div className = "bg-white shadow-md rounded-lg p-4 h-full">
+                        <TopResearchFieldsChart fieldsData = {topFieldsData} height = {400} />
+                      </div>
                     </div>
+                  )}
+
+                  {/* Right: Tables stacked vertically */}
+                  <div className = "w-full lg:w-1/2 flex flex-col gap-6">
+                    {hindexAuthor.length > 0 && (
+                      <div className = "h-[300px] overflow-y-auto bg-white shadow-md rounded-lg p-4">
+                        <HIndexRankingTable data = {hindexAuthor} />
+                      </div>
+                    )}
+                    {citationPaper.length > 0 && (
+                      <div className = "h-[300px] overflow-y-auto bg-white shadow-md rounded-lg p-4">
+                        <PaperRankingTable data = {citationPaper} />
+                      </div>
+                    )}
                   </div>
-                )}
-
-                {/* Right: Tables stacked vertically */}
-                <div className = "w-full lg:w-1/2 flex flex-col gap-6">
-                  {hindexAuthor.length > 0 && (
-                    <div className = "h-[300px] overflow-y-auto bg-white shadow-md rounded-lg p-4">
-                      <HIndexRankingTable data = {hindexAuthor} />
-                    </div>
-                  )}
-                  {citationPaper.length > 0 && (
-                    <div className = "h-[300px] overflow-y-auto bg-white shadow-md rounded-lg p-4">
-                      <PaperRankingTable data = {citationPaper} />
-                    </div>
-                  )}
                 </div>
-              </div>
-            )}
-          </>
-        )}
-            
-        {currentTab === "Researchers" && (
-          <>
-            <SearchBar
-              searchTerm = {searchTerm}
-              setSearchTerm = {setSearchTerm}
-              onSearch = {handleSearch}
-            />
+              )}
+            </>
+          )}
+              
+          {currentTab === "Researchers" && (
+            <>
+              <SearchBar
+                searchTerm = {searchTerm}
+                setSearchTerm = {setSearchTerm}
+                onSearch = {handleSearch}
+              />
 
-            {loading && (
-              <div className = 'flex justify-center mt-6'>
-                <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-              </div>
-            )}
+              {loading && (
+                <div className = 'flex justify-center mt-6'>
+                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+                </div>
+              )}
 
-            {!loading && (
-              <>
-                {searchResults.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                    {searchResults.map((author) => (
-                      <ResearcherCard
-                        key = {author.authorid}
-                        researcher = {author}
-                        onViewDetails = {handleViewDetails}
-                        onCompare = {handleCompare}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                    {authors.map((author) => (
-                      <ResearcherCard
-                        key = {author.authorid}
-                        researcher = {author}
-                        onViewDetails = {handleViewDetails}
-                        onCompare = {handleCompare}
-                      />
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-            {!loading && !searchTerm && authors.length > 0 && (
-              <div className = "flex justify-center mt-8 space-x-4">
+              {!loading && (
+                <>
+                  {searchResults.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                      {searchResults.map((author) => (
+                        <ResearcherCard
+                          key = {author.authorid}
+                          researcher = {author}
+                          onViewDetails = {handleViewDetails}
+                          onCompare = {handleCompare}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                      {authors.map((author) => (
+                        <ResearcherCard
+                          key = {author.authorid}
+                          researcher = {author}
+                          onViewDetails = {handleViewDetails}
+                          onCompare = {handleCompare}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+              {!loading && !searchTerm && authors.length > 0 && (
+                <div className = "flex justify-center mt-8 space-x-4">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled = {currentPage === 1}
+                    className = {`px-4 py-2 rounded-md ${currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  >
+                    Previous
+                  </button>
+                  <span className = "self-center text-gray-700">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick = {() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled = {currentPage === totalPages}
+                    className = {`px-4 py-2 rounded-md ${currentPage === totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {currentTab === "Research Fields" && (
+            <>
+              <div className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
+                {fieldsData.map((field, index) => (
+                  <FieldCard 
+                    key = {index}
+                    field = {field}
+                    onViewResearchers = {() => console.log("Field clicked:", field)}
+                  />
+                ))}
+              </div>
+              <div className="flex justify-center mt-8 space-x-4">
                 <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled = {currentPage === 1}
-                  className = {`px-4 py-2 rounded-md ${currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  onClick={() => setFieldsPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={fieldsPage === 1}
+                  className={`px-4 py-2 rounded-md ${fieldsPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                 >
                   Previous
                 </button>
-                <span className = "self-center text-gray-700">
-                  Page {currentPage} of {totalPages}
+                <span className="self-center text-gray-700">
+                  Page {fieldsPage} of {fieldsTotalPages}
                 </span>
                 <button
-                  onClick = {() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled = {currentPage === totalPages}
-                  className = {`px-4 py-2 rounded-md ${currentPage === totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  onClick={() => setFieldsPage((prev) => Math.min(prev + 1, fieldsTotalPages))}
+                  disabled={fieldsPage === fieldsTotalPages}
+                  className={`px-4 py-2 rounded-md ${fieldsPage === fieldsTotalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                 >
                   Next
                 </button>
               </div>
-            )}
-          </>
+            </>
+          )}
+
+          {currentTab === "About"}
+          {currentTab === "Contact"}
+        </main>
+
+        {selectedResearcher && Array.isArray(selectedResearchTitle) && (
+          <ResearcherDetail
+            researcher={selectedResearcher}
+            researcherTitle={selectedResearchTitle}
+            onClose={handleCloseDetails}
+            handleTitle={handleTitle}
+          />
         )}
-
-        {currentTab === "Research Fields" && (
-          <div className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
-            <FieldCard />
-          </div>
-        )}
-
-        {currentTab === "About"}
-        {currentTab === "Contact"}
-      </main>
-
-      {selectedResearcher && Array.isArray(selectedResearchTitle) && (
-        <ResearcherDetail
-          researcher={selectedResearcher}
-          researcherTitle={selectedResearchTitle}
-          onClose={handleCloseDetails}
-          handleTitle={handleTitle}
-        />
-      )}
+      </div>
       <Footer/>
     </div>      
   );
