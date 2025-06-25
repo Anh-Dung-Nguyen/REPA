@@ -8,40 +8,131 @@ const { getDB } = require("../db");
  *     get:
  *         tags:
  *             - Authors
- *         summary: Get list of authors
+ *         summary: Get a paginated list of authors (optionally filtered by name)
+ *         parameters:
+ *           - in: query
+ *             name: page
+ *             schema:
+ *                 type: integer
+ *             description: Page number (default is 1)
+ *           - in: query
+ *             name: limit
+ *             schema:
+ *                 type: integer
+ *             description: Number of authors per page (default is 51)
+ *           - in: query
+ *             name: name
+ *             schema:
+ *                 type: string
+ *             description: Filter authors by name (case-insensitive, partial match)
  *         responses:
  *             200:
- *               description: List of authors
+ *               description: Paginated list of authors
+ *               content:
+ *                 application/json:
+ *                   schema:
+ *                     type: object
+ *                     properties:
+ *                       page:
+ *                         type: integer
+ *                       limit:
+ *                         type: integer
+ *                       total:
+ *                         type: integer
+ *                       totalPages:
+ *                         type: integer
+ *                       authors:
+ *                         type: array
+ *                         items:
+ *                           type: object
  */
 
 router.get("/", async (req, res) => {
-  try {
-    const db = getDB();
+    try {
+        const db = getDB();
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 51;
-    const skip = (page - 1) * limit;
+        const page = Math.max(1, parseInt(req.query.page)) || 1;
+        const limit = Math.max(1, parseInt(req.query.limit)) || 51;
+        const skip = (page - 1) * limit;
 
-    const authors = await db.collection("authors")
-      .find({}, { projection: { _id: 0 } })
-      .skip(skip)
-      .limit(limit)
-      .toArray();
+        const name = req.query.name?.trim();
+        const query = name ? { name: { $regex: new RegExp(name, "i") } } : {};
 
-    const total = await db.collection("authors").estimatedDocumentCount();
+        const authors = await db.collection("authors")
+                                .find(query, { projection: { _id: 0, authorid: 1, name: 1, hindex: 1, papercount: 1, citationcount: 1 } })
+                                .skip(skip)
+                                .limit(limit)
+                                .toArray();
 
-    res.json({
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-      authors
-    });
+        const total = await db.collection("authors").countDocuments(query);
 
-  } catch (err) {
-    console.error("Error fetching authors:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
+        const authorIds = authors.map(author => author.authorid);
+
+        const latestPapers = await db.collection("papers_with_annotations")
+                                        .aggregate([
+                                            { $match: { "authors.authorId": { $in: authorIds } } },
+                                            { $sort: { updated: -1 } },
+                                            { $unwind: "$authors" },
+                                            { $match: { "authors.authorId": { $in: authorIds } } },
+                                            { $group: {
+                                                _id: "$authors.authorId",
+                                                title: { $first: "$title" }
+                                                }
+                                            }
+                                        ])
+                                        .toArray();
+
+        const paperMap = new Map(latestPapers.map(p => [p._id, p.title]));
+
+        const topicDocs = await db.collection("author_specific_topics")
+                                    .find({ authorId: { $in: authorIds } }, { projection: { _id: 0, authorId: 1, topics: 1 } })
+                                    .toArray();
+
+        const topicMap = new Map(topicDocs.map(t => [t.authorId, t.topics]));
+
+        const papers = await db.collection("papers_with_annotations")
+                                .find({ "authors.authorId": { $in: authorIds } }, { projection: { authors: 1 } })
+                                .toArray();
+
+        const coauthorMap = new Map();
+
+        for (const paper of papers) {
+            const authorList = paper.authors || [];
+            for (const a of authorList) {
+                if (!coauthorMap.has(a.authorId)) {
+                    coauthorMap.set(a.authorId, new Set());
+                }
+                for (const co of authorList) {
+                    if (co.authorId !== a.authorId) {
+                        coauthorMap.get(a.authorId).add(co.authorId);
+                    }
+                }
+            }
+        }
+
+        const capitalizeFirst = str => str.charAt(0).toUpperCase() + str.slice(1);
+
+        const enrichedAuthors = authors.map(author => ({
+            ...author,
+            latest_paper_title: paperMap.get(author.authorid) || null,
+            specific_topic: topicMap.has(author.authorid)
+                ? capitalizeFirst(topicMap.get(author.authorid).join(", "))
+                : null,
+            unique_coauthors_count: coauthorMap.get(author.authorid)?.size || 0
+        }));
+
+        res.json({
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            authors: enrichedAuthors
+        });
+
+    } catch (err) {
+        console.error("Error fetching enriched authors:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 /**
