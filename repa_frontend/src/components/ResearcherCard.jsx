@@ -2,7 +2,7 @@ import React from "react";
 import {Eye, BarChart3} from 'lucide-react';
 
 const ResearcherCard = ({researcher, onViewDetails, onCompare}) => (
-    <div className = "bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+    <div className = "bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col h-full">
         <div className = "flex items-start justify-between mb-4">
             <div className = "flex items-center gap-3">
                 <div className = "w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
@@ -10,7 +10,7 @@ const ResearcherCard = ({researcher, onViewDetails, onCompare}) => (
                 </div>
                 <div>
                     <h3 className = "text-lg font-semibold text-gray-900">{researcher.name}</h3>
-                    <p className = "text-sm text-gray-600">{researcher.specific_topic}</p>
+                    <p className = "text-sm text-gray-600 line-clamp-2">{researcher.specific_topic}</p>
                 </div>
             </div>
         </div>
@@ -29,16 +29,16 @@ const ResearcherCard = ({researcher, onViewDetails, onCompare}) => (
                 <p className = "text-lg font-bold text-orange-600">{researcher.citationcount}</p>
             </div>
             <div className = "text-center">
-                <p className = "text-sm text-gray-600">Number of Co-authors</p>
+                <p className = "text-sm text-gray-600">Co-authors</p>
                 <p className = "text-lg font-bold text-purple-600">{researcher.unique_coauthors_count}</p>
             </div>
         </div>
 
         <p className = "text-sm text-gray-700 mb-4">
-            <span className = "font-medium">Recent work:</span> {researcher.latest_paper_title}
+            <span className = "font-medium line-clamp-3">Recent work:</span> {researcher.latest_paper_title}
         </p>
 
-        <div className = "flex gap-2">
+        <div className = "flex gap-2 mt-auto pt-4">
             <button
                 onClick = {() => onViewDetails(researcher)}
                 className = "flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
