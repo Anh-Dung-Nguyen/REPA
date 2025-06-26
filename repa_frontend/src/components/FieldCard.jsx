@@ -13,11 +13,11 @@ const FieldCard = ({ field, onViewResearchers }) => (
     <div className = "grid grid-cols-2 gap-4">
       <div>
         <p className = "text-sm text-gray-600">Researchers</p>
-        <p className = "text-xl font-bold text-blue-600">{field.count}</p>
+        <p className = "text-xl font-bold text-blue-600">{field.count_author}</p>
       </div>
       <div>
         <p className = "text-sm text-gray-600">Papers</p>
-        <p className = "text-xl font-bold text-green-600">{field.avgHIndex}</p>
+        <p className = "text-xl font-bold text-green-600">{field.count_paper}</p>
       </div>
     </div>
   </div>
