@@ -5,7 +5,7 @@ const ResearcherCard = ({researcher, onViewDetails, onCompare}) => (
     <div className = "bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col h-full">
         <div className = "flex items-start justify-between mb-4">
             <div className = "flex items-center gap-3">
-                <div className = "w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                <div className = "w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
                     {researcher.name.split(' ').map(n => n[0]).join('')}
                 </div>
                 <div>
@@ -26,11 +26,11 @@ const ResearcherCard = ({researcher, onViewDetails, onCompare}) => (
             </div>
             <div className = "text-center">
                 <p className = "text-sm text-gray-600">Citation count</p>
-                <p className = "text-lg font-bold text-orange-600">{researcher.citationcount}</p>
+                <p className = "text-lg font-bold text-purple-600">{researcher.citationcount}</p>
             </div>
             <div className = "text-center">
                 <p className = "text-sm text-gray-600">Co-authors</p>
-                <p className = "text-lg font-bold text-purple-600">{researcher.unique_coauthors_count}</p>
+                <p className = "text-lg font-bold text-yellow-600">{researcher.unique_coauthors_count}</p>
             </div>
         </div>
 
