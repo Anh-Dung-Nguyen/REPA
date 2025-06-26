@@ -23,7 +23,7 @@ logging.basicConfig(
     level = logging.INFO
 )
 
-with open("specific_topics.txt", "r") as f:
+with open("Output/specific_topics.txt", "r") as f:
     specific_topics = set(line.strip().lower() for line in f if line.strip())
 
 batch_queue = Queue(maxsize = QUEUE_MAXSIZE)
