@@ -3,16 +3,13 @@ import React, { Component } from 'react';
 class Footer extends Component {
   render() {
     return (
-      <footer className = "footer bg-gradient-to-r from-blue-600 to-purple-700 text-white p-6 shadow-lg">
-        <div className = "footer-content container mx-auto text-center">
+      <footer className="bg-gray-800 text-white p-4 text-center mt-8 rounded-t-lg">
+        <div className="container mx-auto">
           <p>&copy; {new Date().getFullYear()} OpenCEMS. All rights reserved.</p>
-          <nav>
-            <a href="/about">About</a> | <a href="/contact">Contact</a> | <a href="/privacy">Privacy</a>
-          </nav>
         </div>
       </footer>
     );
   }
 }
 
-export default Footer;
+export default Footer; 
