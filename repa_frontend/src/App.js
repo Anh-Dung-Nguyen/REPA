@@ -236,27 +236,50 @@ function App() {
   const FIELDS_PER_PAGE = 60;
 
   useEffect(() => {
-    const fetchFields = async() => {
+    const fetchResearchFieldsData = async () => {
       if (currentTab !== "Research Fields") return;
 
+      setLoading(true);
       try {
-        setLoading(true);
-        const res = await axios.get('http://localhost:8000/specific_topics/topic_author_counts', {
+        const authorCountsRes = await axios.get('http://localhost:8000/specific_topics/topic_author_counts', {
           params: {
             page: fieldsPage,
             limit: FIELDS_PER_PAGE
           }
         });
 
-        setFieldsData(res.data.topics);
-        setFieldsTotalPages(res.data.totalPages);
-      } catch (error){
-        console.error("Error fetching research fields: ", error);
+        const paperCountsRes = await axios.get('http://localhost:8000/specific_topics/topic_corpus_counts', {
+          params: {
+            page: fieldsPage,
+            limit: FIELDS_PER_PAGE
+          }
+        });
+
+        const authorTopics = authorCountsRes.data.topics;
+        const paperTopics = paperCountsRes.data.topics;
+
+        const paperCountsMap = {};
+        paperTopics.forEach(topic => {
+          paperCountsMap[topic.topic] = topic.count || 0;
+        });
+
+        const combinedFields = authorTopics.map(authorTopic => ({
+          ...authorTopic,
+          count_author: authorTopic.count, 
+          count_paper: paperCountsMap[authorTopic.topic] || 0 
+        }));
+
+        setFieldsData(combinedFields);
+        setFieldsTotalPages(authorCountsRes.data.totalPages);
+
+      } catch (error) {
+        console.error("Error fetching research fields data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchFields();
+
+    fetchResearchFieldsData();
   }, [currentTab, fieldsPage]);
 
   return (
@@ -323,7 +346,7 @@ function App() {
                   {topFieldsData.length > 0 && (
                     <div className = "w-full lg:w-1/2">
                       <div className = "bg-white shadow-md rounded-lg p-4 h-full">
-                        <TopResearchFieldsChart fieldsData = {topFieldsData} height = {400} />
+                        <TopResearchFieldsChart fieldsData = {topFieldsData} height = {550} />
                       </div>
                     </div>
                   )}
@@ -413,34 +436,43 @@ function App() {
 
           {currentTab === "Research Fields" && (
             <>
-              <div className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
-                {fieldsData.map((field, index) => (
-                  <FieldCard 
-                    key = {index}
-                    field = {field}
-                    onViewResearchers = {() => console.log("Field clicked:", field)}
-                  />
-                ))}
-              </div>
-              <div className="flex justify-center mt-8 space-x-4">
-                <button
-                  onClick={() => setFieldsPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={fieldsPage === 1}
-                  className={`px-4 py-2 rounded-md ${fieldsPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                >
-                  Previous
-                </button>
-                <span className="self-center text-gray-700">
-                  Page {fieldsPage} of {fieldsTotalPages}
-                </span>
-                <button
-                  onClick={() => setFieldsPage((prev) => Math.min(prev + 1, fieldsTotalPages))}
-                  disabled={fieldsPage === fieldsTotalPages}
-                  className={`px-4 py-2 rounded-md ${fieldsPage === fieldsTotalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                >
-                  Next
-                </button>
-              </div>
+              {loading && (
+                <div className = 'flex justify-center mt-6'>
+                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+                </div>
+              )}
+              {!loading && (
+                <div className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
+                  {fieldsData.map((field, index) => (
+                    <FieldCard
+                      key={index}
+                      field={field} 
+                      onViewResearchers={() => console.log("Field clicked:", field)}
+                    />
+                  ))}
+                </div>
+              )}
+              {!loading && fieldsData.length > 0 && (
+                <div className="flex justify-center mt-8 space-x-4">
+                  <button
+                    onClick={() => setFieldsPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={fieldsPage === 1 || loading}
+                    className={`px-4 py-2 rounded-md ${fieldsPage === 1 || loading ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  >
+                    Previous
+                  </button>
+                  <span className="self-center text-gray-700">
+                    Page {fieldsPage} of {fieldsTotalPages}
+                  </span>
+                  <button
+                    onClick={() => setFieldsPage((prev) => Math.min(prev + 1, fieldsTotalPages))}
+                    disabled={fieldsPage === fieldsTotalPages || loading}
+                    className={`px-4 py-2 rounded-md ${fieldsPage === fieldsTotalPages || loading ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </>
           )}
 
