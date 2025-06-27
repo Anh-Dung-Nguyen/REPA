@@ -1,7 +1,7 @@
 import React from 'react';
 
 const HIndexRankingTable = ({ data }) => {
-  const sortedData = [...data].sort((a, b) => b.hindex - a.hindex).slice(0, 50);
+  const sortedData = [...data].sort((a, b) => b.hindex - a.hindex).slice(0, 100);
 
   return (
     <div>
