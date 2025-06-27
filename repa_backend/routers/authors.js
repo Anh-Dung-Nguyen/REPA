@@ -418,6 +418,7 @@ router.get('/hindex', async (req, res) => {
 
         const cursor = db.collection("authors")
             .find({ hindex: { $ne: null } }, { projection: { name: 1, hindex: 1, _id: 0 } })
+            .sort({ hindex: -1})
             .skip(skip)
             .limit(limit);
 
