@@ -242,4 +242,107 @@ router.get('/topic_corpus_counts', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /specific_topics/search:
+ *     get:
+ *         tags:
+ *             - Specific topics
+ *         summary: Search specific topic by name
+ *         parameters:
+ *           - in: query
+ *             name: name
+ *             schema:
+ *                 type: string
+ *             required: true
+ *             description: The name of the specific topic to search for
+ *         responses:
+ *             200:
+ *                 description: List of matched specific topic
+ *                 content:
+ *                   application/json:
+ *                     schema:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ */
+
+router.get("/search", async (req, res) => {
+    try {
+        const db = getDB();
+        const { name } = req.query;
+
+        if (!name || name.trim() === "") {
+            return res.status(400).json({ error: "Missing or empty 'name' query parameter" });
+        }
+
+        const regex = new RegExp(name.trim(), "i");
+
+        const matchedTopics = await db.collection("specific_topics")
+            .find({ topic: { $regex: regex } }, { projection: { _id: 0, topic: 1 } })
+            .toArray();
+
+        if (!matchedTopics.length) {
+            return res.json({ specific_topics: [] });
+        }
+
+        const topicNames = matchedTopics.map(t => t.topic);
+
+        const authorCounts = await db.collection("author_specific_topics").aggregate([
+            { $unwind: "$topics" },
+            { $match: { topics: { $in: topicNames } } },
+            {
+                $group: {
+                    _id: "$topics",
+                    researcherCount: { $addToSet: "$_id" }
+                }
+            },
+            {
+                $project: {
+                    topic: "$_id",
+                    researcherCount: { $size: "$researcherCount" },
+                    _id: 0
+                }
+            }
+        ]).toArray();
+
+        const corpusCounts = await db.collection("corpus_specific_topics").aggregate([
+            { $unwind: "$topics" },
+            { $match: { topics: { $in: topicNames } } },
+            {
+                $group: {
+                    _id: "$topics",
+                    paperCount: { $addToSet: "$_id" }
+                }
+            },
+            {
+                $project: {
+                    topic: "$_id",
+                    paperCount: { $size: "$paperCount" },
+                    _id: 0
+                }
+            }
+        ]).toArray();
+
+        const countsByTopic = {};
+        authorCounts.forEach(({ topic, researcherCount }) => {
+            countsByTopic[topic] = { ...countsByTopic[topic], researcherCount };
+        });
+        corpusCounts.forEach(({ topic, paperCount }) => {
+            countsByTopic[topic] = { ...countsByTopic[topic], paperCount };
+        });
+
+        const result = matchedTopics.map(t => ({
+            topic: t.topic,
+            researcherCount: countsByTopic[t.topic]?.researcherCount || 0,
+            paperCount: countsByTopic[t.topic]?.paperCount || 0
+        }));
+
+        res.json({ specific_topics: result });
+    } catch (err) {
+        console.error("Error searching specific topics with counts:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 module.exports = router;
