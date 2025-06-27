@@ -1,7 +1,7 @@
 import React from 'react';
 
 const PaperRankingTable = ({data}) => {
-    const sortedData = [...data].sort((a, b) => b.citationcount - a.citationcount).slice(0, 50);
+    const sortedData = [...data].sort((a, b) => b.citationcount - a.citationcount).slice(0, 100);
 
     return (
         <div>
