@@ -62,6 +62,7 @@ router.get('/citation_count', async (req,res) => {
 
         const cursor = db.collection("papers_with_annotations")
             .find({citationcount: {$ne: null}}, {projection: {corpusid: 1, title: 1, citationcount: 1, _id: 0}})
+            .sort({citationcount: -1})
             .skip(skip)
             .limit(limit);
 
