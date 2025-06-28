@@ -464,16 +464,54 @@ router.get("/:author_id", async (req, res) => {
     try {
         const db = getDB();
         const authorId = req.params.author_id;
-        const author = await db.collection("authors")
-        .findOne({ authorid: authorId }, { projection: { _id: 0 } });
 
-        if (author) {
-        res.json(author);
-        } else {
-        res.status(404).json({ error: "No author found with the given author ID" });
+        const author = await db.collection("authors")
+            .findOne({ authorid: authorId }, { projection: { _id: 0 } });
+
+        if (!author) {
+            return res.status(404).json({ error: "No author found with the given author ID" });
         }
+
+        const latestPaper = await db.collection("papers_with_annotations")
+            .find({ "authors.authorId": authorId })
+            .sort({ updated: -1 })
+            .limit(1)
+            .project({ _id: 0, title: 1 })
+            .next();
+
+        const specificTopicEntry = await db.collection("author_specific_topics")
+            .findOne({ authorId: authorId }, { projection: { _id: 0, topics: 1 } });
+
+        const papers = await db.collection("papers_with_annotations")
+            .find({ "authors.authorId": authorId }, { projection: { authors: 1 } })
+            .toArray();
+
+        const coauthorSet = new Set();
+        for (const paper of papers) {
+            if (paper.authors) {
+                paper.authors.forEach(a => {
+                    if (a.authorId !== authorId) {
+                        coauthorSet.add(a.authorId);
+                    }
+                });
+            }
+        }
+
+        const capitalizeFirstLetter = (string) =>
+            string.charAt(0).toUpperCase() + string.slice(1);
+
+        const enrichedAuthor = {
+            ...author,
+            latest_paper_title: latestPaper?.title || null,
+            specific_topic: specificTopicEntry?.topics
+                ? capitalizeFirstLetter(specificTopicEntry.topics.join(", "))
+                : null,
+            unique_coauthors_count: coauthorSet.size
+        };
+
+        res.json(enrichedAuthor);
     } catch (err) {
-        console.error("Error fetching author:", err);
+        console.error("Error fetching enriched author:", err);
         res.status(500).json({ error: "Internal server error" });
     }
 });
