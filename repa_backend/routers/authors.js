@@ -497,6 +497,15 @@ router.get("/:author_id", async (req, res) => {
             }
         }
 
+        const coauthorIds = Array.from(coauthorSet);
+
+        let coauthors = [];
+        if (coauthorIds.length) {
+            coauthors = await db.collection("authors")
+                .find({ authorid: { $in: coauthorIds } }, { projection: { _id: 0, authorid: 1, name: 1 } })
+                .toArray();
+        }
+
         const capitalizeFirstLetter = (string) =>
             string.charAt(0).toUpperCase() + string.slice(1);
 
@@ -506,7 +515,8 @@ router.get("/:author_id", async (req, res) => {
             specific_topic: specificTopicEntry?.topics
                 ? capitalizeFirstLetter(specificTopicEntry.topics.join(", "))
                 : null,
-            unique_coauthors_count: coauthorSet.size
+            unique_coauthors_count: coauthorSet.size,
+            coauthors
         };
 
         res.json(enrichedAuthor);
