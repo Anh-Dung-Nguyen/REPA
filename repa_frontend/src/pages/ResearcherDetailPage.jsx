@@ -13,6 +13,8 @@ const ResearcherDetailPage = () => {
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('overview');
 
+    const [showAllTopics, setShowAllTopics] = useState(false);
+
     useEffect(() => {
         const fetchResearcherData = async () => {
             if (!authorId) return;
@@ -69,6 +71,12 @@ const ResearcherDetailPage = () => {
         }
     };
 
+    const handleCoAuthorClick = (coAuthor) => {
+        if (coAuthor.authorid) {
+            navigate(`/researchers/${coAuthor.authorid}`);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50">
@@ -103,6 +111,9 @@ const ResearcherDetailPage = () => {
     const specificTopics = researcher.specific_topic
         ? researcher.specific_topic.split(',').map(topic => topic.trim()).filter(Boolean)
         : [];
+
+    // Co-authors are available directly from the researcher object
+    const coAuthors = researcher.coauthors || [];
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -170,6 +181,28 @@ const ResearcherDetailPage = () => {
                         >
                             <BookOpen size={18} />
                             Publications
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('topics')}
+                            className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors ${
+                            activeTab === 'topics'
+                                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            }`}
+                        >
+                            <FileText size={18} />
+                            Research Fields
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('coauthors')}
+                            className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors ${
+                                activeTab === 'coauthors'
+                                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            }`}
+                            >
+                                <User2 size={18} />
+                                Co-Authors
                         </button>
                     </div>
                 </div>
@@ -239,7 +272,7 @@ const ResearcherDetailPage = () => {
                                     </div>
                                     <div>
                                         <h3 className="text-lg font-semibold text-gray-800">Co-Authors</h3>
-                                        <p className="text-3xl font-bold text-yellow-600">{researcher.unique_coauthors_count || 'N/A'}</p>
+                                        <p className="text-3xl font-bold text-yellow-600">{researcher.unique_coauthors_count || coAuthors.length}</p>
                                     </div>
                                 </div>
                             </div>
@@ -287,15 +320,55 @@ const ResearcherDetailPage = () => {
                                 </div>
                             </div>
 
+                            {coAuthors.length > 0 && (
+                                <div className="bg-white rounded-lg shadow-md p-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Top Co-Authors</h3>
+                                    <div className="space-y-3">
+                                        {coAuthors.slice(0, 8).map((coAuthor, index) => (
+                                            <div 
+                                                key={index} 
+                                                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                                                onClick={() => handleCoAuthorClick(coAuthor)}
+                                            >
+                                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                                    <User2 size={14} className="text-blue-600" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium text-gray-800 truncate">{coAuthor.name}</p>
+                                                </div>
+                                                <ExternalLink size={14} className="text-gray-400" />
+                                            </div>
+                                        ))}
+                                        {coAuthors.length > 8 && (
+                                            <button
+                                                onClick={() => setActiveTab('coauthors')}
+                                                className="text-blue-600 hover:text-blue-800 text-sm font-medium w-full text-center pt-2"
+                                            >
+                                                View all {coAuthors.length} co-authors →
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
                             {specificTopics.length > 0 && (
                                 <div className="bg-white rounded-lg shadow-md p-6">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">List of Specific Topics</h3>
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Research Topics</h3>
                                     <div className="space-y-4">
-                                        {specificTopics.map((topic, index) => (
+                                        {(showAllTopics ? specificTopics : specificTopics.slice(0, 4)).map((topic, index) => (
                                             <div key={index} className="border-l-4 border-indigo-200 pl-4">
                                                 <h4 className="font-medium text-gray-800">{topic}</h4>
                                             </div>
                                         ))}
+
+                                        {specificTopics.length > 4 && (
+                                            <button
+                                                onClick={() => setShowAllTopics(!showAllTopics)}
+                                                className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2"
+                                            >
+                                                {showAllTopics ? 'Show less' : `Show ${specificTopics.length - 4} more topics`} 
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -335,10 +408,10 @@ const ResearcherDetailPage = () => {
                                                         <span>{paper.year}</span>
                                                     </div>
                                                     )}
-                                                {researcher.citationcount !== undefined && (
+                                                {paper.citationcount !== undefined && (
                                                     <div className="flex items-center gap-1">
                                                         <TrendingUp size={14} />
-                                                        <span>{researcher.citationcount} citations</span>
+                                                        <span>{paper.citationcount} citations</span>
                                                     </div>
                                                 )}
                                                 {paper.venue && (
@@ -366,6 +439,78 @@ const ResearcherDetailPage = () => {
                                     <FileText size={48} className="text-gray-400 mx-auto mb-4" />
                                     <h3 className="text-lg font-medium text-gray-800 mb-2">No Publications Found</h3>
                                     <p className="text-gray-600">This researcher doesn't have any publications in our database yet.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'topics' && (
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Research Topics</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {specificTopics.map((topic, index) => (
+                                <div key={index} className="bg-gray-50 rounded-lg p-4 border-l-4 border-indigo-500">
+                                    <h4 className="font-medium text-gray-800 capitalize">{topic}</h4>
+                                </div>
+                            ))}
+                        </div>
+                        {specificTopics.length === 0 && (
+                            <div className="text-center py-12">
+                                <FileText size={48} className="text-gray-400 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-gray-800 mb-2">No Topics Found</h3>
+                                <p className="text-gray-600">No specific research topics have been identified for this researcher.</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {activeTab === 'coauthors' && (
+                    <div className="bg-white rounded-lg shadow-md">
+                        <div className="p-6 border-b border-gray-200">
+                            <h2 className="text-xl font-semibold text-gray-800">Co-Authors</h2>
+                            <p className="text-gray-600 mt-1">{coAuthors.length} frequent collaborators</p>
+                        </div>
+
+                        <div className="divide-y divide-gray-200">
+                            {coAuthors.map((coAuthor, index) => (
+                                <div key={index} className="p-6 hover:bg-gray-50 transition-colors">
+                                    <div className="flex justify-between items-center gap-4">
+                                        <div className="flex items-center gap-4 flex-1">
+                                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <User2 size={20} className="text-blue-600" />
+                                            </div>
+                                            
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-lg font-medium text-gray-800 hover:text-blue-600 cursor-pointer transition-colors truncate"
+                                                    onClick={() => handleCoAuthorClick(coAuthor)}>
+                                                    {coAuthor.name}
+                                                </h3>
+                                                
+                                                <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                                                    <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                                        Author ID: {coAuthor.authorid}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={() => handleCoAuthorClick(coAuthor)}
+                                            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors px-4 py-2 border border-blue-200 rounded-lg hover:bg-blue-50"
+                                        >
+                                            <ExternalLink size={14} />
+                                            View Profile
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {coAuthors.length === 0 && (
+                                <div className="p-12 text-center">
+                                    <User2 size={48} className="text-gray-400 mx-auto mb-4" />
+                                    <h3 className="text-lg font-medium text-gray-800 mb-2">No Co-Authors Found</h3>
+                                    <p className="text-gray-600">This researcher doesn't have recorded co-authors in our database yet.</p>
                                 </div>
                             )}
                         </div>
