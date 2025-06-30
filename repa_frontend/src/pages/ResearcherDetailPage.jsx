@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, User2, BookOpen, Award, MapPin,ExternalLink,TrendingUp,Calendar,FileText } from 'lucide-react';
+import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText } from 'lucide-react';
 
 const ResearcherDetailPage = () => {
     const { authorId } = useParams();
@@ -13,7 +13,7 @@ const ResearcherDetailPage = () => {
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('overview');
 
-    const [showAllTopics, setShowAllTopics] = useState(false);
+    const [showAllTopics] = useState(false);
 
     useEffect(() => {
         const fetchResearcherData = async () => {
@@ -28,18 +28,22 @@ const ResearcherDetailPage = () => {
 
                 const papersResponse = await axios.get(`http://localhost:8000/authors_papers_annotations/${authorId}`);
                 
-                const papers = Array.isArray(papersResponse.data[0]?.papers)
-                ? papersResponse.data[0].papers.map(paper => ({
-                    title: paper.title,
-                    corpusid: paper.annotation.corpusid,
-                    year: paper.year,
-                    citationcount: paper.citationcount,
-                    venue: paper.venue,
-                    abstract: paper.abstract
-                    }))
-                : [];
+                const papers = Array.isArray(papersResponse.data?.papers)
+                    ? papersResponse.data.papers.map(paper => ({
+                        title: paper.title,
+                        corpusid: paper.annotation.corpusid,
+                        year: paper.year,
+                        citationcount: paper.citationcount,
+                        venue: paper.venue,
+                        abstract: paper.abstract
+                        }))
+                    : [];
                 
                 setResearcherPapers(papers);
+                
+                console.log('Papers response:', papersResponse.data);
+                console.log('Processed papers:', papers);
+                
             } catch (error) {
                 console.error("Error fetching researcher data:", error);
                 setError("Failed to load researcher data");
@@ -112,7 +116,6 @@ const ResearcherDetailPage = () => {
         ? researcher.specific_topic.split(',').map(topic => topic.trim()).filter(Boolean)
         : [];
 
-    // Co-authors are available directly from the researcher object
     const coAuthors = researcher.coauthors || [];
 
     return (
@@ -136,22 +139,22 @@ const ResearcherDetailPage = () => {
                             <div className="flex-1">
                                 <h1 className="text-3xl font-bold text-gray-800 mb-2">{researcher.name}</h1>
                                 <div className="flex flex-wrap gap-4 text-gray-600">
-                                    {researcher.affiliation && (
-                                        <div className="flex items-center gap-1">
-                                        <MapPin size={16} />
-                                        <span>{researcher.affiliation}</span>
-                                        </div>
-                                    )}
                                     {researcher.hindex && (
                                         <div className="flex items-center gap-1">
-                                        <Award size={16} />
-                                        <span>H-Index: {researcher.hindex}</span>
+                                            <Award size={16} />
+                                            <span>H-Index: {researcher.hindex}</span>
                                         </div>
                                     )}
                                     <div className="flex items-center gap-1">
                                         <FileText size={16} />
                                         <span>{researcher.papercount} Papers</span>
                                     </div>
+                                    {researcher.citationcount && (
+                                        <div className="flex items-center gap-1">
+                                            <Quote size={16} />
+                                            <span>{researcher.citationcount} Citations</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -208,105 +211,47 @@ const ResearcherDetailPage = () => {
                 </div>
 
                 {activeTab === 'overview' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-white rounded-lg shadow-md p-6">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <FileText className="text-blue-600" size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-800">Total Publications</h3>
-                                        <p className="text-3xl font-bold text-blue-600">{researcher.papercount || 'N/A'}</p>
-                                    </div>
-                                </div>
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-white rounded-lg shadow-md p-4 border-t-4 border-blue-500 hover:scale-105 transition-transform">
+                                <div className="text-2xl font-bold text-blue-600">{researcher.papercount || 'N/A'}</div>
+                                <div className="text-sm text-gray-600">Papers Published</div>
                             </div>
-
-                            <div className="bg-white rounded-lg shadow-md p-6">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                        <Award className="text-green-600" size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-800">H-Index</h3>
-                                        <p className="text-3xl font-bold text-green-600">{researcher.hindex || 'N/A'}</p>
-                                    </div>
-                                </div>
+                            <div className="bg-white rounded-lg shadow-md p-4 border-t-4 border-green-500 hover:scale-105 transition-transform">
+                                <div className="text-2xl font-bold text-green-600">{researcher.hindex || 'N/A'}</div>
+                                <div className="text-sm text-gray-600">H-Index Score</div>
                             </div>
-
-                            <div className="bg-white rounded-lg shadow-md p-6">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                                        <TrendingUp className="text-purple-600" size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-800">Total Citations</h3>
-                                        <p className="text-3xl font-bold text-purple-600">
-                                            {researcher.citationcount || 'N/A'}                                       
-                                        </p>
-                                    </div>
-                                </div>
+                            <div className="bg-white rounded-lg shadow-md p-4 border-t-4 border-purple-500 hover:scale-105 transition-transform">
+                                <div className="text-2xl font-bold text-purple-600">{researcher.citationcount || 'N/A'}</div>
+                                <div className="text-sm text-gray-600">Total Citations</div>
                             </div>
-
-                            <div className="bg-white rounded-lg shadow-md p-6">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                                        <Calendar className="text-orange-600" size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-800">Years Active</h3>
-                                        <p className="text-3xl font-bold text-orange-600">
-                                        {researcherPapers.length > 0 
-                                            ? `${Math.min(...researcherPapers.map(p => p.year || 2024))} - ${Math.max(...researcherPapers.map(p => p.year || 2024))}`
-                                            : 'N/A'
-                                        }
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white rounded-lg shadow-md p-6">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                                        <User2 className="text-yellow-600" size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-800">Co-Authors</h3>
-                                        <p className="text-3xl font-bold text-yellow-600">{researcher.unique_coauthors_count || coAuthors.length}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="bg-white rounded-lg shadow-md p-6">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                        <BookOpen className="text-indigo-600" size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-800">Specific Topics</h3>
-                                        <p className="text-3xl font-bold text-indigo-600">
-                                            {specificTopics.length}
-                                        </p>
-                                    </div>
-                                </div>
+                            <div className="bg-white rounded-lg shadow-md p-4 border-t-4 border-orange-500 hover:scale-105 transition-transform">
+                                <div className="text-2xl font-bold text-orange-600">{researcher.unique_coauthors_count || coAuthors.length}</div>
+                                <div className="text-sm text-gray-600">Collaborators</div>
                             </div>
                         </div>
 
-                        <div className="space-y-6">
-                            <div className="bg-white rounded-lg shadow-md p-6">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Publications</h3>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="md:col-span-2 bg-white rounded-lg shadow-md p-6">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    <BookOpen className="text-blue-600" size={20} />
+                                    Recent Publications
+                                </h3>
                                 <div className="space-y-4">
                                     {researcherPapers.slice(0, 5).map((paper, index) => (
-                                        <div key={index} className="border-l-4 border-blue-200 pl-4">
-                                            <h4 
-                                                className="font-medium text-gray-800 hover:text-blue-600 cursor-pointer transition-colors line-clamp-2"
-                                                onClick={() => handlePaperClick(paper)}
-                                            >
-                                                {paper.title}
-                                            </h4>
-                                            <p className="text-sm text-gray-600">
-                                                {paper.year && `${paper.year} • `}
-                                                {paper.citationcount !== undefined && `${paper.citationcount} citations`}
-                                            </p>
+                                        <div
+                                            key={index}
+                                            className="flex gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                                            onClick={() => handlePaperClick(paper)}
+                                        >
+                                            <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
+                                                {paper.year || 'N/A'}
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-medium text-gray-800 mb-1 line-clamp-2">{paper.title}</h4>
+                                                <p className="text-sm text-gray-600">{paper.citationcount || 0} citations</p>
+                                            </div>
                                         </div>
                                     ))}
                                     {researcherPapers.length > 5 && (
@@ -320,67 +265,97 @@ const ResearcherDetailPage = () => {
                                 </div>
                             </div>
 
-                            {coAuthors.length > 0 && (
-                                <div className="bg-white rounded-lg shadow-md p-6">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Top Co-Authors</h3>
-                                    <div className="space-y-3">
-                                        {coAuthors.slice(0, 8).map((coAuthor, index) => (
-                                            <div 
-                                                key={index} 
-                                                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-                                                onClick={() => handleCoAuthorClick(coAuthor)}
-                                            >
-                                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                                    <User2 size={14} className="text-blue-600" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="font-medium text-gray-800 truncate">{coAuthor.name}</p>
-                                                </div>
-                                                <ExternalLink size={14} className="text-gray-400" />
-                                            </div>
-                                        ))}
-                                        {coAuthors.length > 8 && (
-                                            <button
-                                                onClick={() => setActiveTab('coauthors')}
-                                                className="text-blue-600 hover:text-blue-800 text-sm font-medium w-full text-center pt-2"
-                                            >
-                                                View all {coAuthors.length} co-authors →
-                                            </button>
-                                        )}
+                            <div className="bg-white rounded-lg shadow-md p-6">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    <Calendar className="text-green-600" size={20} />
+                                    Career Timeline
+                                </h3>
+                                <div className="space-y-4">
+                                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                                        <div className="text-2xl font-bold text-green-600">
+                                            {researcherPapers.length > 0 ? Math.min(...researcherPapers.map(p => p.year || 2024)) : 'N/A'}
+                                        </div>
+                                        <div className="text-sm text-gray-600">First Publication</div>
+                                    </div>
+                                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                                        <div className="text-2xl font-bold text-blue-600">
+                                            {researcherPapers.length > 0 ? Math.max(...researcherPapers.map(p => p.year || 2024)) : 'N/A'}
+                                        </div>
+                                        <div className="text-sm text-gray-600">Latest Work</div>
+                                    </div>
+                                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                                        <div className="text-2xl font-bold text-purple-600">{specificTopics.length}</div>
+                                        <div className="text-sm text-gray-600">Research Areas</div>
                                     </div>
                                 </div>
-                            )}
+                            </div>
 
                             {specificTopics.length > 0 && (
                                 <div className="bg-white rounded-lg shadow-md p-6">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Research Topics</h3>
+                                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                        <Award className="text-orange-600" size={20} />
+                                        Research Topics
+                                    </h3>
                                     <div className="space-y-4">
-                                        {(showAllTopics ? specificTopics : specificTopics.slice(0, 4)).map((topic, index) => (
-                                            <div key={index} className="border-l-4 border-indigo-200 pl-4">
+                                        {(showAllTopics ? specificTopics : specificTopics.slice(0, 6)).map((topic, index) => (
+                                            <div key={index} className="border-l-4 border-orange-200 pl-4">
                                                 <h4 className="font-medium text-gray-800">{topic}</h4>
                                             </div>
                                         ))}
-
-                                        {specificTopics.length > 4 && (
+                                        {specificTopics.length > 5 && (
                                             <button
-                                                onClick={() => setShowAllTopics(!showAllTopics)}
+                                                onClick={() => setActiveTab('topics')}
                                                 className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2"
                                             >
-                                                {showAllTopics ? 'Show less' : `Show ${specificTopics.length - 4} more topics`} 
+                                                View all topics →
                                             </button>
                                         )}
                                     </div>
                                 </div>
                             )}
                         </div>
+
+                        {coAuthors.length > 0 && (
+                            <div className="bg-white rounded-lg shadow-md p-6">
+                            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                <User2 className="text-purple-600" size={20} />
+                                Top Co-Authors
+                            </h3>
+                            <div className="space-y-3">
+                                {coAuthors.slice(0, 12).map((coAuthor, index) => (
+                                <div
+                                    key={index}
+                                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                                    onClick={() => handleCoAuthorClick(coAuthor)}
+                                >
+                                    <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                    {coAuthor.name.charAt(0)}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-gray-800 truncate">{coAuthor.name}</p>
+                                    </div>
+                                </div>
+                                ))}
+                                {coAuthors.length > 5 && (
+                                <button
+                                    onClick={() => setActiveTab('coauthors')}
+                                    className="text-blue-600 hover:text-blue-800 text-sm font-medium w-full text-center pt-2"
+                                >
+                                    View all {coAuthors.length} co-authors →
+                                </button>
+                                )}
+                            </div>
+                            </div>
+                        )}
+                        </div>
                     </div>
-                )}
+                    )}
 
                 {activeTab === 'publications' && (
                     <div className="bg-white rounded-lg shadow-md">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-xl font-semibold text-gray-800">Publications</h2>
-                            <p className="text-gray-600 mt-1">{researcher.papercount} total publications</p>
+                            <p className="text-gray-600 mt-1">{researcherPapers.length} total publications found</p>
                         </div>
                         
                         <div className="divide-y divide-gray-200">
@@ -469,7 +444,7 @@ const ResearcherDetailPage = () => {
                     <div className="bg-white rounded-lg shadow-md">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-xl font-semibold text-gray-800">Co-Authors</h2>
-                            <p className="text-gray-600 mt-1">{coAuthors.length} frequent collaborators</p>
+                            <p className="text-gray-600 mt-1">{coAuthors.length} collaborators</p>
                         </div>
 
                         <div className="divide-y divide-gray-200">
@@ -490,6 +465,15 @@ const ResearcherDetailPage = () => {
                                                 <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
                                                     <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
                                                         Author ID: {coAuthor.authorid}
+                                                    </span>
+                                                    <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                                        H-Index: {coAuthor.hindex}
+                                                    </span>
+                                                    <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                                        Papers: {coAuthor.papercount}
+                                                    </span>
+                                                    <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                                        Citations: {coAuthor.citationcount}
                                                     </span>
                                                 </div>
                                             </div>
