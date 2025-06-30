@@ -84,6 +84,37 @@ router.get('/citation_count', async (req,res) => {
 
 /**
  * @swagger
+ * /papers_with_annotations/count:
+ *    get:
+ *      tags:
+ *        - Papers with annotations
+ *      summary: Get the total number of papers with annotations
+ *      responses:
+ *        200:
+ *          description: Total number of papers with annotations
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  totalPapersWithAnnotations:
+ *                    type: integer
+ *                    example: 120
+ */
+
+router.get("/count", async (req, res) => {
+  try {
+    const db = getDB();
+    const totalPapersWithAnnotations = await db.collection("papers_with_annotations").countDocuments();
+    res.json({totalPapersWithAnnotations});
+  } catch (error) {
+    console.error("Error fetching papers with annotations count: ", error);
+    res.status(500).json({error: "Internal server error"});
+  }
+});
+
+/**
+ * @swagger
  * /papers_with_annotations/latest_paper_title/{authorId}:
  *   get:
  *     tags:
