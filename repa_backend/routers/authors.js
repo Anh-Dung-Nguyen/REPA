@@ -59,40 +59,41 @@ router.get("/", async (req, res) => {
         const query = name ? { name: { $regex: new RegExp(name, "i") } } : {};
 
         const authors = await db.collection("authors")
-                                .find(query, { projection: { _id: 0, authorid: 1, name: 1, hindex: 1, papercount: 1, citationcount: 1 } })
-                                .skip(skip)
-                                .limit(limit)
-                                .toArray();
+            .find(query, { projection: { _id: 0, authorid: 1, name: 1, hindex: 1, papercount: 1, citationcount: 1 } })
+            .skip(skip)
+            .limit(limit)
+            .toArray();
 
         const total = await db.collection("authors").countDocuments(query);
 
         const authorIds = authors.map(author => author.authorid);
 
         const latestPapers = await db.collection("papers_with_annotations")
-                                        .aggregate([
-                                            { $match: { "authors.authorId": { $in: authorIds } } },
-                                            { $sort: { updated: -1 } },
-                                            { $unwind: "$authors" },
-                                            { $match: { "authors.authorId": { $in: authorIds } } },
-                                            { $group: {
-                                                _id: "$authors.authorId",
-                                                title: { $first: "$title" }
-                                                }
-                                            }
-                                        ])
-                                        .toArray();
+            .aggregate([
+                { $match: { "authors.authorId": { $in: authorIds } } },
+                { $sort: { updated: -1 } },
+                { $unwind: "$authors" },
+                { $match: { "authors.authorId": { $in: authorIds } } },
+                {
+                    $group: {
+                        _id: "$authors.authorId",
+                        title: { $first: "$title" }
+                    }
+                }
+            ])
+            .toArray();
 
         const paperMap = new Map(latestPapers.map(p => [p._id, p.title]));
 
         const topicDocs = await db.collection("author_specific_topics")
-                                    .find({ authorId: { $in: authorIds } }, { projection: { _id: 0, authorId: 1, topics: 1 } })
-                                    .toArray();
+            .find({ authorId: { $in: authorIds } }, { projection: { _id: 0, authorId: 1, topics: 1 } })
+            .toArray();
 
         const topicMap = new Map(topicDocs.map(t => [t.authorId, t.topics]));
 
         const papers = await db.collection("papers_with_annotations")
-                                .find({ "authors.authorId": { $in: authorIds } }, { projection: { authors: 1 } })
-                                .toArray();
+            .find({ "authors.authorId": { $in: authorIds } }, { projection: { authors: 1 } })
+            .toArray();
 
         const coauthorMap = new Map();
 
@@ -110,16 +111,42 @@ router.get("/", async (req, res) => {
             }
         }
 
+        const allCoauthorIds = new Set();
+        for (const coauthorIds of coauthorMap.values()) {
+            for (const id of coauthorIds) {
+                allCoauthorIds.add(id);
+            }
+        }
+
+        const coauthorDetails = await db.collection("authors")
+            .find(
+                { authorid: { $in: Array.from(allCoauthorIds) } },
+                { projection: { _id: 0, authorid: 1, name: 1, hindex: 1, papercount: 1 } }
+            )
+            .toArray();
+
+        const coauthorDetailMap = new Map(coauthorDetails.map(co => [
+            co.authorid,
+            { authorid: co.authorid, name: co.name, hindex: co.hindex, papercount: co.papercount }
+        ]));
+
         const capitalizeFirst = str => str.charAt(0).toUpperCase() + str.slice(1);
 
-        const enrichedAuthors = authors.map(author => ({
-            ...author,
-            latest_paper_title: paperMap.get(author.authorid) || null,
-            specific_topic: topicMap.has(author.authorid)
-                ? capitalizeFirst(topicMap.get(author.authorid).join(", "))
-                : null,
-            unique_coauthors_count: coauthorMap.get(author.authorid)?.size || 0
-        }));
+        const enrichedAuthors = authors.map(author => {
+            const coauthorIds = coauthorMap.get(author.authorid) || new Set();
+
+            const enrichedCoauthors = Array.from(coauthorIds).map(id => coauthorDetailMap.get(id)).filter(Boolean);
+
+            return {
+                ...author,
+                latest_paper_title: paperMap.get(author.authorid) || null,
+                specific_topic: topicMap.has(author.authorid)
+                    ? capitalizeFirst(topicMap.get(author.authorid).join(", "))
+                    : null,
+                unique_coauthors_count: coauthorIds.size,
+                coauthors: enrichedCoauthors
+            };
+        });
 
         res.json({
             page,
@@ -502,7 +529,10 @@ router.get("/:author_id", async (req, res) => {
         let coauthors = [];
         if (coauthorIds.length) {
             coauthors = await db.collection("authors")
-                .find({ authorid: { $in: coauthorIds } }, { projection: { _id: 0, authorid: 1, name: 1 } })
+                .find(
+                    { authorid: { $in: Array.from(coauthorIds) } },
+                    { projection: { _id: 0, authorid: 1, name: 1, hindex: 1, papercount: 1, citationcount: 1 } }
+                )
                 .toArray();
         }
 
