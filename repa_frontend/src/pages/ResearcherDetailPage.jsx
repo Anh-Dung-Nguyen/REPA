@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText } from 'lucide-react';
+import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText, Users } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ResearcherDetailPage = () => {
     const { authorId } = useParams();
@@ -35,7 +36,9 @@ const ResearcherDetailPage = () => {
                         year: paper.year,
                         citationcount: paper.citationcount,
                         venue: paper.venue,
-                        abstract: paper.abstract
+                        abstract: paper.abstract,
+                        numberOfCoAuthors: paper.numberOfCoAuthors,
+                        specificTopics: paper.specificTopics || []
                         }))
                     : [];
                 
@@ -117,6 +120,36 @@ const ResearcherDetailPage = () => {
         : [];
 
     const coAuthors = researcher.coauthors || [];
+
+    const papersByYear = {};
+
+    researcherPapers.forEach((paper) => {
+        if (paper.year) {
+            if (!papersByYear[paper.year]) {
+                papersByYear[paper.year] = { year: paper.year, citations: 0, topics: new Set() };
+            }
+
+            papersByYear[paper.year].citations += paper.citationcount || 0;
+
+            (paper.specificTopics || []).forEach(topic => {
+                papersByYear[paper.year].topics.add(topic.trim());
+            });
+        }
+    });
+
+    const topicEvolutionData = Object.values(papersByYear)
+        .sort((a, b) => a.year - b.year)
+        .map(item => ({
+            year: item.year,
+            topicCount: item.topics.size,
+        }));
+
+    const citationsEvolutionData = Object.values(papersByYear)
+        .sort((a, b) => a.year - b.year)
+        .map(item => ({
+            year: item.year,
+            citations: item.citations,
+        }));
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -204,7 +237,7 @@ const ResearcherDetailPage = () => {
                                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                             }`}
                             >
-                                <User2 size={18} />
+                                <Users size={18} />
                                 Co-Authors
                         </button>
                     </div>
@@ -232,6 +265,50 @@ const ResearcherDetailPage = () => {
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="bg-white rounded-lg shadow-md p-6">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    <TrendingUp className="text-blue-600" size={20} />
+                                    Topic Evolution
+                                </h3>
+                                <ResponsiveContainer width="100%" height={200}>
+                                    <LineChart data={topicEvolutionData}>
+                                        <XAxis dataKey="year" stroke="#4B5563" />
+                                        <YAxis allowDecimals={false} />
+                                        <Tooltip />
+                                        <Line type="monotone" dataKey="topicCount" stroke="#3B82F6" strokeWidth={2} />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+                            
+                            <div className="bg-white rounded-lg shadow-md p-6">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    <Quote className="text-green-600" size={20} />
+                                    Author Citations Evolution
+                                </h3>
+                                <ResponsiveContainer width="100%" height={200}>
+                                    <LineChart data={citationsEvolutionData}>
+                                        <XAxis dataKey="year" stroke="#4B5563" />
+                                        <YAxis allowDecimals={false} />
+                                        <Tooltip />
+                                        <Line type="monotone" dataKey="citations" stroke="#10B981" strokeWidth={2} />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+                            
+                            <div className="bg-white rounded-lg shadow-md p-6">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    <Users className="text-purple-600" size={20} />
+                                    Co-Authors Citations Evolution
+                                </h3>
+                                <ResponsiveContainer width="100%" height={200}>
+                                    <LineChart data={citationsEvolutionData}>
+                                        <XAxis dataKey="year" stroke="#4B5563" />
+                                        <YAxis allowDecimals={false} />
+                                        <Tooltip />
+                                        <Line type="monotone" dataKey="citations" stroke="#8B5CF6" strokeWidth={2} />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
                         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="md:col-span-2 bg-white rounded-lg shadow-md p-6">
                                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -349,7 +426,7 @@ const ResearcherDetailPage = () => {
                         )}
                         </div>
                     </div>
-                    )}
+                )}
 
                 {activeTab === 'publications' && (
                     <div className="bg-white rounded-lg shadow-md">
@@ -382,7 +459,7 @@ const ResearcherDetailPage = () => {
                                                         <Calendar size={14} />
                                                         <span>{paper.year}</span>
                                                     </div>
-                                                    )}
+                                                )}
                                                 {paper.citationcount !== undefined && (
                                                     <div className="flex items-center gap-1">
                                                         <TrendingUp size={14} />
@@ -393,6 +470,12 @@ const ResearcherDetailPage = () => {
                                                     <div className="flex items-center gap-1">
                                                         <FileText size={14} />
                                                         <span>{paper.venue}</span>
+                                                    </div>
+                                                )}
+                                                {paper.numberOfCoAuthors && (
+                                                    <div className="flex items-center gap-1">
+                                                        <Users size={14} />
+                                                        <span>{paper.numberOfCoAuthors}</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -492,7 +575,7 @@ const ResearcherDetailPage = () => {
 
                             {coAuthors.length === 0 && (
                                 <div className="p-12 text-center">
-                                    <User2 size={48} className="text-gray-400 mx-auto mb-4" />
+                                    <Users size={48} className="text-gray-400 mx-auto mb-4" />
                                     <h3 className="text-lg font-medium text-gray-800 mb-2">No Co-Authors Found</h3>
                                     <p className="text-gray-600">This researcher doesn't have recorded co-authors in our database yet.</p>
                                 </div>
