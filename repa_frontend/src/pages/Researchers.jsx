@@ -12,51 +12,43 @@ const Researchers = () => {
     const [authors, setAuthors] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [hasFetchedAuthors, setHasFetchedAuthors] = useState(false);
     const AUTHORS_PER_PAGE = 51;
 
     useEffect(() => {
         const fetchPaginatedAuthors = async () => {
             try {
                 setLoading(true);
-                const res = await axios.get("http://localhost:8000/authors", {
-                    params: {
-                        page: currentPage,
-                        limit: AUTHORS_PER_PAGE
-                }
+                const res = await axios.get('http://localhost:8000/authors', {
+                    params: { page: currentPage, limit: AUTHORS_PER_PAGE }
                 });
                 setAuthors(res.data.authors);
                 setTotalPages(res.data.totalPages);
-                setHasFetchedAuthors(true);
             } catch (error) {
-                console.error("Error fetching paginated authors:", error);
+                console.error('Error fetching paginated authors:', error);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (!searchTerm && (!hasFetchedAuthors || authors.length === 0)) {
+        if (!searchTerm) {
             fetchPaginatedAuthors();
         }
-    }, [currentPage, searchTerm, hasFetchedAuthors, authors.length]);
+    }, [currentPage, searchTerm]);
 
     const handleSearch = async () => {
         if (!searchTerm.trim()) {
             setSearchResults([]);
             return;
         }
-
         setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 500));
-
+        await new Promise(resolve => setTimeout(resolve, 300));
         try {
-            const response = await axios.get(`http://localhost:8000/authors/search`, {
+            const response = await axios.get('http://localhost:8000/authors/search', {
                 params: { name: searchTerm }
             });
-            console.log("Search results: ", response.data.authors);
             setSearchResults(response.data.authors || []);
         } catch (error) {
-            console.error("Error searching authors:", error);
+            console.error('Error searching authors:', error);
         } finally {
             setLoading(false);
         }
@@ -67,82 +59,73 @@ const Researchers = () => {
     };
 
     const handleCompare = (researcher) => {
-        console.log("Compare researcher: ", researcher.name);
+        console.log('Compare researcher:', researcher.name);
     };
 
+    const renderAuthors = (list) => (
+        list.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                {list.map(author => (
+                    <ResearcherCard
+                        key={author.authorid}
+                        researcher={author}
+                        onViewDetails={handleViewDetails}
+                        onCompare={handleCompare}
+                    />
+                ))}
+            </div>
+            ) : (
+            <div className="mt-10 text-center text-gray-500">No researchers found.</div>
+            )
+    );
+
+    const renderPagination = () => (
+        <div className="flex justify-center mt-8 space-x-2">
+            <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 rounded-lg text-sm ${
+                    currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+            >
+                Previous
+            </button>
+            <span className="px-3 py-1 rounded-lg bg-gray-100 text-gray-700">
+                Page {currentPage} of {totalPages}
+            </span>
+            <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1 rounded-lg text-sm ${
+                    currentPage === totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+            >
+                Next
+            </button>
+        </div>
+    );
+
     return (
-        <div className="container mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+            <h1 className="text-2xl font-semibold text-gray-900 mb-4">Researchers</h1>
             <SearchBar
-                searchTerm = {searchTerm}
-                setSearchTerm = {setSearchTerm}
-                onSearch = {handleSearch}
-                placeholder = "Search researcher by name ..."
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                onSearch={handleSearch}
+                placeholder="Search researcher by name ..."
             />
 
-            {loading && (
-                <div className = 'flex justify-center mt-6'>
-                    <div className = "animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+            {loading ? (
+                <div className="flex justify-center mt-10">
+                    <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
                 </div>
-            )}
-
-            {!loading && (
+            ) : (
                 <>
-                    {searchResults.length > 0 ? (
-                        <div className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                            {searchResults.map((author) => (
-                                <ResearcherCard
-                                    key = {author.authorid}
-                                    researcher = {author}
-                                    onViewDetails = {handleViewDetails}
-                                    onCompare = {handleCompare}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                            {authors.map((author) => (
-                                <ResearcherCard
-                                    key = {author.authorid}
-                                    researcher = {author}
-                                    onViewDetails = {handleViewDetails}
-                                    onCompare = {handleCompare}
-                                />
-                            ))}
-                        </div>
-                    )}
+                    {searchTerm ? renderAuthors(searchResults) : renderAuthors(authors)}
+                    {!searchTerm && authors.length > 0 && renderPagination()}
                 </>
-            )}
-
-            {!loading && !searchTerm && authors.length > 0 && (
-                <div className = "w-full bg-white mt-8 z-50">
-                    <div className = "flex justify-center mt-4 mb-4 space-x-4">
-                        <button
-                            onClick = {() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                            disabled = {currentPage === 1}
-                            className = {`px-4 py-2 rounded-md ${
-                                currentPage === 1
-                                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}
-                        >
-                            Previous
-                        </button>
-                            <span className = "self-center text-gray-700">
-                                Page {currentPage} of {totalPages}
-                            </span>
-                        <button
-                            onClick = {() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                            disabled = {currentPage === totalPages}
-                            className = {`px-4 py-2 rounded-md ${
-                                currentPage === totalPages
-                                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
-                        >
-                            Next
-                        </button>
-                    </div>
-                </div>
             )}
         </div>
     );
