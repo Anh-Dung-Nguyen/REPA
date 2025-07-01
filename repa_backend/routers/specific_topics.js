@@ -9,18 +9,53 @@ const { getDB } = require("../db");
  *         tags:
  *             - Specific topics
  *         summary: Get list of specific topics
+ *         parameters:
+ *             - in: query
+ *               name: page
+ *               schema:
+ *                 type: integer
+ *                 default: 1
+ *             - in: query
+ *               name: limit
+ *               schema:
+ *                 type: integer
+ *                 default: 60
  *         responses:
  *             200:
- *                 description: List of specific topics
+ *                 description: Paginated list of specific topics
+ *                 content:
+ *                     application/json:
+ *                         schema:
+ *                             type: object
+ *                             properties:
+ *                                 topics:
+ *                                     type: array
+ *                                 totalPages:
+ *                                     type: integer
+ *                                 totalCount:
+ *                                     type: integer
  */
 
 router.get("/", async (req, res) => {
     try {
         const db = getDB();
-        const specificTopics = await db.collection("specific_topics")
-        .find({}, { projection: { _id: 0 } })
-        .toArray();
-        res.json(specificTopics);
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 60;
+        const skip = (page - 1) * limit;
+
+        const [totalCount, specificTopics] = await Promise.all([
+            db.collection("specific_topics").countDocuments(),
+            db.collection("specific_topics")
+                .find({}, {projection: {_id: 0}})
+                .skip(skip)
+                .limit(limit)
+                .toArray()
+        ]);
+
+        const totalPages = Math.ceil(totalCount / limit);
+
+        res.json({specificTopics, totalCount, totalPages, currentPage: page});
     } catch (err) {
         console.error("Error fetching annotated papers:", err);
         res.status(500).json({ error: "Internal server error" });
