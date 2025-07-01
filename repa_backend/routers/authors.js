@@ -472,7 +472,7 @@ router.get('/hindex', async (req, res) => {
  *     get:
  *         tags:
  *             - Authors
- *         summary: Get author by authorId
+ *         summary: Get author by authorId, including distinct specific topics and their count
  *         parameters:
  *           - in: path
  *             name: author_id
@@ -506,8 +506,15 @@ router.get("/:author_id", async (req, res) => {
             .project({ _id: 0, title: 1 })
             .next();
 
-        const specificTopicEntry = await db.collection("author_specific_topics")
-            .findOne({ authorId: authorId }, { projection: { _id: 0, topics: 1 } });
+        const axios = require('axios');
+        const filteredRes = await axios.get(`http://localhost:8000/author_specific_topics/filtered_author_paper_topics/author/${authorId}`);
+        const filteredAuthorPaperTopics = filteredRes.data;
+
+        const allTopics = filteredAuthorPaperTopics.flatMap(paper => paper.topics || []);
+        const distinctTopicsSet = new Set(allTopics);
+        const distinctTopics = Array.from(distinctTopicsSet).sort();
+
+        const specificTopicsCount = distinctTopics.length;
 
         const papers = await db.collection("papers_with_annotations")
             .find({ "authors.authorId": authorId }, { projection: { authors: 1 } })
@@ -530,7 +537,7 @@ router.get("/:author_id", async (req, res) => {
         if (coauthorIds.length) {
             coauthors = await db.collection("authors")
                 .find(
-                    { authorid: { $in: Array.from(coauthorIds) } },
+                    { authorid: { $in: coauthorIds } },
                     { projection: { _id: 0, authorid: 1, name: 1, hindex: 1, papercount: 1, citationcount: 1 } }
                 )
                 .toArray();
@@ -542,9 +549,10 @@ router.get("/:author_id", async (req, res) => {
         const enrichedAuthor = {
             ...author,
             latest_paper_title: latestPaper?.title || null,
-            specific_topic: specificTopicEntry?.topics
-                ? capitalizeFirstLetter(specificTopicEntry.topics.join(", "))
+            specific_topic: distinctTopics.length
+                ? capitalizeFirstLetter(distinctTopics.join(", "))
                 : null,
+            specific_topics_count: specificTopicsCount,
             unique_coauthors_count: coauthorSet.size,
             coauthors
         };
@@ -555,5 +563,100 @@ router.get("/:author_id", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
+/**
+ * @swagger
+ * /authors/authors_coauthors_citations_evolution/{authorId}:
+ *   get:
+ *     tags:
+ *       - Authors
+ *     summary: Get evolution of citations of co-authors by year
+ *     parameters:
+ *       - in: path
+ *         name: authorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the main author
+ *     responses:
+ *       200:
+ *         description: Yearly citations of co-authors
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/authors_coauthors_citations_evolution/:authorId', async (req, res) => {
+    try {
+        const db = getDB();
+        const authorId = req.params.authorId;
+
+        // Fetch the main author's data
+        const authorData = await db.collection("authors_papers_annotations")
+            .findOne({ authorId });
+
+        if (!authorData || !Array.isArray(authorData.papers)) {
+            // This case is ruled out by your findOne() returning data
+            return res.status(404).json({ error: "No papers found for the given author ID" });
+        }
+
+        const coAuthorIds = new Set();
+        // Collect all unique co-author IDs from the main author's papers
+        authorData.papers.forEach(paper => {
+            if (Array.isArray(paper.authors)) {
+                paper.authors.forEach(coAuthor => {
+                    if (coAuthor.authorId && coAuthor.authorId !== authorId) { // Ensure authorId exists and is not the main author
+                        coAuthorIds.add(coAuthor.authorId);
+                    }
+                });
+            }
+        });
+
+        // If no co-authors found, return empty data
+        if (coAuthorIds.size === 0) {
+            console.log(`No co-authors found for authorId: ${authorId}`);
+            return res.json({ data: [] });
+        }
+
+        const coAuthorsCitationsByYear = {};
+
+        // Iterate through each unique co-author
+        for (const coAuthorId of coAuthorIds) {
+            // Fetch papers for each co-author
+            const coAuthorData = await db.collection("authors_papers_annotations")
+                .findOne({ authorId: coAuthorId });
+
+            if (coAuthorData && Array.isArray(coAuthorData.papers)) {
+                // Aggregate citations by year for the co-author's papers
+                coAuthorData.papers.forEach(paper => {
+                    // Ensure 'year' and 'citationcount' exist before using them
+                    if (paper.year && typeof paper.citationcount === 'number') {
+                        if (!coAuthorsCitationsByYear[paper.year]) {
+                            coAuthorsCitationsByYear[paper.year] = { year: paper.year, citations: 0 };
+                        }
+                        coAuthorsCitationsByYear[paper.year].citations += paper.citationcount;
+                    } else {
+                        // Log if year or citationcount is missing/invalid for a co-author's paper
+                        console.warn(`Skipping paper for co-author ${coAuthorId} due to missing year or invalid citationcount:`, paper);
+                    }
+                });
+            } else {
+                console.warn(`Co-author data not found or papers array missing/invalid for co-authorId: ${coAuthorId}`);
+            }
+        }
+
+        // Convert the aggregated object into a sorted array
+        const coAuthorsCitationsEvolutionData = Object.values(coAuthorsCitationsByYear)
+            .sort((a, b) => a.year - b.year);
+
+        res.json({ data: coAuthorsCitationsEvolutionData });
+
+    } catch (err) {
+        console.error("Error building co-authors citations evolution:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 
 module.exports = router;
