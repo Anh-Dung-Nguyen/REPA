@@ -16,19 +16,20 @@ const ResearcherDetailPage = () => {
 
     const [showAllTopics] = useState(false);
 
+    const [coAuthorsCitationsEvolution, setCoAuthorsCitationsEvolution] = useState([]);
+
     useEffect(() => {
-        const fetchResearcherData = async () => {
+        const fetchData = async () => {
             if (!authorId) return;
-            
+
             setLoading(true);
             setError(null);
-            
+
             try {
                 const researcherResponse = await axios.get(`http://localhost:8000/authors/${authorId}`);
                 setResearcher(researcherResponse.data);
 
                 const papersResponse = await axios.get(`http://localhost:8000/authors_papers_annotations/${authorId}`);
-                
                 const papers = Array.isArray(papersResponse.data?.papers)
                     ? papersResponse.data.papers.map(paper => ({
                         title: paper.title,
@@ -39,14 +40,15 @@ const ResearcherDetailPage = () => {
                         abstract: paper.abstract,
                         numberOfCoAuthors: paper.numberOfCoAuthors,
                         specificTopics: paper.specificTopics || []
-                        }))
+                    }))
                     : [];
-                
                 setResearcherPapers(papers);
-                
-                console.log('Papers response:', papersResponse.data);
-                console.log('Processed papers:', papers);
-                
+
+                const coAuthorsCitationsResponse = await axios.get(
+                    `http://localhost:8000/authors/authors_coauthors_citations_evolution/${authorId}`
+                );
+                setCoAuthorsCitationsEvolution(coAuthorsCitationsResponse.data?.data || []);
+
             } catch (error) {
                 console.error("Error fetching researcher data:", error);
                 setError("Failed to load researcher data");
@@ -55,7 +57,7 @@ const ResearcherDetailPage = () => {
             }
         };
 
-        fetchResearcherData();
+        fetchData();
     }, [authorId]);
 
     const handlePaperClick = async (paper) => {
@@ -294,14 +296,14 @@ const ResearcherDetailPage = () => {
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>
-                            
+
                             <div className="bg-white rounded-lg shadow-md p-6">
                                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                    <Users className="text-purple-600" size={20} />
-                                    Co-Authors Citations Evolution
+                                    <Quote className="text-purple-600" size={20} />
+                                    Co-Author Citations Evolution
                                 </h3>
                                 <ResponsiveContainer width="100%" height={200}>
-                                    <LineChart data={citationsEvolutionData}>
+                                    <LineChart data={coAuthorsCitationsEvolution}>
                                         <XAxis dataKey="year" stroke="#4B5563" />
                                         <YAxis allowDecimals={false} />
                                         <Tooltip />
@@ -309,6 +311,7 @@ const ResearcherDetailPage = () => {
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>
+                            
                         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="md:col-span-2 bg-white rounded-lg shadow-md p-6">
                                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -394,34 +397,34 @@ const ResearcherDetailPage = () => {
 
                         {coAuthors.length > 0 && (
                             <div className="bg-white rounded-lg shadow-md p-6">
-                            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                                <User2 className="text-purple-600" size={20} />
-                                Top Co-Authors
-                            </h3>
-                            <div className="space-y-3">
-                                {coAuthors.slice(0, 12).map((coAuthor, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-                                    onClick={() => handleCoAuthorClick(coAuthor)}
-                                >
-                                    <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                                    {coAuthor.name.charAt(0)}
+                                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    <User2 className="text-purple-600" size={20} />
+                                    Top Co-Authors
+                                </h3>
+                                <div className="space-y-3">
+                                    {coAuthors.slice(0, 12).map((coAuthor, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                                        onClick={() => handleCoAuthorClick(coAuthor)}
+                                    >
+                                        <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                        {coAuthor.name.charAt(0)}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-gray-800 truncate">{coAuthor.name}</p>
+                                        </div>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-gray-800 truncate">{coAuthor.name}</p>
-                                    </div>
+                                    ))}
+                                    {coAuthors.length > 5 && (
+                                    <button
+                                        onClick={() => setActiveTab('coauthors')}
+                                        className="text-blue-600 hover:text-blue-800 text-sm font-medium w-full text-center pt-2"
+                                    >
+                                        View all {coAuthors.length} co-authors →
+                                    </button>
+                                    )}
                                 </div>
-                                ))}
-                                {coAuthors.length > 5 && (
-                                <button
-                                    onClick={() => setActiveTab('coauthors')}
-                                    className="text-blue-600 hover:text-blue-800 text-sm font-medium w-full text-center pt-2"
-                                >
-                                    View all {coAuthors.length} co-authors →
-                                </button>
-                                )}
-                            </div>
                             </div>
                         )}
                         </div>
