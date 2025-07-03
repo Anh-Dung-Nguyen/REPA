@@ -151,7 +151,7 @@ router.get("/latest_paper_title/:authorId", async (req, res) => {
 
     const latestPaper = await db.collection("papers_with_annotations")
       .find({ "authors.authorId": authorId })
-      .sort({ updated: -1 })
+      .sort({ year: -1 })
       .limit(1)
       .project({ _id: 0, title: 1})
       .next();
@@ -257,6 +257,47 @@ router.get("/url/:corpusid", async (req, res) => {
     console.error("Error fetching paper URL by corpusid:", err);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+/**
+ * @swagger
+ * /papers_with_annotations/author/{author_id}:
+ *     get:
+ *         tags:
+ *             - Papers with annotations
+ *         summary: Get all papers with annotation by authorId
+ *         parameters:
+ *             - in: path
+ *               name: author_id
+ *               required: true
+ *               schema:
+ *                   type: string
+ *               description: The authorId of the author
+ *         responses:
+ *             200:
+ *                 description: List of papers with annotations
+ *             404:
+ *                 description: No papers found for the given authorId
+ */
+
+router.get("/author/:author_id", async (req, res) => {
+    try {
+        const db = getDB();
+        const authorId = req.params.author_id;
+
+        const papers = await db.collection("papers_with_annotations")
+            .find({ "authors.authorId": authorId }, { projection: { _id: 0 } })
+            .toArray();
+
+        if (papers.length > 0) {
+            res.json({ authorId, papers });
+        } else {
+            res.status(404).json({ error: "No papers found for the given authorId" });
+        }
+    } catch (err) {
+        console.error("Error fetching papers by authorId:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 module.exports = router;
