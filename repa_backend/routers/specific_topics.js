@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { getDB } = require("../db"); 
+const axios = require("axios");
 
 /**
  * @swagger
@@ -376,6 +377,90 @@ router.get("/search", async (req, res) => {
         res.json({ specific_topics: result });
     } catch (err) {
         console.error("Error searching specific topics with counts:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+/**
+ * @swagger
+ * /specific_topics/average_hindex:
+ *   get:
+ *     tags:
+ *       - Specific topics
+ *     summary: Get average H-Index per specific topic (paginated)
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of topics per page
+ *     responses:
+ *       200:
+ *         description: Success
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get("/average_hindex", async (req, res) => {
+    try {
+        const db = getDB();
+
+        const page = parseInt(req.query.page) > 0 ? parseInt(req.query.page) : 1;
+        const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10;
+
+        const total = await db.collection("specific_topics").countDocuments();
+        const totalPages = Math.ceil(total / limit);
+
+        const topics = await db.collection("specific_topics")
+            .find({}, { projection: { _id: 0, topic: 1 } })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .toArray();
+
+        const results = [];
+
+        for (const { topic } of topics) {
+            const authorsRes = await axios.get('http://localhost:8000/authors');
+            const authors = authorsRes.data.authors || [];
+
+            const topicRegex = new RegExp(topic.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+            
+            const matchedAuthors = authors.filter(author => 
+                author.specific_topic && topicRegex.test(author.specific_topic)
+            );
+
+            const hindexes = matchedAuthors.map(a => a.hindex || 0);
+            const authorsCount = hindexes.length;
+
+            let average_hindex = null;
+            if (authorsCount > 0) {
+                const sum = hindexes.reduce((acc, val) => acc + val, 0);
+                average_hindex = parseFloat((sum / authorsCount).toFixed(2));
+            }
+
+            results.push({
+                topic,
+                average_hindex,
+                authors_count: authorsCount
+            });
+        }
+
+        res.json({
+            page,
+            limit,
+            total,
+            totalPages,
+            results
+        });
+    } catch (err) {
+        console.error("Error calculating average H-Index per topic:", err);
         res.status(500).json({ error: "Internal server error" });
     }
 });
