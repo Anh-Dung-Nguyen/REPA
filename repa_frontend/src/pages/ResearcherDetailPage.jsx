@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText, Users } from 'lucide-react';
+import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText, Users, BookType } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ResearcherDetailPage = () => {
@@ -16,7 +16,7 @@ const ResearcherDetailPage = () => {
 
     const [showAllTopics] = useState(false);
 
-    const [coAuthorsCitationsEvolution, setCoAuthorsCitationsEvolution] = useState([]);
+    // const [coAuthorsCitationsEvolution, setCoAuthorsCitationsEvolution] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,15 +39,18 @@ const ResearcherDetailPage = () => {
                         venue: paper.venue,
                         abstract: paper.abstract,
                         numberOfCoAuthors: paper.numberOfCoAuthors,
-                        specificTopics: paper.specificTopics || []
+                        specificTopics: paper.specificTopics || [],
+                        coAuthors: paper.authors || []
                     }))
                     : [];
                 setResearcherPapers(papers);
-
+                
+                /*
                 const coAuthorsCitationsResponse = await axios.get(
                     `http://localhost:8000/authors/authors_coauthors_citations_evolution/${authorId}`
                 );
                 setCoAuthorsCitationsEvolution(coAuthorsCitationsResponse.data?.data || []);
+                */
 
             } catch (error) {
                 console.error("Error fetching researcher data:", error);
@@ -297,6 +300,7 @@ const ResearcherDetailPage = () => {
                                 </ResponsiveContainer>
                             </div>
 
+                            {/*
                             <div className="bg-white rounded-lg shadow-md p-6">
                                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                                     <Quote className="text-purple-600" size={20} />
@@ -311,6 +315,7 @@ const ResearcherDetailPage = () => {
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>
+                            */}
                             
                         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="md:col-span-2 bg-white rounded-lg shadow-md p-6">
@@ -481,6 +486,32 @@ const ResearcherDetailPage = () => {
                                                         <span>{paper.numberOfCoAuthors}</span>
                                                     </div>
                                                 )}
+                                            </div>
+                                            <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                                {paper.year && (
+                                                    <div className="flex items-center gap-1">
+                                                        <BookType size={14} />
+                                                        <span>
+                                                            {paper.specificTopics && paper.specificTopics.length > 0
+                                                                ? paper.specificTopics.join(', ')
+                                                                : 'No topics'}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-2 mt-2">
+                                                <span className="font-medium text-sm text-gray-500">Co-authors:</span>
+                                                {paper.coAuthors
+                                                    ?.filter(author => author.authorId !== authorId)
+                                                    .map(author => (
+                                                        <button
+                                                            key={author.authorId}
+                                                            onClick={() => navigate(`/researchers/${author.authorId}`)}
+                                                            className="bg-gray-200 rounded-lg px-2 py-1 text-gray-500 hover:text-blue-500 cursor-pointer text-sm"
+                                                        >
+                                                            {author.name}
+                                                        </button>
+                                                    ))}
                                             </div>
                                         </div>
                                         
