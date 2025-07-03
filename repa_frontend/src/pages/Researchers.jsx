@@ -109,7 +109,6 @@ const Researchers = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-4">Researchers</h1>
             <SearchBar
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
