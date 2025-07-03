@@ -86,11 +86,21 @@ router.get("/", async (req, res) => {
 
         const paperMap = new Map(latestPapers.map(p => [p._id, p.title]));
 
-        const topicDocs = await db.collection("author_specific_topics")
-            .find({ authorId: { $in: authorIds } }, { projection: { _id: 0, authorId: 1, topics: 1 } })
-            .toArray();
+        const topicMap = new Map();
+        await Promise.all(authorIds.map(async (authorId) => {
+            try {
+                const filteredRes = await axios.get(`http://localhost:8000/author_specific_topics/filtered_author_paper_topics/author/${authorId}`);
+                const filteredTopicsData = filteredRes.data;
 
-        const topicMap = new Map(topicDocs.map(t => [t.authorId, t.topics]));
+                const allTopics = filteredTopicsData.flatMap(paper => paper.topics || []);
+                const distinctTopics = Array.from(new Set(allTopics)).sort();
+
+                topicMap.set(authorId, distinctTopics);
+            } catch (err) {
+                console.error(`Error fetching filtered topics for authorId=${authorId}:`, err.message);
+                topicMap.set(authorId, []);
+            }
+        }));
 
         const papers = await db.collection("papers_with_annotations")
             .find({ "authors.authorId": { $in: authorIds } }, { projection: { authors: 1 } })
@@ -112,16 +122,13 @@ router.get("/", async (req, res) => {
             }
         }
 
-        const allCoauthorIds = new Set();
-        for (const coauthorIds of coauthorMap.values()) {
-            for (const id of coauthorIds) {
-                allCoauthorIds.add(id);
-            }
-        }
+        const allCoauthorIds = Array.from(
+            new Set(Array.from(coauthorMap.values()).flatMap(set => Array.from(set)))
+        );
 
         const coauthorDetails = await db.collection("authors")
             .find(
-                { authorid: { $in: Array.from(allCoauthorIds) } },
+                { authorid: { $in: allCoauthorIds } },
                 { projection: { _id: 0, authorid: 1, name: 1, hindex: 1, papercount: 1 } }
             )
             .toArray();
@@ -134,16 +141,21 @@ router.get("/", async (req, res) => {
         const capitalizeFirst = str => str.charAt(0).toUpperCase() + str.slice(1);
 
         const enrichedAuthors = authors.map(author => {
+            const latestTitle = paperMap.get(author.authorid) || null;
+            const topics = topicMap.get(author.authorid) || [];
             const coauthorIds = coauthorMap.get(author.authorid) || new Set();
 
-            const enrichedCoauthors = Array.from(coauthorIds).map(id => coauthorDetailMap.get(id)).filter(Boolean);
+            const enrichedCoauthors = Array.from(coauthorIds)
+                .map(id => coauthorDetailMap.get(id))
+                .filter(Boolean);
 
             return {
                 ...author,
-                latest_paper_title: paperMap.get(author.authorid) || null,
-                specific_topic: topicMap.has(author.authorid)
-                    ? capitalizeFirst(topicMap.get(author.authorid).join(", "))
+                latest_paper_title: latestTitle,
+                specific_topic: topics.length
+                    ? capitalizeFirst(topics.join(", "))
                     : null,
+                specific_topics_count: topics.length,
                 unique_coauthors_count: coauthorIds.size,
                 coauthors: enrichedCoauthors
             };
