@@ -152,9 +152,7 @@ router.get("/", async (req, res) => {
             return {
                 ...author,
                 latest_paper_title: latestTitle,
-                specific_topic: topics.length
-                    ? capitalizeFirst(topics.join(", "))
-                    : null,
+                specific_topics: topics.length ? topics.map(capitalizeFirst) : [],
                 specific_topics_count: topics.length,
                 unique_coauthors_count: coauthorIds.size,
                 coauthors: enrichedCoauthors
