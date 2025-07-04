@@ -158,4 +158,69 @@ router.get('/filtered_author_paper_topics/author/:authorId', async (req, res) =>
     }
 });
 
+/**
+ * @swagger
+ * /author_specific_topics/aggregate_author_topics/author/{authorId}:
+ *   get:
+ *     tags:
+ *       - Author with specific topics
+ *     summary: Get unique filtered topics for an author (only topics that exist in specific_topics)
+ *     parameters:
+ *       - in: path
+ *         name: authorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the author
+ *     responses:
+ *       200:
+ *         description: Unique filtered topics by author
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 authorId:
+ *                   type: string
+ *                 topics:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/aggregate_author_topics/author/:authorId', async (req, res) => {
+    const { authorId } = req.params;
+
+    try {
+        const authorTopicsRes = await axios.get(`http://localhost:8000/author_paper_topics/author/${authorId}`);
+        const authorPaperTopics = authorTopicsRes.data;
+
+        const specificTopicsRes = await axios.get(`http://localhost:8000/specific_topics?page=1&limit=10000`);
+        const allowedTopicsSet = new Set(specificTopicsRes.data.specificTopics.map(t => t.topic.trim().toLowerCase()));
+
+        const allTopics = [];
+        authorPaperTopics.forEach(paper => {
+            (paper.topics || []).forEach(topic => {
+                const cleanTopic = topic.trim().toLowerCase();
+                if (allowedTopicsSet.has(cleanTopic)) {
+                    allTopics.push(topic.trim());
+                }
+            });
+        });
+
+        const uniqueTopics = Array.from(new Set(allTopics)).sort((a, b) => a.localeCompare(b));
+
+        res.json({
+            authorId,
+            topics: uniqueTopics
+        });
+
+    } catch (error) {
+        console.error('Error aggregating author topics:', error.message);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 module.exports = router;
