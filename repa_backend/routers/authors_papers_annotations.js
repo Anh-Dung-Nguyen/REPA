@@ -10,18 +10,66 @@ const { getDB } = require("../db");
  *     tags:
  *       - Author with papers and annotations
  *     summary: Get list of author with paper annotation
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number (starts from 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
  *         description: List of author with paper annotation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
  */
 
 router.get("/", async (req, res) => {
     try {
         const db = getDB();
+
+        const page = parseInt(req.query.page) > 0 ? parseInt(req.query.page) : 1;
+        const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10;
+        const skip = (page - 1) * limit;
+
+        const total = await db.collection("authors_papers_annotations").countDocuments();
+        const totalPages = Math.ceil(total / limit);
+
         const results = await db.collection("authors_papers_annotations")
             .find({}, { projection: { _id: 0, "papers.paperId": 0 } })
+            .skip(skip)
+            .limit(limit)
             .toArray();
-        res.json(results);
+
+        res.json({
+            page,
+            limit,
+            total,
+            totalPages,
+            results
+        });
+
     } catch (err) {
         console.error("Error fetching authors papers annotations:", err);
         res.status(500).json({ error: "Internal server error" });
