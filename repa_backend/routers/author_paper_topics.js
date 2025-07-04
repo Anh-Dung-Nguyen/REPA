@@ -5,22 +5,70 @@ const { getDB } = require("../db");
 /**
  * @swagger
  * /author_paper_topics:
- *     get:
- *         tags:
- *             - Author with papers and topics
- *         summary: Get list of author with paper and topic
- *         responses:
- *             200:
- *                 description: List of author with paper and topic
+ *   get:
+ *     tags:
+ *       - Author with papers and topics
+ *     summary: Get paginated list of authors with papers and topics
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number (starts from 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *     responses:
+ *       200:
+ *         description: List of authors with paper topics (paginated)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
  */
 
 router.get("/", async (req, res) => {
     try {
         const db = getDB();
-        const topics = await db.collection("author_paper_topics")
-        .find({}, { projection: { _id: 0 } })
-        .toArray();
-        res.json(topics);
+
+        const page = parseInt(req.query.page) > 0 ? parseInt(req.query.page) : 1;
+        const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10;
+        const skip = (page - 1) * limit;
+
+        const total = await db.collection("author_paper_topics").countDocuments();
+        const totalPages = Math.ceil(total / limit);
+
+        const data = await db.collection("author_paper_topics")
+            .find({}, { projection: { _id: 0 } })
+            .skip(skip)
+            .limit(limit)
+            .toArray();
+
+        res.json({
+            page,
+            limit,
+            total,
+            totalPages,
+            data
+        });
+
     } catch (err) {
         console.error("Error fetching author paper topics:", err);
         res.status(500).json({ error: "Internal server error" });
