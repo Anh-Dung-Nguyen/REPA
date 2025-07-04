@@ -465,4 +465,48 @@ router.get("/average_hindex", async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /specific_topics/hindex_sums:
+ *   get:
+ *     tags:
+ *       - Specific topics
+ *     summary: Get total hindex sums per specific topic from authors
+ *     responses:
+ *       200:
+ *         description: List of specific topics with sum of hindex
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/hindex_sums', async (req, res) => {
+    try {
+        const authorsRes = await axios.get(`http://localhost:8000/authors?page=1&limit=1000`);
+        const authorsData = authorsRes.data.authors || [];
+
+        const topicHindexMap = new Map();
+
+        authorsData.forEach(author => {
+            const hindex = author.hindex || 0;
+            const specificTopics = author.specific_topics || [];
+
+            specificTopics.forEach(topic => {
+                const lowerTopic = topic.toLowerCase().trim();
+                const prev = topicHindexMap.get(lowerTopic) || 0;
+                topicHindexMap.set(lowerTopic, prev + hindex);
+            });
+        });
+
+        const topic_hindex_sums = Array.from(topicHindexMap.entries()).map(([topic, total_hindex]) => ({
+            topic: topic.charAt(0).toUpperCase() + topic.slice(1),
+            total_hindex
+        })).sort((a, b) => b.total_hindex - a.total_hindex);
+
+        res.json(topic_hindex_sums);
+    } catch (error) {
+        console.error('Error computing topic hindex sums:', error.message);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 module.exports = router;
