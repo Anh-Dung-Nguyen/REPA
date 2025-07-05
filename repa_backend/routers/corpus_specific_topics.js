@@ -18,8 +18,8 @@ router.get("/", async (req, res) => {
     try {
         const db = getDB();
         const topics = await db.collection("corpus_specific_topics")
-        .find({}, { projection: { _id: 0 } })
-        .toArray();
+            .find({}, { projection: { _id: 0 } })
+            .toArray();
         res.json(topics);
     } catch (err) {
         console.error("Error fetching author specific topics:", err);
@@ -53,13 +53,13 @@ router.get("/:corpus_id", async (req, res) => {
         const db = getDB();
         const corpusId = Number(req.params.corpus_id);
         const topics = await db.collection("corpus_specific_topics")
-        .find({ corpusId }, { projection: { _id: 0 } })
-        .toArray();
+            .find({ corpusId }, { projection: { _id: 0 } })
+            .toArray();
 
         if (topics.length > 0) {
-        res.json(topics);
+            res.json(topics);
         } else {
-        res.status(404).json({ error: "No result found for the given corpus ID" });
+            res.status(404).json({ error: "No result found for the given corpus ID" });
         }
     } catch (err) {
         console.error("Error fetching author specific topics by corpus ID:", err);
