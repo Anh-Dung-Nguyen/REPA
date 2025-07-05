@@ -18,8 +18,8 @@ router.get("/", async (req, res) => {
     try {
         const db = getDB();
         const papersWithAnnotations = await db.collection("papers_with_annotations")
-        .find({}, { projection: { _id: 0 } })
-        .toArray();
+          .find({}, { projection: { _id: 0 } })
+          .toArray();
         res.json(papersWithAnnotations);
     } catch (err) {
         console.error("Error fetching papers with annotations:", err);
@@ -193,12 +193,12 @@ router.get("/:corpus_id", async (req, res) => {
         const db = getDB();
         const corpusId = parseInt(req.params.corpus_id, 10);
         const paperWithAnnotation = await db.collection("papers_with_annotations")
-        .findOne({ corpusid: corpusId }, { projection: { _id: 0 } });
+          .findOne({ corpusid: corpusId }, { projection: { _id: 0 } });
 
         if (paperWithAnnotation) {
-        res.json(paperWithAnnotation);
+          res.json(paperWithAnnotation);
         } else {
-        res.status(404).json({ error: "No paper found with the given corpus ID" });
+          res.status(404).json({ error: "No paper found with the given corpus ID" });
         }
     } catch (err) {
         console.error("Error fetching paper with annotation:", err);
