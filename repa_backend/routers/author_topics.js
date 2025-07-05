@@ -18,8 +18,8 @@ router.get("/", async (req, res) => {
     try {
         const db = getDB();
         const topics = await db.collection("author_topics")
-        .find({}, { projection: { _id: 0 } })
-        .toArray();
+            .find({}, { projection: { _id: 0 } })
+            .toArray();
         res.json(topics);
     } catch (err) {
         console.error("Error fetching author topics:", err);
@@ -53,13 +53,13 @@ router.get("/:author_id", async (req, res) => {
         const db = getDB();
         const authorId = req.params.author_id;
         const topics = await db.collection("author_topics")
-        .find({ authorId }, { projection: { _id: 0 } })
-        .toArray();
+            .find({ authorId }, { projection: { _id: 0 } })
+            .toArray();
 
         if (topics.length > 0) {
-        res.json(topics);
+            res.json(topics);
         } else {
-        res.status(404).json({ error: "No papers found for the given author ID" });
+            res.status(404).json({ error: "No papers found for the given author ID" });
         }
     } catch (err) {
         console.error("Error fetching author topics by author ID:", err);
