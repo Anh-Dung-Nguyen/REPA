@@ -18,9 +18,9 @@ router.get("/", async (req, res) => {
     try {
         const db = getDB();
         const annotatedPapers = await db.collection("annotated_papers")
-        .find({}, { projection: { _id: 0 } })
-        .toArray();
-        res.json(annotatedPapers);
+            .find({}, { projection: { _id: 0 } })
+            .toArray();
+            res.json(annotatedPapers);
     } catch (err) {
         console.error("Error fetching annotated papers:", err);
         res.status(500).json({ error: "Internal server error" });
@@ -84,12 +84,12 @@ router.get("/:corpus_id", async (req, res) => {
         const db = getDB();
         const corpusId = parseInt(req.params.corpus_id, 10);
         const annotatedPaper = await db.collection("annotated_papers")
-        .findOne({ corpusid: corpusId }, { projection: { _id: 0 } });
+            .findOne({ corpusid: corpusId }, { projection: { _id: 0 } });
 
         if (annotatedPaper) {
-        res.json(annotatedPaper);
+            res.json(annotatedPaper);
         } else {
-        res.status(404).json({ error: "No annotated papers was found with the given corpus ID" });
+            res.status(404).json({ error: "No annotated papers was found with the given corpus ID" });
         }
     } catch (err) {
         console.error("Error fetching annotated paper:", err);
