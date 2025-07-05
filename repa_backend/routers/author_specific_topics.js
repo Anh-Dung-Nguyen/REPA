@@ -94,13 +94,13 @@ router.get("/:author_id", async (req, res) => {
         const db = getDB();
         const authorId = req.params.author_id;
         const topics = await db.collection("author_specific_topics")
-        .find({ authorId }, { projection: { _id: 0 } })
-        .toArray();
+            .find({ authorId }, { projection: { _id: 0 } })
+            .toArray();
 
         if (topics.length > 0) {
-        res.json(topics);
+            res.json(topics);
         } else {
-        res.status(404).json({ error: "No result found for the given author ID" });
+            res.status(404).json({ error: "No result found for the given author ID" });
         }
     } catch (err) {
         console.error("Error fetching author specific topics by author ID:", err);
