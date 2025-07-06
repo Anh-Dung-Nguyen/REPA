@@ -503,6 +503,7 @@ router.get('/hindex_sums', async (req, res) => {
         })).sort((a, b) => b.total_hindex - a.total_hindex);
 
         res.json(topic_hindex_sums);
+        
     } catch (error) {
         console.error('Error computing topic hindex sums:', error.message);
         res.status(500).json({ error: 'Internal server error' });
