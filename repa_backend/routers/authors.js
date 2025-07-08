@@ -455,7 +455,7 @@ router.get('/hindex', async (req, res) => {
         const skip = (page - 1) * limit;
 
         const cursor = db.collection("authors")
-            .find({ hindex: { $ne: null } }, { projection: { name: 1, hindex: 1, _id: 0 } })
+            .find({ hindex: { $ne: null } }, { projection: { name: 1, hindex: 1, authorid: 1, _id: 0 } })
             .sort({ hindex: -1})
             .skip(skip)
             .limit(limit);
