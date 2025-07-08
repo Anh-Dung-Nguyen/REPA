@@ -33,52 +33,75 @@ router.get("/", async (req, res) => {
  *     get:
  *         tags:
  *             - Papers with annotations
- *         summary: Get number of citation by paper with annotation
+ *         summary: Get number of citations by paper with annotation (including URL)
  *         responses:
  *             200:
- *                 description: Number of citation by paper with annotation
+ *                 description: Number of citations by paper with annotation
  *                 content:
  *                     application/json:
  *                         schema:
  *                             type: object
  *                             properties:
- *                                 corpusid:
- *                                     type: int
- *                                     example: 66
- *                                 title:
- *                                     type: string
- *                                     example: Machine Learning
- *                                 citationcount:
- *                                     type: int
- *                                     example: 5
+ *                                 page:
+ *                                     type: integer
+ *                                     example: 1
+ *                                 limit:
+ *                                     type: integer
+ *                                     example: 100
+ *                                 totalPages:
+ *                                     type: integer
+ *                                     example: 10
+ *                                 totalResults:
+ *                                     type: integer
+ *                                     example: 1000
+ *                                 results:
+ *                                     type: array
+ *                                     items:
+ *                                         type: object
+ *                                         properties:
+ *                                             corpusid:
+ *                                                 type: integer
+ *                                                 example: 66
+ *                                             title:
+ *                                                 type: string
+ *                                                 example: Machine Learning
+ *                                             citationcount:
+ *                                                 type: integer
+ *                                                 example: 5
+ *                                             url:
+ *                                                 type: string
+ *                                                 example: "https://www.semanticscholar.org/paper/78dc9426d7ac0d652aaf3dc1ace1250214375ce0"
  */
 
-router.get('/citation_count', async (req,res) => {
+router.get('/citation_count', async (req, res) => {
     try {
         const db = getDB();
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 100;
-        const skip = (page -1) * limit;
+        const skip = (page - 1) * limit;
 
         const cursor = db.collection("papers_with_annotations")
-            .find({citationcount: {$ne: null}}, {projection: {corpusid: 1, title: 1, citationcount: 1, _id: 0}})
-            .sort({citationcount: -1})
+            .find(
+                { citationcount: { $ne: null } },
+                { projection: { corpusid: 1, title: 1, citationcount: 1, url: 1, _id: 0 } }
+            )
+            .sort({ citationcount: -1 })
             .skip(skip)
             .limit(limit);
 
         const papers_with_annotations = await cursor.toArray();
-        const total = await db.collection("papers_with_annotations").countDocuments({citationcount: {$ne: null}});
+        const total = await db.collection("papers_with_annotations").countDocuments({ citationcount: { $ne: null } });
 
         res.json({
             page,
             limit,
-            totalPages: Math.ceil(total/limit),
+            totalPages: Math.ceil(total / limit),
             totalResults: total,
             results: papers_with_annotations
         });
     } catch (error) {
         console.error("Error fetching citation: ", error);
-        res.status(500).json({error: "Internal server error"});
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 
