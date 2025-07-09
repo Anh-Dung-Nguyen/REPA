@@ -4,6 +4,7 @@ import MetricCard from '../components/MetricCard';
 import TopResearchFieldsChart from '../components/TopResearchFieldChart';
 import HIndexRankingTable from '../components/HIndexRankingTable';
 import PaperRankingTable from '../components/PaperRankingTable';
+import PapersAnnotationsOverYear from '../components/PapersAnnotationsOverYear';
 import { Users, BookOpen, BookIcon, Paperclip } from 'lucide-react';
 
 function Overview() {
@@ -118,6 +119,10 @@ function Overview() {
                     </div>
                 </div>
             )}
+
+            <div className="w-full mx-auto mb-6">
+                <PapersAnnotationsOverYear />
+            </div>
         </>
     );
 }
