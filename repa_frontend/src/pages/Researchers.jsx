@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import debounce from 'lodash.debounce';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SearchBar from '../components/SearchBar';
@@ -12,7 +13,7 @@ const Researchers = () => {
     const [authors, setAuthors] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const AUTHORS_PER_PAGE = 51;
+    const AUTHORS_PER_PAGE = 21;
 
     useEffect(() => {
         const fetchPaginatedAuthors = async () => {
@@ -35,24 +36,30 @@ const Researchers = () => {
         }
     }, [currentPage, searchTerm]);
 
-    const handleSearch = async () => {
-        if (!searchTerm.trim()) {
-            setSearchResults([]);
-            return;
-        }
-        setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 300));
-        try {
-            const response = await axios.get('http://localhost:8000/authors/search', {
-                params: { name: searchTerm }
-            });
-            setSearchResults(response.data.authors || []);
-        } catch (error) {
-            console.error('Error searching authors:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const handleSearch = useCallback(
+        debounce(async () => {
+            if (!searchTerm.trim()) {
+                setSearchResults([]);
+                return;
+            }
+            setLoading(true);
+            try {
+                const response = await axios.get('http://localhost:8000/authors', {
+                    params: { name: searchTerm }
+                });
+                setSearchResults(response.data.authors || []);
+            } catch (error) {
+                console.error('Error searching authors:', error);
+            } finally {
+                setLoading(false);
+            }
+        }, 500), [searchTerm]
+    );
+
+    useEffect(() => {
+        handleSearch();
+        return handleSearch.cancel;
+    }, [searchTerm, handleSearch]);
 
     const handleViewDetails = (researcher) => {
         navigate(`/researchers/${researcher.authorid}`);
