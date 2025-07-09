@@ -29,6 +29,127 @@ router.get("/", async (req, res) => {
 
 /**
  * @swagger
+ * /papers_with_annotations/search_all:
+ *     get:
+ *         tags:
+ *             - Papers with annotations
+ *         summary: Get list of paper with annotation
+ *         parameters:
+ *             - in: query
+ *               name: page
+ *               schema:
+ *                  type: integer
+ *                  default: 1
+ *             - in: query
+ *               name: limit
+ *               schema:
+ *                  type: integer
+ *                  default: 60
+ *         responses:
+ *             200:
+ *                 description: List of paper with annotation
+ *                 content:
+ *                    application/json:
+ *                      schema:
+ *                        type: object
+ *                        properties:
+ *                          topics:
+ *                            type: array
+ *                          totalPages:
+ *                            type: integer
+ *                          totalCount:
+ *                            type: integer
+ */
+
+router.get("/search_all", async (req, res) => {
+    try {
+        const db = getDB();
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 60;
+        const skip = (page - 1) * limit;
+
+        const [totalCount, papersWithAnnotations] = await Promise.all([
+            db.collection("papers_with_annotations").countDocuments(),
+            db.collection("papers_with_annotations")
+                .find({}, { projection: { _id: 0 } })
+                .skip(skip)
+                .limit(limit)
+                .toArray()
+        ]);
+
+        const totalPages = Math.ceil(totalCount / limit);
+
+        res.json({papersWithAnnotations, totalCount, totalPages, currentPage: page});
+
+    } catch (err) {
+        console.error("Error fetching papers with annotations:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+/**
+ * @swagger
+ * /papers_with_annotations/count_by_year:
+ *   get:
+ *     tags:
+ *       - Papers with annotations
+ *     summary: Get number of papers with annotations grouped by publication year
+ *     responses:
+ *       200:
+ *         description: Papers count per year
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   year:
+ *                     type: integer
+ *                     example: 2012
+ *                   count:
+ *                     type: integer
+ *                     example: 5
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/count_by_year', async (req, res) => {
+  try {
+    const db = getDB();
+    const aggregation = [
+      { 
+        $match: { year: { $ne: null } } 
+      },
+      {
+        $group: {
+          _id: "$year",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          year: "$_id",
+          count: 1
+        }
+      },
+      {
+        $sort: { year: 1 }
+      }
+    ];
+
+    const countsByYear = await db.collection("papers_with_annotations").aggregate(aggregation).toArray();
+    res.json(countsByYear);
+  } catch (error) {
+    console.error("Error calculating papers count by year:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * @swagger
  * /papers_with_annotations/citation_count:
  *     get:
  *         tags:
