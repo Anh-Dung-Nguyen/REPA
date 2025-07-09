@@ -20,7 +20,7 @@ const axios = require("axios");
  *               name: limit
  *               schema:
  *                 type: integer
- *                 default: 60
+ *                 default: 28
  *         responses:
  *             200:
  *                 description: Paginated list of specific topics
@@ -42,7 +42,7 @@ router.get("/", async (req, res) => {
         const db = getDB();
 
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 60;
+        const limit = parseInt(req.query.limit) || 28;
         const skip = (page - 1) * limit;
 
         const [totalCount, specificTopics] = await Promise.all([
