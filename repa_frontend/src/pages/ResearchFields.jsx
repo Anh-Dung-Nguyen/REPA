@@ -10,7 +10,7 @@ const ResearchFields = () => {
   const [fieldsTotalPages, setFieldsTotalPages] = useState(1);
   const [fieldSearchTerm, setFieldSearchTerm] = useState('');
   const [fieldSearchResults, setFieldSearchResults] = useState([]);
-  const FIELDS_PER_PAGE = 60;
+  const FIELDS_PER_PAGE = 28;
 
   useEffect(() => {
     const fetchFields = async () => {
