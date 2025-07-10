@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { getDB } = require("../db"); 
 const axios = require("axios");
+const NodeCache = require("node-cache");
+
+const cache = new NodeCache({ stdTTL: 3600});
 
 /**
  * @swagger
@@ -136,52 +139,69 @@ router.get("/count", async (req, res) => {
  *                 totalPages:
  *                   type: integer
  *                   example: 154
+ *                 totalCount:
+ *                   type: integer
+ *                   example: 9227
+ *                 currentPage:
+ *                   type: integer
+ *                   example: 1
  */
 
 router.get('/topic_author_counts', async (req, res) => {
     try {
         const db = getDB();
-
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 60;
         const skip = (page - 1) * limit;
 
-        const totalCountResult = await db.collection("author_specific_topics").aggregate([
-            { $unwind: "$topics" },
-            { $group: { _id: "$topics" } },
-            { $count: "total" }
-        ]).toArray();
-
-        const totalCount = totalCountResult[0]?.total || 0;
+        const totalCount = await db.collection("specific_topics").countDocuments();
         const totalPages = Math.ceil(totalCount / limit);
 
-        const result = await db.collection("author_specific_topics").aggregate([
+        const topicsPage = await db.collection("specific_topics")
+            .find({}, { projection: { _id: 0, topic: 1 } })
+            .skip(skip)
+            .limit(limit)
+            .toArray();
+
+        const topicNames = topicsPage.map(t => t.topic);
+
+        const authorCounts = await db.collection("author_specific_topics").aggregate([
             { $unwind: "$topics" },
+            { $match: { topics: { $in: topicNames } } },
             {
                 $group: {
-                    _id: "$topics",
-                    authors: { $addToSet: "$_id" }
+                _id: "$topics",
+                uniqueAuthors: { $addToSet: "$authorId" }
                 }
             },
             {
                 $project: {
-                    topic: "$_id",
-                    count: { $size: "$authors" },
-                    _id: 0
+                topic: "$_id",
+                count: { $size: "$uniqueAuthors" },
+                _id: 0
                 }
-            },
-            { $sort: { count: -1 } },
-            { $skip: skip },
-            { $limit: limit }
-        ]).toArray();
+            }
+            ]).toArray();
+
+        const countsByTopic = {};
+        authorCounts.forEach(item => {
+            countsByTopic[item.topic] = item.count;
+        });
+
+        const result = topicNames.map(topic => ({
+            topic,
+            count: countsByTopic[topic] || 0
+        }));
 
         res.json({
             topics: result,
-            totalPages
+            totalPages,
+            totalCount,
+            currentPage: page
         });
 
     } catch (err) {
-        console.error("Error fetching topic author counts:", err);
+        console.error("Error in topic_author_counts:", err);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -228,52 +248,69 @@ router.get('/topic_author_counts', async (req, res) => {
  *                 totalPages:
  *                   type: integer
  *                   example: 154
+ *                 totalCount:
+ *                   type: integer
+ *                   example: 9227
+ *                 currentPage:
+ *                   type: integer
+ *                   example: 1
  */
 
 router.get('/topic_corpus_counts', async (req, res) => {
     try {
         const db = getDB();
-
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 60;
         const skip = (page - 1) * limit;
 
-        const totalCountResult = await db.collection("corpus_specific_topics").aggregate([
-            { $unwind: "$topics" },
-            { $group: { _id: "$topics" } },
-            { $count: "total" }
-        ]).toArray();
-
-        const totalCount = totalCountResult[0]?.total || 0;
+        const totalCount = await db.collection("specific_topics").countDocuments();
         const totalPages = Math.ceil(totalCount / limit);
 
-        const result = await db.collection("corpus_specific_topics").aggregate([
+        const topicsPage = await db.collection("specific_topics")
+            .find({}, { projection: { _id: 0, topic: 1 } })
+            .skip(skip)
+            .limit(limit)
+            .toArray();
+
+        const topicNames = topicsPage.map(t => t.topic);
+
+        const corpusCounts = await db.collection("corpus_specific_topics").aggregate([
             { $unwind: "$topics" },
+            { $match: { topics: { $in: topicNames } } },
             {
                 $group: {
-                    _id: "$topics",
-                    corpusIds: { $addToSet: "$_id" }
+                _id: "$topics",
+                uniqueCorpusIds: { $addToSet: "$_id" }
                 }
             },
             {
                 $project: {
-                    topic: "$_id",
-                    count: { $size: "$corpusIds" },
-                    _id: 0
+                topic: "$_id",
+                count: { $size: "$uniqueCorpusIds" },
+                _id: 0
                 }
-            },
-            { $sort: { count: -1 } },
-            { $skip: skip },
-            { $limit: limit }
-        ]).toArray();
+            }
+            ]).toArray();
+
+        const countsByTopic = {};
+        corpusCounts.forEach(item => {
+            countsByTopic[item.topic] = item.count;
+        });
+
+        const result = topicNames.map(topic => ({
+            topic,
+            count: countsByTopic[topic] || 0
+        }));
 
         res.json({
             topics: result,
-            totalPages
+            totalPages,
+            totalCount,
+            currentPage: page
         });
 
     } catch (err) {
-        console.error("Error fetching topic author counts:", err);
+        console.error("Error in topic_corpus_counts:", err);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -315,11 +352,12 @@ router.get("/search", async (req, res) => {
         const regex = new RegExp(name.trim(), "i");
 
         const matchedTopics = await db.collection("specific_topics")
-            .find({ topic: { $regex: regex } }, { projection: { _id: 0, topic: 1 } })
+            .find({ topic: { $regex: regex } })
+            .project({ _id: 0 })
             .toArray();
 
         if (!matchedTopics.length) {
-            return res.json({ specific_topics: [] });
+            return res.json({ specificTopics: [] });
         }
 
         const topicNames = matchedTopics.map(t => t.topic);
@@ -327,37 +365,15 @@ router.get("/search", async (req, res) => {
         const authorCounts = await db.collection("author_specific_topics").aggregate([
             { $unwind: "$topics" },
             { $match: { topics: { $in: topicNames } } },
-            {
-                $group: {
-                    _id: "$topics",
-                    researcherCount: { $addToSet: "$_id" }
-                }
-            },
-            {
-                $project: {
-                    topic: "$_id",
-                    researcherCount: { $size: "$researcherCount" },
-                    _id: 0
-                }
-            }
+            { $group: { _id: "$topics", researcherCount: { $addToSet: "$_id" } } },
+            { $project: { topic: "$_id", researcherCount: { $size: "$researcherCount" }, _id: 0 } }
         ]).toArray();
 
         const corpusCounts = await db.collection("corpus_specific_topics").aggregate([
             { $unwind: "$topics" },
             { $match: { topics: { $in: topicNames } } },
-            {
-                $group: {
-                    _id: "$topics",
-                    paperCount: { $addToSet: "$_id" }
-                }
-            },
-            {
-                $project: {
-                    topic: "$_id",
-                    paperCount: { $size: "$paperCount" },
-                    _id: 0
-                }
-            }
+            { $group: { _id: "$topics", paperCount: { $addToSet: "$_id" } } },
+            { $project: { topic: "$_id", paperCount: { $size: "$paperCount" }, _id: 0 } }
         ]).toArray();
 
         const countsByTopic = {};
@@ -368,13 +384,20 @@ router.get("/search", async (req, res) => {
             countsByTopic[topic] = { ...countsByTopic[topic], paperCount };
         });
 
-        const result = matchedTopics.map(t => ({
+        let result = matchedTopics.map(t => ({
             topic: t.topic,
             researcherCount: countsByTopic[t.topic]?.researcherCount || 0,
             paperCount: countsByTopic[t.topic]?.paperCount || 0
         }));
 
-        res.json({ specific_topics: result });
+        const lowerQuery = name.trim().toLowerCase();
+        result.sort((a, b) => {
+            const aStarts = a.topic.toLowerCase().startsWith(lowerQuery) ? -1 : 0;
+            const bStarts = b.topic.toLowerCase().startsWith(lowerQuery) ? -1 : 0;
+            return aStarts - bStarts;
+        });
+
+        res.json({ specificTopics: result });
     } catch (err) {
         console.error("Error searching specific topics with counts:", err);
         res.status(500).json({ error: "Internal server error" });
@@ -383,130 +406,122 @@ router.get("/search", async (req, res) => {
 
 /**
  * @swagger
- * /specific_topics/average_hindex:
+ * /specific_topics/topic_avg_hindex:
  *   get:
  *     tags:
  *       - Specific topics
- *     summary: Get average H-Index per specific topic (paginated)
+ *     summary: Get average h-index of authors by topic (via API calls)
  *     parameters:
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *           default: 1
- *         description: Page number
+ *         description: Page number for pagination
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *           default: 10
+ *           default: 60
  *         description: Number of topics per page
  *     responses:
  *       200:
- *         description: Success
- *       500:
- *         description: Internal server error
+ *         description: Average h-index per topic
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 topics:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       topic:
+ *                         type: string
+ *                       avg_hindex:
+ *                         type: number
+ *                 totalPages:
+ *                   type: integer
+ *                 totalCount:
+ *                   type: integer
+ *                 currentPage:
+ *                   type: integer
  */
 
-router.get("/average_hindex", async (req, res) => {
+router.get('/topic_avg_hindex', async (req, res) => {
     try {
         const db = getDB();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 60;
 
-        const page = parseInt(req.query.page) > 0 ? parseInt(req.query.page) : 1;
-        const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10;
+        const totalCount = await db.collection('specific_topics').countDocuments();
+        const totalPages = Math.ceil(totalCount / limit);
 
-        const total = await db.collection("specific_topics").countDocuments();
-        const totalPages = Math.ceil(total / limit);
-
-        const topics = await db.collection("specific_topics")
+        const topicsDocs = await db.collection('specific_topics')
             .find({}, { projection: { _id: 0, topic: 1 } })
             .skip((page - 1) * limit)
             .limit(limit)
             .toArray();
 
-        const results = [];
+        const topics = topicsDocs.map(doc => doc.topic);
 
-        for (const { topic } of topics) {
-            const authorsRes = await axios.get('http://localhost:8000/authors');
-            const authors = authorsRes.data.authors || [];
+        const topicHindexMap = {};
+        topics.forEach(topic => topicHindexMap[topic] = []);
 
-            const topicRegex = new RegExp(topic.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-            
-            const matchedAuthors = authors.filter(author => 
-                author.specific_topic && topicRegex.test(author.specific_topic)
-            );
+        let authorsPage = 1;
+        const authorsPerPage = 500;
+        let totalAuthorsPages = 1;
 
-            const hindexes = matchedAuthors.map(a => a.hindex || 0);
-            const authorsCount = hindexes.length;
+        do {
+            const cacheKey = `authors_page_${authorsPage}`;
 
-            let average_hindex = null;
-            if (authorsCount > 0) {
-                const sum = hindexes.reduce((acc, val) => acc + val, 0);
-                average_hindex = parseFloat((sum / authorsCount).toFixed(2));
+            let authorsData;
+            if (cache.has(cacheKey)) {
+                authorsData = cache.get(cacheKey);
+            } else {
+                const resp = await axios.get(`http://localhost:8000/authors?page=${authorsPage}&limit=${authorsPerPage}`);
+                authorsData = resp.data;
+                cache.set(cacheKey, authorsData);
             }
 
-            results.push({
-                topic,
-                average_hindex,
-                authors_count: authorsCount
-            });
-        }
+            if (authorsPage === 1 && authorsData.totalPages) {
+                totalAuthorsPages = authorsData.totalPages;
+            }
+
+            const authors = authorsData.authors;
+
+            for (const author of authors) {
+                if (author.specific_topics && author.hindex != null) {
+                    author.specific_topics.forEach(topic => {
+                        if (topicHindexMap[topic] !== undefined) {
+                            topicHindexMap[topic].push(author.hindex);
+                        }
+                    });
+                }
+            }
+
+            authorsPage++;
+
+        } while (authorsPage <= totalAuthorsPages);
+
+            const result = Object.entries(topicHindexMap).map(([topic, hindexes]) => {
+            const avg = hindexes.length
+                ? Number((hindexes.reduce((a, b) => a + b, 0) / hindexes.length).toFixed(2))
+                : 0;
+            return { topic, avg_hindex: avg };
+        });
 
         res.json({
-            page,
-            limit,
-            total,
+            topics: result,
             totalPages,
-            results
+            totalCount,
+            currentPage: page
         });
+
     } catch (err) {
-        console.error("Error calculating average H-Index per topic:", err);
+        console.error("Error in topic_avg_hindex:", err);
         res.status(500).json({ error: "Internal server error" });
-    }
-});
-
-/**
- * @swagger
- * /specific_topics/hindex_sums:
- *   get:
- *     tags:
- *       - Specific topics
- *     summary: Get total hindex sums per specific topic from authors
- *     responses:
- *       200:
- *         description: List of specific topics with sum of hindex
- *       500:
- *         description: Internal server error
- */
-
-router.get('/hindex_sums', async (req, res) => {
-    try {
-        const authorsRes = await axios.get(`http://localhost:8000/authors?page=1&limit=1000`);
-        const authorsData = authorsRes.data.authors || [];
-
-        const topicHindexMap = new Map();
-
-        authorsData.forEach(author => {
-            const hindex = author.hindex || 0;
-            const specificTopics = author.specific_topics || [];
-
-            specificTopics.forEach(topic => {
-                const lowerTopic = topic.toLowerCase().trim();
-                const prev = topicHindexMap.get(lowerTopic) || 0;
-                topicHindexMap.set(lowerTopic, prev + hindex);
-            });
-        });
-
-        const topic_hindex_sums = Array.from(topicHindexMap.entries()).map(([topic, total_hindex]) => ({
-            topic: topic.charAt(0).toUpperCase() + topic.slice(1),
-            total_hindex
-        })).sort((a, b) => b.total_hindex - a.total_hindex);
-
-        res.json(topic_hindex_sums);
-        
-    } catch (error) {
-        console.error('Error computing topic hindex sums:', error.message);
-        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
