@@ -17,23 +17,30 @@ const ResearchFields = () => {
       if (fieldSearchTerm) return;
       setLoading(true);
       try {
-        const [authorCountsRes, paperCountsRes] = await Promise.all([
-          axios.get('http://localhost:8000/specific_topics/topic_author_counts', { params: { page: fieldsPage, limit: FIELDS_PER_PAGE }}),
-          axios.get('http://localhost:8000/specific_topics/topic_corpus_counts', { params: { page: fieldsPage, limit: FIELDS_PER_PAGE }})
+        const [authorRes, corpusRes] = await Promise.all([
+          axios.get('http://localhost:8000/specific_topics/topic_author_counts', {
+            params: { page: fieldsPage, limit: FIELDS_PER_PAGE }
+          }),
+          axios.get('http://localhost:8000/specific_topics/topic_corpus_counts', {
+            params: { page: fieldsPage, limit: FIELDS_PER_PAGE }
+          }),
         ]);
 
-        const paperCountsMap = Object.fromEntries(
-          paperCountsRes.data.topics.map(topic => [topic.topic, topic.count || 0])
-        );
+        const authorTopics = authorRes.data.topics || [];
+        const corpusTopics = corpusRes.data.topics || [];
 
-        const combined = authorCountsRes.data.topics.map(t => ({
-          ...t,
-          count_author: t.count,
-          count_paper: paperCountsMap[t.topic] || 0
-        }));
+        const merged = authorTopics.map((authorItem) => {
+          const corpusItem = corpusTopics.find(c => c.topic === authorItem.topic);
+          return {
+            topic: authorItem.topic,
+            count_author: authorItem.count || 0,
+            count_paper: corpusItem?.count || 0,
+            avg_hindex: 0
+          };
+        });
 
-        setFieldsData(combined);
-        setFieldsTotalPages(authorCountsRes.data.totalPages);
+        setFieldsData(merged);
+        setFieldsTotalPages(Math.max(authorRes.data.totalPages, corpusRes.data.totalPages) || 1);
       } catch (err) {
         console.error('Error fetching fields:', err);
       } finally {
@@ -50,21 +57,12 @@ const ResearchFields = () => {
     }
     setLoading(true);
     try {
-      const [searchRes, paperRes] = await Promise.all([
-        axios.get('http://localhost:8000/specific_topics/search', { params: { topic: fieldSearchTerm } }),
-        axios.get('http://localhost:8000/specific_topics/topic_corpus_counts', { params: { limit: 50000 } })
-      ]);
+      const res = await axios.get('http://localhost:8000/specific_topics/search', {
+        params: { name: fieldSearchTerm }
+      });
 
-      const paperCountsMap = Object.fromEntries(
-        (paperRes.data.topics || []).map(t => [t.topic, t.count || 0])
-      );
-
-      const filtered = (searchRes.data.topics || []).map(t => ({
-        ...t,
-        count_author: t.count,
-        count_paper: paperCountsMap[t.topic] || 0
-      }));
-      setFieldSearchResults(filtered);
+      setFieldSearchResults(res.data.specificTopics || []);
+      setFieldsPage(1);
     } catch (err) {
       console.error('Search error:', err);
     } finally {
