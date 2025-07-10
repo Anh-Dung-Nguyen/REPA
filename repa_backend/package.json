@@ -8,6 +8,7 @@
     "mongodb": "^6.17.0",
     "mongoose": "^8.15.1",
     "node-cache": "^5.1.2",
+    "node-fetch": "^3.3.2",
     "p-limit": "^6.2.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
