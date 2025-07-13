@@ -39,7 +39,7 @@ function Overview() {
     useEffect(() => {
         const fetchTopFields = async () => {
             try {
-                const res = await axios.get('http://localhost:8000/specific_topics/topic_author_counts');
+                const res = await axios.get('http://localhost:8000/specific_topics/topic_author_counts?page=1&limit=9227');
 
                 const sortedTop50 = res.data.topics
                 .map(item => ({
