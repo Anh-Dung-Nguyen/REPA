@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import SearchBar from '../components/SearchBar';
 import FieldCard from '../components/FieldCard';
+import { useNavigate } from 'react-router-dom';
 
 const ResearchFields = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [fieldsData, setFieldsData] = useState([]);
   const [fieldsPage, setFieldsPage] = useState(1);
@@ -17,36 +19,19 @@ const ResearchFields = () => {
       if (fieldSearchTerm) return;
       setLoading(true);
       try {
-        const [authorRes, corpusRes] = await Promise.all([
-          axios.get('http://localhost:8000/specific_topics/topic_author_counts', {
-            params: { page: fieldsPage, limit: FIELDS_PER_PAGE }
-          }),
-          axios.get('http://localhost:8000/specific_topics/topic_corpus_counts', {
-            params: { page: fieldsPage, limit: FIELDS_PER_PAGE }
-          }),
-        ]);
-
-        const authorTopics = authorRes.data.topics || [];
-        const corpusTopics = corpusRes.data.topics || [];
-
-        const merged = authorTopics.map((authorItem) => {
-          const corpusItem = corpusTopics.find(c => c.topic === authorItem.topic);
-          return {
-            topic: authorItem.topic,
-            count_author: authorItem.count || 0,
-            count_paper: corpusItem?.count || 0,
-            avg_hindex: 0
-          };
+        const res = await axios.get('http://localhost:8000/specific_topics/topic_author_corpus_counts', {
+          params: { page: fieldsPage, limit: FIELDS_PER_PAGE },
         });
 
-        setFieldsData(merged);
-        setFieldsTotalPages(Math.max(authorRes.data.totalPages, corpusRes.data.totalPages) || 1);
+        setFieldsData(res.data.topics || []);
+        setFieldsTotalPages(res.data.totalPages || 1);
       } catch (err) {
         console.error('Error fetching fields:', err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchFields();
   }, [fieldsPage, fieldSearchTerm]);
 
@@ -58,7 +43,7 @@ const ResearchFields = () => {
     setLoading(true);
     try {
       const res = await axios.get('http://localhost:8000/specific_topics/search', {
-        params: { name: fieldSearchTerm }
+        params: { name: fieldSearchTerm },
       });
 
       setFieldSearchResults(res.data.specificTopics || []);
@@ -71,6 +56,8 @@ const ResearchFields = () => {
   };
 
   const handleFieldClick = (field) => {
+    const topicName = encodeURIComponent(field.topic);
+    navigate(`${topicName}`);
     console.log('Clicked field:', field);
   };
 
@@ -112,10 +99,12 @@ const ResearchFields = () => {
       {!loading && !fieldSearchTerm && fieldsTotalPages > 1 && (
         <div className="flex justify-center items-center gap-4 mt-10">
           <button
-            onClick={() => setFieldsPage(prev => Math.max(prev - 1, 1))}
+            onClick={() => setFieldsPage((prev) => Math.max(prev - 1, 1))}
             disabled={fieldsPage === 1}
             className={`px-4 py-2 rounded-md text-sm font-medium ${
-              fieldsPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700 transition'
+              fieldsPage === 1
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700 transition'
             }`}
           >
             Previous
@@ -124,10 +113,12 @@ const ResearchFields = () => {
             Page {fieldsPage} of {fieldsTotalPages}
           </span>
           <button
-            onClick={() => setFieldsPage(prev => Math.min(prev + 1, fieldsTotalPages))}
+            onClick={() => setFieldsPage((prev) => Math.min(prev + 1, fieldsTotalPages))}
             disabled={fieldsPage === fieldsTotalPages}
             className={`px-4 py-2 rounded-md text-sm font-medium ${
-              fieldsPage === fieldsTotalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700 transition'
+              fieldsPage === fieldsTotalPages
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700 transition'
             }`}
           >
             Next
