@@ -11,10 +11,9 @@ const FieldCard = ({ field, onViewResearchers }) => (
       <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
     </div>
 
-    <div className="grid grid-cols-3 gap-4 mt-2">
+    <div className="grid grid-cols-2 gap-4 mt-2">
       <Stat label="Researchers" value={field.count_author} color="text-blue-600" />
       <Stat label="Papers" value={field.count_paper} color="text-green-600" />
-      <Stat label="Avg H-Index" value={field.avg_hindex} color="text-purple-600" />
     </div>
   </div>
 );
