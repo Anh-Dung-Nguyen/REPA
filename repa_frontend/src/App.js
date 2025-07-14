@@ -8,6 +8,7 @@ import NotFound from './pages/NotFound';
 import Overview from './pages/Overview';
 import Researchers from './pages/Researchers';
 import ResearchFields from './pages/ResearchFields';
+import FieldDetailPage from './pages/FieldDetailPage';
 import ResearcherDetailPage from './pages/ResearcherDetailPage';
 
 function App() {
@@ -75,6 +76,7 @@ function App() {
           <Route path = "/about" element = {<About />} />
           <Route path = "/researchers/:authorId" element = {<ResearcherDetailPage />} />
           <Route path = "*" element = {<NotFound />} /> 
+          <Route path = "/research-fields/:topicName" element = {<FieldDetailPage/>} />
         </Routes>
       </main>
 
