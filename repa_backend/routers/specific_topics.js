@@ -525,4 +525,197 @@ router.get('/topic_avg_hindex', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /specific_topics/topic_author_corpus_counts:
+ *   get:
+ *     tags:
+ *       - Specific topics
+ *     summary: Get number of authors and papers per topic, sorted by total (authors + papers)
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 28
+ *         description: Number of topics per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of topics with counts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 topics:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       topic:
+ *                         type: string
+ *                         example: AI
+ *                       count_author:
+ *                         type: integer
+ *                         example: 150
+ *                       count_paper:
+ *                         type: integer
+ *                         example: 300
+ *                       total:
+ *                         type: integer
+ *                         example: 450
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 10
+ *                 totalCount:
+ *                   type: integer
+ *                   example: 280
+ *                 currentPage:
+ *                   type: integer
+ *                   example: 1
+ */
+
+router.get('/topic_author_corpus_counts', async (req, res) => {
+    try {
+        const db = getDB();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 28;
+        const skip = (page - 1) * limit;
+
+        const allTopicsDocs = await db.collection("specific_topics")
+            .find({}, { projection: { _id: 0, topic: 1 } })
+            .toArray();
+
+        const allTopicNames = allTopicsDocs.map(doc => doc.topic);
+
+        const authorCounts = await db.collection("author_specific_topics").aggregate([
+            { $unwind: "$topics" },
+            { $match: { topics: { $in: allTopicNames } } },
+            { $group: { _id: "$topics", uniqueAuthors: { $addToSet: "$authorId" } } },
+            { $project: { topic: "$_id", count_author: { $size: "$uniqueAuthors" }, _id: 0 } }
+            ]).toArray();
+
+        const corpusCounts = await db.collection("corpus_specific_topics").aggregate([
+            { $unwind: "$topics" },
+            { $match: { topics: { $in: allTopicNames } } },
+            { $group: { _id: "$topics", uniqueCorpusIds: { $addToSet: "$_id" } } },
+            { $project: { topic: "$_id", count_paper: { $size: "$uniqueCorpusIds" }, _id: 0 } }
+            ]).toArray();
+
+        const countsMap = {};
+        allTopicNames.forEach(topic => {
+            countsMap[topic] = { topic, count_author: 0, count_paper: 0 };
+        });
+
+        authorCounts.forEach(({ topic, count_author }) => {
+            countsMap[topic].count_author = count_author;
+        });
+        corpusCounts.forEach(({ topic, count_paper }) => {
+            countsMap[topic].count_paper = count_paper;
+        });
+
+        let allTopicsWithTotal = Object.values(countsMap).map(item => ({
+            ...item,
+            total: item.count_author + item.count_paper
+        }));
+
+        allTopicsWithTotal.sort((a, b) => b.total - a.total);
+
+        const totalCount = allTopicsWithTotal.length;
+        const totalPages = Math.ceil(totalCount / limit);
+        const paginated = allTopicsWithTotal.slice(skip, skip + limit);
+
+        res.json({
+            topics: paginated,
+            totalPages,
+            totalCount,
+            currentPage: page
+        });
+
+    } catch (err) {
+        console.error("Error in topic_author_corpus_counts:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+/**
+ * @swagger
+ * /specific_topics/topic_author_corpus_counts/{topic}:
+ *   get:
+ *     tags:
+ *       - Specific topics
+ *     summary: Get number of authors and papers for a specific topic
+ *     parameters:
+ *       - in: path
+ *         name: topic
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Topic name (URL-encoded)
+ *     responses:
+ *       200:
+ *         description: Counts for the specific topic
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 topic:
+ *                   type: string
+ *                   example: AI
+ *                 count_author:
+ *                   type: integer
+ *                   example: 150
+ *                 count_paper:
+ *                   type: integer
+ *                   example: 300
+ *                 total:
+ *                   type: integer
+ *                   example: 450
+ */
+
+router.get('/topic_author_corpus_counts/:topic', async (req, res) => {
+    try {
+        const db = getDB();
+        const topicName = decodeURIComponent(req.params.topic);
+
+        const authorResult = await db.collection("author_specific_topics").aggregate([
+            { $unwind: "$topics" },
+            { $match: { topics: topicName } },
+            { $group: { _id: null, uniqueAuthors: { $addToSet: "$authorId" } } },
+            { $project: { count_author: { $size: "$uniqueAuthors" } } }
+        ]).toArray();
+
+        const count_author = authorResult.length > 0 ? authorResult[0].count_author : 0;
+
+        const corpusResult = await db.collection("corpus_specific_topics").aggregate([
+            { $unwind: "$topics" },
+            { $match: { topics: topicName } },
+            { $group: { _id: null, uniqueCorpusIds: { $addToSet: "$_id" } } },
+            { $project: { count_paper: { $size: "$uniqueCorpusIds" } } }
+        ]).toArray();
+
+        const count_paper = corpusResult.length > 0 ? corpusResult[0].count_paper : 0;
+
+        const total = count_author + count_paper;
+
+        res.json({
+            topic: topicName,
+            count_author,
+            count_paper,
+            total
+        });
+
+    } catch (err) {
+        console.error("Error in topic_author_corpus_counts/:topic:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 module.exports = router;
