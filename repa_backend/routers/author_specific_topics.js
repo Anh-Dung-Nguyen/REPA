@@ -166,6 +166,73 @@ router.get('/group_by_topic', async (req, res) => {
 
 /**
  * @swagger
+ * /author_specific_topics/group_by_topic/{topic}:
+ *   get:
+ *     tags:
+ *       - Author with specific topics
+ *     summary: Get all authorIds for a specific topic
+ *     parameters:
+ *       - in: path
+ *         name: topic
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The topic name to filter by
+ *     responses:
+ *       200:
+ *         description: List of authorIds for the topic
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 topic:
+ *                   type: string
+ *                 authorIds:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       404:
+ *         description: Topic not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/group_by_topic/:topic', async (req, res) => {
+    try {
+        const db = getDB();
+        const topic = req.params.topic;
+
+        const result = await db.collection('author_specific_topics').aggregate([
+            { $match: { topics: topic } },
+            {
+                $group: {
+                    _id: topic,
+                    authorIds: { $addToSet: "$authorId" }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    topic: "$_id",
+                    authorIds: 1
+                }
+            }
+        ]).toArray();
+
+        if (!result.length) {
+            return res.status(404).json({ error: 'Topic not found' });
+        }
+
+        res.json(result[0]);
+    } catch (error) {
+        console.error('Error fetching authors by topic:', error.message);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * @swagger
  * /author_specific_topics/{author_id}:
  *     get:
  *         tags:
