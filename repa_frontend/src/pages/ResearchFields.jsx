@@ -12,6 +12,7 @@ const ResearchFields = () => {
   const [fieldsTotalPages, setFieldsTotalPages] = useState(1);
   const [fieldSearchTerm, setFieldSearchTerm] = useState('');
   const [fieldSearchResults, setFieldSearchResults] = useState([]);
+  const [averageHIndexRes, setAverageHIndexRes] = useState({});
   const FIELDS_PER_PAGE = 28;
 
   useEffect(() => {
@@ -34,6 +35,29 @@ const ResearchFields = () => {
 
     fetchFields();
   }, [fieldsPage, fieldSearchTerm]);
+
+  useEffect(() => {
+    const fetchAverageHIndexes = async () => {
+      try {
+        const fields = fieldSearchResults.length > 0 ? fieldSearchResults : fieldsData;
+        const hindexMap = {};
+
+        await Promise.all(fields.map(async (field) => {
+          const topicName = encodeURIComponent(field.topic);
+          const res = await axios.get(`http://localhost:8000/author_specific_topics/group_by_topic/${topicName}/average_hindex`);
+          hindexMap[field.topic] = res.data.averageHindex;
+        }));
+
+        setAverageHIndexRes(hindexMap);
+      } catch (err) {
+        console.error('Error fetching average h-index:', err);
+      }
+    };
+
+    if ((fieldsData.length > 0 || fieldSearchResults.length > 0) && !loading) {
+      fetchAverageHIndexes();
+    }
+  }, [fieldsData, fieldSearchResults, loading]);
 
   const handleFieldSearch = async () => {
     if (!fieldSearchTerm.trim()) {
@@ -79,11 +103,12 @@ const ResearchFields = () => {
       {!loading && (
         <>
           {(fieldSearchResults.length > 0 || fieldsData.length > 0) ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8 animate-fade-in">
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6 mt-8 animate-fade-in">
               {(fieldSearchResults.length > 0 ? fieldSearchResults : fieldsData).map((field, idx) => (
                 <FieldCard
                   key={idx}
                   field={field}
+                  averageHindex={averageHIndexRes[field.topic]}
                   onViewResearchers={() => handleFieldClick(field)}
                 />
               ))}
