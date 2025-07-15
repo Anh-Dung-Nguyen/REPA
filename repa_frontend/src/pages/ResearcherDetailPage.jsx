@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText, Users, BookType } from 'lucide-react';
+import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText, Users, BookType, User } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ResearcherDetailPage = () => {
@@ -177,6 +177,10 @@ const ResearcherDetailPage = () => {
                             <div className="flex-1">
                                 <h1 className="text-3xl font-bold text-gray-800 mb-2">{researcher.name}</h1>
                                 <div className="flex flex-wrap gap-4 text-gray-600">
+                                    <div className="flex items-center gap-1">
+                                        <User size={16} />
+                                        <span>Author ID: {researcher.authorid}</span>
+                                    </div>
                                     {researcher.hindex && (
                                         <div className="flex items-center gap-1">
                                             <Award size={16} />
