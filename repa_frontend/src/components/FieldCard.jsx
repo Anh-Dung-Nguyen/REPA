@@ -1,7 +1,7 @@
 import React from "react";
 import { ChevronRight } from "lucide-react";
 
-const FieldCard = ({ field, onViewResearchers }) => (
+const FieldCard = ({ field, averageHindex, onViewResearchers }) => (
   <div
     onClick={() => onViewResearchers(field)}
     className="bg-white rounded-2xl border border-gray-100 shadow hover:shadow-lg transition cursor-pointer p-5 flex flex-col gap-4"
@@ -11,9 +11,10 @@ const FieldCard = ({ field, onViewResearchers }) => (
       <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
     </div>
 
-    <div className="grid grid-cols-2 gap-4 mt-2">
+    <div className="grid grid-cols-3 gap-4 mt-2">
       <Stat label="Researchers" value={field.count_author} color="text-blue-600" />
       <Stat label="Papers" value={field.count_paper} color="text-green-600" />
+      <Stat label="H-Index" value={averageHindex} color="text-purple-600" />
     </div>
   </div>
 );
