@@ -170,7 +170,7 @@ router.get('/group_by_topic', async (req, res) => {
  *   get:
  *     tags:
  *       - Author with specific topics
- *     summary: Get all authorIds for a specific topic
+ *     summary: Get paginated authorIds for a specific topic
  *     parameters:
  *       - in: path
  *         name: topic
@@ -178,9 +178,23 @@ router.get('/group_by_topic', async (req, res) => {
  *         schema:
  *           type: string
  *         description: The topic name to filter by
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *           minimum: 1
+ *         description: Page number (starts from 1)
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *           minimum: 1
+ *         description: Number of items per page
  *     responses:
  *       200:
- *         description: List of authorIds for the topic
+ *         description: Paginated list of authorIds for the topic
  *         content:
  *           application/json:
  *             schema:
@@ -188,10 +202,22 @@ router.get('/group_by_topic', async (req, res) => {
  *               properties:
  *                 topic:
  *                   type: string
+ *                   example: "deep learning"
  *                 authorIds:
  *                   type: array
  *                   items:
  *                     type: string
+ *                   example: ["12345", "67890", "112233"]
+ *                 total:
+ *                   type: integer
+ *                   description: Total number of authorIds
+ *                   example: 120
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 pageSize:
+ *                   type: integer
+ *                   example: 10
  *       404:
  *         description: Topic not found
  *       500:
@@ -202,6 +228,8 @@ router.get('/group_by_topic/:topic', async (req, res) => {
     try {
         const db = getDB();
         const topic = req.params.topic;
+        const page = parseInt(req.query.page) > 0 ? parseInt(req.query.page) : 1;
+        const pageSize = parseInt(req.query.pageSize) > 0 ? parseInt(req.query.pageSize) : 10;
 
         const result = await db.collection('author_specific_topics').aggregate([
             { $match: { topics: topic } },
@@ -224,9 +252,106 @@ router.get('/group_by_topic/:topic', async (req, res) => {
             return res.status(404).json({ error: 'Topic not found' });
         }
 
-        res.json(result[0]);
+        const allAuthorIds = result[0].authorIds;
+        const total = allAuthorIds.length;
+
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        const paginatedAuthorIds = allAuthorIds.slice(start, end);
+
+        res.json({
+            topic: topic,
+            authorIds: paginatedAuthorIds,
+            total,
+            page,
+            pageSize
+        });
     } catch (error) {
         console.error('Error fetching authors by topic:', error.message);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * @swagger
+ * /author_specific_topics/group_by_topic/{topic}/average_hindex:
+ *   get:
+ *     tags:
+ *       - Author with specific topics
+ *     summary: Get average h-index for all authors of a specific topic
+ *     parameters:
+ *       - in: path
+ *         name: topic
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The topic name to filter by
+ *     responses:
+ *       200:
+ *         description: Average h-index for authors of the topic
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 topic:
+ *                   type: string
+ *                 authorCount:
+ *                   type: integer
+ *                 averageHindex:
+ *                   type: number
+ *       404:
+ *         description: Topic not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/group_by_topic/:topic/average_hindex', async (req, res) => {
+    try {
+        const db = getDB();
+        const topic = req.params.topic;
+
+        const topicResult = await db.collection('author_specific_topics').aggregate([
+            { $match: { topics: topic } },
+            {
+                $group: {
+                    _id: topic,
+                    authorIds: { $addToSet: "$authorId" }
+                }
+            }
+        ]).toArray();
+
+        if (!topicResult.length) {
+            return res.status(404).json({ error: 'Topic not found' });
+        }
+
+        const authorIds = topicResult[0].authorIds;
+
+        if (!authorIds.length) {
+            return res.json({
+                topic,
+                authorCount: 0,
+                averageHindex: 0
+            });
+        }
+
+        const authorsCollection = db.collection('authors');
+        const authors = await authorsCollection.find(
+            { authorid: { $in: authorIds } },
+            { projection: { hindex: 1 } }
+        ).toArray();
+
+        const hindexes = authors.map(a => a.hindex || 0);
+        const sumHindex = hindexes.reduce((sum, val) => sum + val, 0);
+        const averageHindex = hindexes.length ? sumHindex / hindexes.length : 0;
+
+        res.json({
+            topic,
+            authorCount: hindexes.length,
+            averageHindex: Number(averageHindex.toFixed(2))
+        });
+    } catch (error) {
+        console.error('Error calculating average hindex:', error.message);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
