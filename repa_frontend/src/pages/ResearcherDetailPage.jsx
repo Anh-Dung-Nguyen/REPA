@@ -18,6 +18,8 @@ const ResearcherDetailPage = () => {
 
     // const [coAuthorsCitationsEvolution, setCoAuthorsCitationsEvolution] = useState([]);
 
+    const [hindexPerTopic, setHindexPerTopic] = useState([]);
+
     useEffect(() => {
         const fetchData = async () => {
             if (!authorId) return;
@@ -51,6 +53,9 @@ const ResearcherDetailPage = () => {
                 );
                 setCoAuthorsCitationsEvolution(coAuthorsCitationsResponse.data?.data || []);
                 */
+
+                const hindexPerTopicResponse = await axios.get(`http://localhost:8000/authors/hindex_per_topic/${authorId}`);
+                setHindexPerTopic(hindexPerTopicResponse.data?.hindexPerTopic || []);
 
             } catch (error) {
                 console.error("Error fetching researcher data:", error);
@@ -89,6 +94,11 @@ const ResearcherDetailPage = () => {
         }
     };
 
+    const handleTopicClick = async (topic) => {
+        const name = typeof topic === 'string' ? topic.toLowerCase() : topic.name.toLowerCase();
+        navigate(`/research-fields/${name}`);
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50">
@@ -121,7 +131,14 @@ const ResearcherDetailPage = () => {
     }
 
     const specificTopics = researcher.specific_topic
-        ? researcher.specific_topic.split(',').map(topic => topic.trim()).filter(Boolean)
+        ? researcher.specific_topic.split(',').map(topic => {
+            const trimmedTopic = topic.trim();
+            const hindexData = hindexPerTopic.find(item => item.topic.toLowerCase() === trimmedTopic.toLowerCase());
+            return {
+                name: trimmedTopic,
+                hindex: hindexData ? hindexData.hindex : 'N/A'
+            };
+        }).filter(topic => Boolean(topic.name))
         : [];
 
     const coAuthors = researcher.coauthors || [];
@@ -387,8 +404,17 @@ const ResearcherDetailPage = () => {
                                     </h3>
                                     <div className="space-y-4">
                                         {(showAllTopics ? specificTopics : specificTopics.slice(0, 6)).map((topic, index) => (
-                                            <div key={index} className="border-l-4 border-orange-200 pl-4">
-                                                <h4 className="font-medium text-gray-800">{topic}</h4>
+                                            <div 
+                                                key={index} 
+                                                className="border-l-4 border-orange-200 pl-4 py-2 flex justify-between items-center cursor-pointer"
+                                                onClick={() => handleTopicClick(topic)}
+                                            >
+                                                <h4 className="font-medium text-gray-800 capitalize">{topic.name}</h4>
+                                                {topic.hindex !== 'N/A' && (
+                                                    <span className="bg-orange-100 text-orange-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                                                        H-Index: {topic.hindex}
+                                                    </span>
+                                                )}
                                             </div>
                                         ))}
                                         {specificTopics.length > 5 && (
@@ -418,20 +444,20 @@ const ResearcherDetailPage = () => {
                                         onClick={() => handleCoAuthorClick(coAuthor)}
                                     >
                                         <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                                        {coAuthor.name.charAt(0)}
+                                            {coAuthor.name.charAt(0)}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                        <p className="font-medium text-gray-800 truncate">{coAuthor.name}</p>
+                                            <p className="font-medium text-gray-800 truncate">{coAuthor.name}</p>
                                         </div>
                                     </div>
                                     ))}
                                     {coAuthors.length > 5 && (
-                                    <button
-                                        onClick={() => setActiveTab('coauthors')}
-                                        className="text-blue-600 hover:text-blue-800 text-sm font-medium w-full text-center pt-2"
-                                    >
-                                        View all {coAuthors.length} co-authors →
-                                    </button>
+                                        <button
+                                            onClick={() => setActiveTab('coauthors')}
+                                            className="text-blue-600 hover:text-blue-800 text-sm font-medium w-full text-center pt-2"
+                                        >
+                                            View all {coAuthors.length} co-authors →
+                                        </button>
                                     )}
                                 </div>
                             </div>
@@ -491,15 +517,25 @@ const ResearcherDetailPage = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                            <div className="flex flex-wrap gap-1 text-sm text-gray-500">
                                                 {paper.year && (
-                                                    <div className="flex items-center gap-1">
-                                                        <BookType size={14} />
-                                                        <span>
-                                                            {paper.specificTopics && paper.specificTopics.length > 0
-                                                                ? paper.specificTopics.join(', ')
-                                                                : 'No topics'}
-                                                        </span>
+                                                    <div className="flex items-center gap-1 flex-wrap">
+                                                    <BookType size={14} />
+                                                        {paper.specificTopics && paper.specificTopics.length > 0 ? (
+                                                            paper.specificTopics.map((topic, idx) => (
+                                                            <React.Fragment key={idx}>
+                                                                <button
+                                                                    onClick={() => handleTopicClick(topic)}
+                                                                    className="hover:text-blue-600 transition-colors"
+                                                                >
+                                                                    {topic}
+                                                                </button>
+                                                                {idx < paper.specificTopics.length - 1 && ','}
+                                                            </React.Fragment>
+                                                            ))
+                                                        ) : (
+                                                            <span>No topics</span>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
@@ -546,8 +582,18 @@ const ResearcherDetailPage = () => {
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Research Topics</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {specificTopics.map((topic, index) => (
-                                <div key={index} className="bg-gray-50 rounded-lg p-4 border-l-4 border-indigo-500">
-                                    <h4 className="font-medium text-gray-800 capitalize">{topic}</h4>
+                                <div 
+                                    key={index} 
+                                    className="bg-gray-50 rounded-lg p-4 border-l-4 border-indigo-500 flex flex-col justify-between cursor-pointer"
+                                    onClick={() => handleTopicClick(topic)}
+                                >
+                                    <h4 className="font-medium text-gray-800 capitalize mb-2">{topic.name}</h4>
+                                    {topic.hindex !== 'N/A' && (
+                                        <div className="flex items-center text-sm text-gray-600">
+                                            <Award size={14} className="mr-1 text-indigo-600" />
+                                            <span>H-Index: {topic.hindex}</span>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
