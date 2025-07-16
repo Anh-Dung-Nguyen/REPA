@@ -180,6 +180,7 @@ router.get('/group_by_topic', async (req, res) => {
  *         description: The topic name to filter by
  *       - in: query
  *         name: page
+ *         required: false
  *         schema:
  *           type: integer
  *           default: 1
@@ -187,6 +188,7 @@ router.get('/group_by_topic', async (req, res) => {
  *         description: Page number (starts from 1)
  *       - in: query
  *         name: pageSize
+ *         required: false
  *         schema:
  *           type: integer
  *           default: 10
@@ -214,9 +216,11 @@ router.get('/group_by_topic', async (req, res) => {
  *                   example: 120
  *                 page:
  *                   type: integer
+ *                   description: Current page number
  *                   example: 1
  *                 pageSize:
  *                   type: integer
+ *                   description: Number of items per page
  *                   example: 10
  *       404:
  *         description: Topic not found
