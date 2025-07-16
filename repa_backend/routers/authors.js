@@ -682,4 +682,101 @@ router.get('/authors_coauthors_citations_evolution/:authorId', async (req, res) 
     }
 });
 
+/**
+ * @swagger
+ * /authors/hindex_per_topic/{authorId}:
+ *   get:
+ *     tags:
+ *       - Authors
+ *     summary: Get H-index per topic for a specific author
+ *     parameters:
+ *       - in: path
+ *         name: authorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Author ID
+ *     responses:
+ *       200:
+ *         description: H-index per topic
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 authorId:
+ *                   type: string
+ *                 hindexPerTopic:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       topic:
+ *                         type: string
+ *                       hindex:
+ *                         type: integer
+ *       404:
+ *         description: Author or topics not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/hindex_per_topic/:authorId', async (req, res) => {
+    try {
+        const authorId = req.params.authorId;
+        const axios = require('axios');
+
+        const { data: topicData } = await axios.get(`http://localhost:8000/author_specific_topics/aggregate_author_topics/author/${authorId}`);
+
+        if (!topicData || !Array.isArray(topicData.topics) || topicData.topics.length === 0) {
+            return res.status(404).json({ error: 'No topics found for this author' });
+        }
+
+        const topics = topicData.topics;
+
+        const { data: papersData } = await axios.get(`http://localhost:8000/authors_papers_annotations/${authorId}`);
+
+        if (!papersData || !Array.isArray(papersData.papers)) {
+            return res.status(404).json({ error: 'No papers found for this author' });
+        }
+
+        const papers = papersData.papers;
+
+        const hindexPerTopic = [];
+
+        for (const topic of topics) {
+            const topicPapers = papers.filter(paper =>
+                paper.annotation &&
+                Array.isArray(paper.annotation.union) &&
+                paper.annotation.union.includes(topic)
+            );
+
+            const citationCounts = topicPapers
+                .map(p => Number(p.citationcount))
+                .filter(n => !isNaN(n) && n > 0)
+                .sort((a, b) => b - a);
+
+            let h = 0;
+            for (let i = 0; i < citationCounts.length; i++) {
+                if (citationCounts[i] >= i + 1) {
+                    h = i + 1;
+                } else {
+                    break;
+                }
+            }
+
+            hindexPerTopic.push({ topic, hindex: h });
+        }
+
+        res.json({
+            authorId,
+            hindexPerTopic
+        });
+
+    } catch (error) {
+        console.error('Error calculating H-index per topic:', error.message);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 module.exports = router;
