@@ -515,4 +515,99 @@ router.get('/aggregate_author_topics/author/:authorId', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /author_specific_topics/test/group_by_topic/{topic}/average_hindex:
+ *   get:
+ *     tags:
+ *       - Author with specific topics
+ *     summary: Get average h-index for all authors of a specific topic
+ *     parameters:
+ *       - in: path
+ *         name: topic
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The topic name to filter by
+ *     responses:
+ *       200:
+ *         description: Average h-index for authors of the topic
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 topic:
+ *                   type: string
+ *                 authorCount:
+ *                   type: integer
+ *                 averageHindex:
+ *                   type: number
+ *       404:
+ *         description: Topic not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/test/group_by_topic/:topic/average_hindex', async (req, res) => {
+  try {
+    const topic = req.params.topic;
+    const topicEncoded = encodeURIComponent(topic);
+    const authorIds = [];
+    let page = 1;
+    const pageSize = 100;
+    let totalAuthors = 0;
+
+    while (true) {
+      const url = `http://localhost:8000/author_specific_topics/group_by_topic/${topicEncoded}?page=${page}&pageSize=${pageSize}`;
+      const response = await axios.get(url);
+      if (response.status !== 200) {
+        return res.status(500).json({ error: 'Failed to fetch author IDs from external API' });
+      }
+
+      const data = response.data;
+      authorIds.push(...data.authorIds);
+      totalAuthors = data.total;
+
+      if (authorIds.length >= totalAuthors || data.authorIds.length === 0) {
+        break;
+      }
+      page++;
+      if(page > 1000) break;
+    }
+
+    if (authorIds.length === 0) {
+      return res.status(404).json({ error: 'Topic not found or no authors for topic' });
+    }
+
+    const hindexPromises = authorIds.map(async (authorId) => {
+      try {
+        const resH = await axios.get(`http://localhost:8000/authors/hindex_per_topic/${authorId}`);
+        const topicHindexObj = resH.data.hindexPerTopic.find(
+          (t) => t.topic.toLowerCase() === topic.toLowerCase()
+        );
+        return topicHindexObj ? topicHindexObj.hindex : null;
+      } catch (err) {
+        console.warn(`Failed to fetch h-index for author ${authorId}: ${err.message}`);
+        return null;
+      }
+    });
+
+    const hindexResults = await Promise.all(hindexPromises);
+    const filteredHindexes = hindexResults.filter((h) => h !== null);
+
+    const totalHindex = filteredHindexes.reduce((sum, h) => sum + h, 0);
+    const averageHindex = filteredHindexes.length ? totalHindex / filteredHindexes.length : 0;
+
+    res.json({
+      topic,
+      authorCount: filteredHindexes.length,
+      averageHindex: Number(averageHindex.toFixed(2)),
+    });
+  } catch (error) {
+    console.error('Error calculating average hindex:', error.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
