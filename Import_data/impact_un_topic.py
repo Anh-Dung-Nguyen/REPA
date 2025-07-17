@@ -103,10 +103,7 @@ class CSOTopicImpactCalculator:
             closeness_centrality = {node: 0 for node in self.graph.nodes()}
         
         try:
-            if self.graph.number_of_nodes() < 1000:
-                betweenness_centrality = nx.betweenness_centrality(self.graph)
-            else:
-                betweenness_centrality = nx.betweenness_centrality(self.graph, k = min(100, self.graph.number_of_nodes()))
+            betweenness_centrality = nx.betweenness_centrality(self.graph)
         except:
             betweenness_centrality = {node: 0 for node in self.graph.nodes()}
         
@@ -281,7 +278,7 @@ class CSOTopicImpactCalculator:
 
         print(f"Analyse de {len(topic_ids)} topics...")
 
-        reference_topics = list(self.specific_topics.intersection(set(self.graph.nodes())))[:20]
+        reference_topics = list(self.specific_topics.intersection(set(self.graph.nodes())))[:len(self.specific_topics)]
         if not reference_topics:
             sorted_topics = sorted(self.centrality_cache.items(), key = lambda x: x[1], reverse = True)
             reference_topics = [t[0] for t in sorted_topics[:20]]
@@ -301,12 +298,12 @@ class CSOTopicImpactCalculator:
     
 if __name__ == "__main__":
     calculator = CSOTopicImpactCalculator(
-        csv_file_path = "Input/CSO.3.4.1.csv",
-        specific_topics_file = "Output/specific_topics.txt"
+        csv_file_path = "../Input/CSO.3.4.1.csv",
+        specific_topics_file = "../Output/specific_topics.txt"
     )
 
     print("\nExportation des topics spécifiques classés par facteur d'impact...")
     all_specific_ranked = calculator.rank_topics_by_impact(specific_topics_only = True, top_k = len(calculator.specific_topics))
     df_export = pd.DataFrame(all_specific_ranked)
-    df_export.to_csv("Output/specific_topics_ranked.csv", index = False, encoding = 'utf-8')
+    df_export.to_csv("../Output/specific_topics_ranked.csv", index = False, encoding = 'utf-8')
     print("Export terminé : Output/specific_topics_ranked.csv")
