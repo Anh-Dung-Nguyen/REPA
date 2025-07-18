@@ -68,13 +68,13 @@ class TopicGroupImpactCalculator:
 
 if __name__ == "__main__":
     calculator = CSOTopicImpactCalculator(
-        csv_file_path = "Input/CSO.3.4.1.csv",
-        specific_topics_file = "Output/specific_topics.txt"
+        csv_file_path = "../Input/CSO.3.4.1.csv",
+        specific_topics_file = "../Output/specific_topics.txt"
     )
 
     group_calculator = TopicGroupImpactCalculator(calculator)
 
-    topics = ["chromosome translocation 18"]
+    topics = ["chromosome translocation 18", "1064 nm"]
     result = group_calculator.compute_group_impact(topics)
     
     print("\nRésultat du facteur d'impact du groupe :")
