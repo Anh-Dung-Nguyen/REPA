@@ -13,7 +13,7 @@ const FieldDetailPage = () => {
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('overview');
     const [topicCounts, setTopicCounts] = useState(null);
-    const [averageHindex, setAverageHindex] = useState([]);
+    const [impactOneTopic, setImpactOneTopic] = useState([]);
     const [corpusStat, setCorpusStat] = useState([]);
     const [topicEvolutionData, setTopicEvolutionData] = useState([]);
     const [citationEvolutionData, setCitationEvolutionData] = useState([]);
@@ -28,6 +28,7 @@ const FieldDetailPage = () => {
     const [paperPage, setPaperPage] = useState(1);
     const PAPERS_PER_PAGE = 10;
     const [paperTotal, setPaperTotal] = useState(0);
+    const [paperTopics, setPaperTopics] = useState({});
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -37,20 +38,20 @@ const FieldDetailPage = () => {
             try {
                 const [
                     countsResponse,
-                    avgHindexResponse,
+                    impactResponse,
                     corpusResponse,
                     authorResponse,
                     paperResponse
                 ] = await Promise.all([
                     axios.get(`http://localhost:8000/specific_topics/topic_author_corpus_counts/${topicName}`),
-                    axios.get(`http://localhost:8000/author_specific_topics/group_by_topic/${topicName}/average_hindex`),
+                    axios.get(`http://localhost:8000/impact/impact_one_topic/${topicName}`),
                     axios.get(`http://localhost:8000/corpus_specific_topics/group_by_topic/${topicName}/stats`),
                     axios.get(`http://localhost:8000/author_specific_topics/group_by_topic/${topicName}?page=${authorPage}&pageSize=${AUTHORS_PER_PAGE}`),
                     axios.get(`http://localhost:8000/corpus_specific_topics/group_by_topic/${topicName}?page=${paperPage}&pageSize=${PAPERS_PER_PAGE}`)
                 ]);
 
                 setTopicCounts(countsResponse.data);
-                setAverageHindex(avgHindexResponse.data);
+                setImpactOneTopic(impactResponse.data);
                 setCorpusStat(corpusResponse.data);
 
                 setAuthorTotal(authorResponse.data.total || 0);
@@ -69,7 +70,26 @@ const FieldDetailPage = () => {
                         axios.get(`http://localhost:8000/papers_with_annotations/${id}`).then(res => res.data).catch(() => null)
                     )
                 );
-                setPaperList(paperDetails.filter(Boolean));
+                const validPapers = paperDetails.filter(Boolean);
+                setPaperList(validPapers);
+
+                const topicsMap = {};
+                await Promise.all(
+                    validPapers.map(async (paper) => {
+                        if (paper.corpusid) {
+                            try {
+                                const topicsResponse = await axios.get(`http://localhost:8000/corpus_specific_topics/filtered_author_paper_topics/corpus/${paper.corpusid}`);
+                                if (topicsResponse.data && topicsResponse.data.length > 0) {
+                                    topicsMap[paper.corpusid] = topicsResponse.data[0].topics || [];
+                                }
+                            } catch (error) {
+                                console.error(`Error fetching topics for corpus ${paper.corpusid}:`, error);
+                                topicsMap[paper.corpusid] = [];
+                            }
+                        }
+                    })
+                );
+                setPaperTopics(topicsMap);
 
                 const details = corpusResponse.data.details || [];
 
@@ -124,6 +144,11 @@ const FieldDetailPage = () => {
 
     const handlePaperClick = async (paper) => {
         window.open(paper.url, '_blank');
+    };
+
+    const handleTopicClick = async (topic) => {
+        const name = typeof topic === 'string' ? topic.toLowerCase() : topic.name.toLowerCase();
+        navigate(`/research-fields/${name}`);
     };
 
     return (
@@ -214,8 +239,8 @@ const FieldDetailPage = () => {
                                             <div className='text-sm text-gray-600'>Number of Papers</div>
                                         </div>
                                         <div className='bg-white rounded-lg shadow-md p-4 border-t-4 border-orange-500 hover:scale-105 transition-transform'>
-                                            <div className='text-2xl font-bold text-orange-600'>{averageHindex.averageHindex}</div>
-                                            <div className='text-sm text-gray-600'>Average of H-Index</div>
+                                            <div className='text-2xl font-bold text-orange-600'>{impactOneTopic.impact_factor.toFixed(3)}</div>
+                                            <div className='text-sm text-gray-600'>Impact Factor</div>
                                         </div>
                                         <div className='bg-white rounded-lg shadow-md p-4 border-t-4 border-green-500 hover:scale-105 transition-transform'>
                                             <div className='text-2xl font-bold text-green-600'>{corpusStat.averagePages}</div>
@@ -387,19 +412,30 @@ const FieldDetailPage = () => {
                                                             )}
                                                         </div>
 
-                                                        <div className="flex flex-wrap gap-4 text-sm text-gray-500 mt-1">
-                                                            {paper.annotation?.union && (
-                                                                <div className="flex items-center gap-1">
+                                                        <div className="flex flex-wrap gap-1 text-sm text-gray-500">
+                                                            {paper.corpusid && paperTopics[paper.corpusid] && (
+                                                                <div className="flex items-center gap-1 flex-wrap">
                                                                     <BookOpen size={14} />
-                                                                    <span>
-                                                                        {paper.annotation.union.length > 0
-                                                                            ? paper.annotation.union.join(', ')
-                                                                            : 'No topics'}
-                                                                    </span>
+                                                                    {paperTopics[paper.corpusid].length > 0 ? (
+                                                                        paperTopics[paper.corpusid].map((topic, topicIndex) => (
+                                                                            <React.Fragment key={`${paper.corpusid}-${topic}-${topicIndex}`}>
+                                                                                <button
+                                                                                    onClick={() => handleTopicClick(topic)}
+                                                                                    className="hover:text-blue-600 transition-colors"
+                                                                                >
+                                                                                    {topic}
+                                                                                </button>
+                                                                                {topicIndex < paperTopics[paper.corpusid].length - 1 && (
+                                                                                    <span className="text-gray-500">,</span>
+                                                                                )}
+                                                                            </React.Fragment>
+                                                                        ))
+                                                                    ) : (
+                                                                        <span>No topics</span>
+                                                                    )}
                                                                 </div>
                                                             )}
                                                         </div>
-
                                                         <div className="flex flex-wrap items-center gap-2 mt-2">
                                                             <span className="font-medium text-sm text-gray-500">Authors:</span>
                                                             {paper.authors?.map(author => (
