@@ -13,12 +13,10 @@ const ResearcherDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('overview');
-
     const [showAllTopics] = useState(false);
-
-    // const [coAuthorsCitationsEvolution, setCoAuthorsCitationsEvolution] = useState([]);
-
     const [hindexPerTopic, setHindexPerTopic] = useState([]);
+    // const [impactPerTopic, setImpactPerTopic] = useState({});
+    // const [coAuthorsCitationsEvolution, setCoAuthorsCitationsEvolution] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,6 +65,34 @@ const ResearcherDetailPage = () => {
 
         fetchData();
     }, [authorId]);
+
+    /**
+    useEffect(() => {
+        const fetchImpactFactors = async () => {
+            const impactResults = {};
+
+            await Promise.all(
+                specificTopics.map(async (topic) => {
+                    try {
+                        const encodedTopic = encodeURIComponent(topic.name);
+                        const res = await axios.get(`http://localhost:8000/impact/impact_one_topic/${encodedTopic}`);
+                        if (res.data?.impact_factor !== undefined) {
+                            impactResults[topic.name] = res.data.impact_factor;
+                        }
+                    } catch (e) {
+                        console.warn(`Impact factor not found for topic "${topic.name}"`);
+                    }
+                })
+            );
+
+            setImpactPerTopic(impactResults);
+        };
+
+        if (specificTopics.length > 0) {
+            fetchImpactFactors();
+        }
+    }, [specificTopics]);
+    */
 
     const handlePaperClick = async (paper) => {
         if (!paper?.corpusid) {
@@ -134,9 +160,11 @@ const ResearcherDetailPage = () => {
         ? researcher.specific_topic.split(',').map(topic => {
             const trimmedTopic = topic.trim();
             const hindexData = hindexPerTopic.find(item => item.topic.toLowerCase() === trimmedTopic.toLowerCase());
+            // const impact = impactPerTopic[trimmedTopic]
             return {
                 name: trimmedTopic,
-                hindex: hindexData ? hindexData.hindex : 'N/A'
+                hindex: hindexData ? hindexData.hindex : 'N/A',
+                // impactFactor: impact !== undefined ? impact : 'N/A'            
             };
         }).filter(topic => Boolean(topic.name))
         : [];
@@ -409,12 +437,19 @@ const ResearcherDetailPage = () => {
                                                 className="border-l-4 border-orange-200 pl-4 py-2 flex justify-between items-center cursor-pointer"
                                                 onClick={() => handleTopicClick(topic)}
                                             >
-                                                <h4 className="font-medium text-gray-800 capitalize">{topic.name}</h4>
+                                                <h4 className="font-medium text-gray-800 capitalize hover:text-orange-800">{topic.name}</h4>
                                                 {topic.hindex !== 'N/A' && (
                                                     <span className="bg-orange-100 text-orange-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
                                                         H-Index: {topic.hindex}
                                                     </span>
                                                 )}
+                                                {/*
+                                                {topic.impactFactor !== 'N/A' && (
+                                                    <span className="text-indigo-600 font-semibold">
+                                                        Impact: {topic.impactFactor.toFixed(2)}
+                                                    </span>
+                                                )}
+                                                */}
                                             </div>
                                         ))}
                                         {specificTopics.length > 5 && (
@@ -520,7 +555,7 @@ const ResearcherDetailPage = () => {
                                             <div className="flex flex-wrap gap-1 text-sm text-gray-500">
                                                 {paper.year && (
                                                     <div className="flex items-center gap-1 flex-wrap">
-                                                    <BookType size={14} />
+                                                        <BookType size={14} />
                                                         {paper.specificTopics && paper.specificTopics.length > 0 ? (
                                                             paper.specificTopics.map((topic, idx) => (
                                                             <React.Fragment key={idx}>
@@ -587,13 +622,23 @@ const ResearcherDetailPage = () => {
                                     className="bg-gray-50 rounded-lg p-4 border-l-4 border-indigo-500 flex flex-col justify-between cursor-pointer"
                                     onClick={() => handleTopicClick(topic)}
                                 >
-                                    <h4 className="font-medium text-gray-800 capitalize mb-2">{topic.name}</h4>
-                                    {topic.hindex !== 'N/A' && (
-                                        <div className="flex items-center text-sm text-gray-600">
-                                            <Award size={14} className="mr-1 text-indigo-600" />
-                                            <span>H-Index: {topic.hindex}</span>
-                                        </div>
-                                    )}
+                                    <h4 className="font-medium text-gray-800 capitalize mb-2 hover:text-indigo-500">{topic.name}</h4>
+                                    <div className="flex flex-col text-sm text-gray-600">
+                                        {topic.hindex !== 'N/A' && (
+                                            <div className="flex items-center">
+                                                <Award size={14} className="mr-1 text-indigo-600" />
+                                                <span>H-Index: {topic.hindex}</span>
+                                            </div>
+                                        )}
+                                        {/*
+                                        {topic.impactFactor !== 'N/A' && (
+                                            <div className="flex items-center">
+                                                <TrendingUp size={14} className="mr-1 text-orange-500" />
+                                                <span>Impact: {topic.impactFactor.toFixed(2)}</span>
+                                            </div>
+                                        )}
+                                        */}
+                                    </div>
                                 </div>
                             ))}
                         </div>
