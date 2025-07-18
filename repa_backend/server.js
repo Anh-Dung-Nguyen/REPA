@@ -12,6 +12,7 @@ const authorsPapersAnnotationsRouter = require("./routers/authors_papers_annotat
 const authorSpecificTopicsRouter = require("./routers/author_specific_topics");
 const specificTopicsRouter = require("./routers/specific_topics");
 const corpusSpecificTopicRouter = require("./routers/corpus_specific_topics");
+const impactRouter = require("./routers/impact");
 
 const setupSwagger = require('./swagger');
 
@@ -30,6 +31,7 @@ app.use("/authors_papers_annotations", authorsPapersAnnotationsRouter);
 app.use("/author_specific_topics", authorSpecificTopicsRouter); 
 app.use("/specific_topics", specificTopicsRouter);
 app.use("/corpus_specific_topics", corpusSpecificTopicRouter);
+app.use("/impact", impactRouter);
 
 setupSwagger(app);
 
