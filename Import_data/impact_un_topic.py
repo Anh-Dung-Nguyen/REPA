@@ -281,7 +281,7 @@ class CSOTopicImpactCalculator:
         reference_topics = list(self.specific_topics.intersection(set(self.graph.nodes())))[:len(self.specific_topics)]
         if not reference_topics:
             sorted_topics = sorted(self.centrality_cache.items(), key = lambda x: x[1], reverse = True)
-            reference_topics = [t[0] for t in sorted_topics[:20]]
+            reference_topics = [t[0] for t in sorted_topics[:len(reference_topics)]]
 
         results = []
         for i, topic_id in enumerate(topic_ids):
