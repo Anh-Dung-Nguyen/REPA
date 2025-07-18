@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const axios = require("axios");
 const { getDB } = require("../db"); 
 
 /**
@@ -409,6 +410,69 @@ router.get("/:corpus_id", async (req, res) => {
     } catch (err) {
         console.error("Error fetching author specific topics by corpus ID:", err);
         res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+/**
+ * @swagger
+ * /corpus_specific_topics/filtered_author_paper_topics/corpus/{corpusId}:
+ *   get:
+ *     tags:
+ *       - Corpus with specific topics
+ *     summary: Get filtered topics by corpus (only topics that exist in specific_topics)
+ *     parameters:
+ *       - in: path
+ *         name: corpusId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the corpus
+ *     responses:
+ *       200:
+ *         description: Filtered list of topics by corpus
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/filtered_author_paper_topics/corpus/:corpusId', async (req, res) => {
+    const { corpusId } = req.params;
+
+    try {
+        const axios = require('axios');
+
+        const corpusTopicsRes = await axios.get(`http://localhost:8000/author_paper_topics/corpus/${corpusId}`);
+        const corpusPaperTopics = corpusTopicsRes.data;
+
+        const specificTopicsRes = await axios.get(`http://localhost:8000/specific_topics?page=1&limit=10000`);
+        const allowedTopicsArray = specificTopicsRes.data.specificTopics.map(t => t.topic);
+        const allowedTopicsSet = new Set(allowedTopicsArray.map(t => t.trim().toLowerCase()));
+
+        const grouped = new Map();
+
+        corpusPaperTopics.forEach(paper => {
+            const filteredTopics = (paper.topics || []).filter(topic =>
+                allowedTopicsSet.has(topic.trim().toLowerCase())
+            );
+
+            const key = JSON.stringify([...filteredTopics].sort());
+
+            if (!grouped.has(key)) {
+                grouped.set(key, []);
+            }
+
+            grouped.get(key).push(paper.authorId);
+        });
+
+        const response = Array.from(grouped.entries()).map(([topicKey, authorIds]) => ({
+            authorId: authorIds,
+            corpusId: Number(corpusId),
+            topics: JSON.parse(topicKey)
+        }));
+
+        res.json(response);
+    } catch (error) {
+        console.error('Error filtering topics:', error.message);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
