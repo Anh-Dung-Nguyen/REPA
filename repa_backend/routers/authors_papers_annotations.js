@@ -78,7 +78,7 @@ router.get("/", async (req, res) => {
 
 /**
  * @swagger
- * /authors_papers_annotations/{author_id}:
+ * /authors_papers_annotations/author/{author_id}:
  *   get:
  *     tags:
  *       - Author with papers and annotations
@@ -97,7 +97,7 @@ router.get("/", async (req, res) => {
  *         description: Not found
  */
 
-router.get("/:author_id", async (req, res) => {
+router.get("/author/:author_id", async (req, res) => {
     try {
         const db = getDB();
         const authorId = req.params.author_id;
@@ -154,6 +154,97 @@ router.get("/:author_id", async (req, res) => {
             authorId: authorData.authorId,
             name: authorData.name,
             papers: enrichedPapers
+        });
+
+    } catch (err) {
+        if (err.code === 'ECONNREFUSED' || err.response?.status) {
+            res.status(500).json({ error: "Error connecting to topics service" });
+        } else {
+            res.status(500).json({ error: "Internal server error" });
+        }
+    }
+});
+
+/**
+ * @swagger
+ * /authors_papers_annotations/corpus/{corpus_id}:
+ *   get:
+ *     tags:
+ *       - Author with papers and annotations
+ *     summary: Get list of authors and annotations by corpusId
+ *     parameters:
+ *       - in: path
+ *         name: corpus_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the corpus (paper)
+ *     responses:
+ *       200:
+ *         description: List of authors with annotation for the given corpus
+ *       404:
+ *         description: Not found
+ */
+
+router.get("/corpus/:corpus_id", async (req, res) => {
+    try {
+        const db = getDB();
+        const corpusId = Number(req.params.corpus_id);
+
+        const authorsCursor = db.collection("authors_papers_annotations").find({
+            "papers.annotation.corpusid": corpusId
+        }, {
+            projection: {
+                _id: 0,
+                authorId: 1,
+                name: 1,
+                papers: 1
+            }
+        });
+
+        const authors = await authorsCursor.toArray();
+
+        if (!authors.length) {
+            return res.status(404).json({ error: "No authors found for the given corpus ID" });
+        }
+
+        const axios = require("axios");
+        const topicsApiRes = await axios.get(
+            `http://localhost:8000/corpus_specific_topics/filtered_author_paper_topics/corpus/${corpusId}`
+        );
+        const topicsList = topicsApiRes.data;
+
+        const enrichedResults = await Promise.all(authors.map(async (author) => {
+            const matchingPaper = author.papers.find(p => p.annotation.corpusid === corpusId);
+
+            const paperDetails = await db.collection("papers_with_annotations")
+                .findOne(
+                    { corpusid: corpusId },
+                    { projection: { _id: 0, year: 1, referencecount: 1, citationcount: 1, influentialcitationcount: 1, venue: 1, abstract: 1, authors: 1 } }
+                );
+
+            let numberOfCoAuthors = 0;
+            if (paperDetails?.authors) {
+                numberOfCoAuthors = paperDetails.authors.filter(a => a.authorId !== author.authorId).length;
+            }
+
+            const specificTopics = (topicsList.find(item => item.authorId === author.authorId)?.topics) || [];
+
+            return {
+                authorId: author.authorId,
+                name: author.name,
+                paper: {
+                    ...matchingPaper,
+                    ...(paperDetails || {}),
+                    numberOfCoAuthors,
+                    specificTopics
+                }
+            };
+        }));
+
+        res.json({
+            corpusId: corpusId,
+            authors: enrichedResults
         });
 
     } catch (err) {
