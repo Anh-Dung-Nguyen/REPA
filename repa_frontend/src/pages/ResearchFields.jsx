@@ -12,7 +12,7 @@ const ResearchFields = () => {
   const [fieldsTotalPages, setFieldsTotalPages] = useState(1);
   const [fieldSearchTerm, setFieldSearchTerm] = useState('');
   const [fieldSearchResults, setFieldSearchResults] = useState([]);
-  const [averageHIndexRes, setAverageHIndexRes] = useState({});
+  const [impactFactorRes, setImpactFactorRes] = useState({});
   const FIELDS_PER_PAGE = 28;
 
   useEffect(() => {
@@ -37,25 +37,25 @@ const ResearchFields = () => {
   }, [fieldsPage, fieldSearchTerm]);
 
   useEffect(() => {
-    const fetchAverageHIndexes = async () => {
+    const fetchImpactFactors = async () => {
       try {
         const fields = fieldSearchResults.length > 0 ? fieldSearchResults : fieldsData;
-        const hindexMap = {};
+        const impactMap = {};
 
         await Promise.all(fields.map(async (field) => {
           const topicName = encodeURIComponent(field.topic);
-          const res = await axios.get(`http://localhost:8000/author_specific_topics/group_by_topic/${topicName}/average_hindex`);
-          hindexMap[field.topic] = res.data.averageHindex;
+          const res = await axios.get(`http://localhost:8000/impact/impact_one_topic/${topicName}`);
+          impactMap[field.topic] = res.data.impact_factor;
         }));
 
-        setAverageHIndexRes(hindexMap);
+        setImpactFactorRes(impactMap);
       } catch (err) {
         console.error('Error fetching average h-index:', err);
       }
     };
 
     if ((fieldsData.length > 0 || fieldSearchResults.length > 0) && !loading) {
-      fetchAverageHIndexes();
+      fetchImpactFactors();
     }
   }, [fieldsData, fieldSearchResults, loading]);
 
@@ -108,7 +108,11 @@ const ResearchFields = () => {
                 <FieldCard
                   key={idx}
                   field={field}
-                  averageHindex={averageHIndexRes[field.topic]}
+                  impactFactor={
+                    impactFactorRes[field.topic] !== undefined
+                      ? impactFactorRes[field.topic].toFixed(2)
+                      : 'N/A'
+                  }
                   onViewResearchers={() => handleFieldClick(field)}
                 />
               ))}
