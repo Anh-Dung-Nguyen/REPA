@@ -734,7 +734,7 @@ router.get('/hindex_per_topic/:authorId', async (req, res) => {
 
         const topics = topicData.topics;
 
-        const { data: papersData } = await axios.get(`http://localhost:8000/authors_papers_annotations/${authorId}`);
+        const { data: papersData } = await axios.get(`http://localhost:8000/authors_papers_annotations/author/${authorId}`);
 
         if (!papersData || !Array.isArray(papersData.papers)) {
             return res.status(404).json({ error: 'No papers found for this author' });
