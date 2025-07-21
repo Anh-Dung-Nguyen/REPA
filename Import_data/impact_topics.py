@@ -1,6 +1,8 @@
 from impact_un_topic import CSOTopicImpactCalculator
 import numpy as np
 import networkx as nx
+import sys
+import json
 
 class TopicGroupImpactCalculator:
     def __init__(self, csocalculator):
@@ -67,16 +69,20 @@ class TopicGroupImpactCalculator:
         }
 
 if __name__ == "__main__":
-    calculator = CSOTopicImpactCalculator(
-        csv_file_path = "../Input/CSO.3.4.1.csv",
-        specific_topics_file = "../Output/specific_topics.txt"
-    )
+    try:
+        input_data = json.loads(sys.stdin.read())
+        topics = input_data.get("topics", [])
 
-    group_calculator = TopicGroupImpactCalculator(calculator)
+        calculator = CSOTopicImpactCalculator(
+            csv_file_path="../Input/CSO.3.4.1.csv",
+            specific_topics_file="../Output/specific_topics.txt"
+        )
 
-    topics = ["chromosome translocation 18", "1064 nm"]
-    result = group_calculator.compute_group_impact(topics)
-    
-    print("\nRésultat du facteur d'impact du groupe :")
-    for key, value in result.items():
-        print(f"{key}: {value}")
+        group_calculator = TopicGroupImpactCalculator(calculator)
+        result = group_calculator.compute_group_impact(topics)
+        print(json.dumps(result))
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc(), file=sys.stderr)
+        sys.exit(1)
