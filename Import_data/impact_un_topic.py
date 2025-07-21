@@ -7,6 +7,7 @@ from nltk.stem import WordNetLemmatizer
 from collections import defaultdict
 import math
 import nltk
+import sys
 
 try:
     nltk.download('wordnet', quiet = True)
@@ -55,16 +56,16 @@ class CSOTopicImpactCalculator:
         return None
     
     def load_data(self):
-        print("Chargement des données...")
+        print("Chargement des données...", file=sys.stderr)
         
         with open(self.specific_topics_file, 'r', encoding = 'utf-8') as f:
             self.specific_topics = set(line.strip() for line in f if line.strip())
-        print(f"Topics spécifiques chargés: {len(self.specific_topics)}")
+        print(f"Topics spécifiques chargés: {len(self.specific_topics)}", file=sys.stderr)
         
         df = pd.read_csv(self.csv_file, header = None)
         df.columns = ["super_topic_uri", "predicate", "sub_topic_uri"]
         
-        print("Preprocessing des topics...")
+        print("Preprocessing des topics...", file=sys.stderr)
         df["super_topic"] = df["super_topic_uri"].apply(self.extract_topic)
         df["sub_topic"] = df["sub_topic_uri"].apply(self.extract_topic)
         df = df.dropna(subset = ["super_topic", "sub_topic"])
@@ -84,7 +85,7 @@ class CSOTopicImpactCalculator:
             elif 'contributesTo' in predicate:
                 self.contributions[super_topic].append(sub_topic)
         
-        print(f"Graphe construit: {self.graph.number_of_nodes()} noeuds, {self.graph.number_of_edges()} arêtes")
+        print(f"Graphe construit: {self.graph.number_of_nodes()} noeuds, {self.graph.number_of_edges()} arêtes", file=sys.stderr)
     
     def _compute_topic_frequencies(self):
         for node in self.graph.nodes():
@@ -269,6 +270,7 @@ class CSOTopicImpactCalculator:
             'impact_factor': impact_factor
         }
     
+    # Given a set of topics, which ones are the most important or impactful within the ontology?
     def rank_topics_by_impact(self, topic_ids=None, top_k=10, specific_topics_only=False):
         if topic_ids is None:
             if specific_topics_only:
@@ -278,6 +280,7 @@ class CSOTopicImpactCalculator:
 
         print(f"Analyse de {len(topic_ids)} topics...")
 
+        # compute semantic weight (how connected the topic is)
         reference_topics = list(self.specific_topics.intersection(set(self.graph.nodes())))[:len(self.specific_topics)]
         if not reference_topics:
             sorted_topics = sorted(self.centrality_cache.items(), key = lambda x: x[1], reverse = True)
