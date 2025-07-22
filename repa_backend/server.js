@@ -13,6 +13,7 @@ const authorSpecificTopicsRouter = require("./routers/author_specific_topics");
 const specificTopicsRouter = require("./routers/specific_topics");
 const corpusSpecificTopicRouter = require("./routers/corpus_specific_topics");
 const impactRouter = require("./routers/impact");
+const allTopics = require("./routers/all_topics");
 
 const setupSwagger = require('./swagger');
 
@@ -32,6 +33,7 @@ app.use("/author_specific_topics", authorSpecificTopicsRouter);
 app.use("/specific_topics", specificTopicsRouter);
 app.use("/corpus_specific_topics", corpusSpecificTopicRouter);
 app.use("/impact", impactRouter);
+app.use("/all_topics", allTopics);
 
 setupSwagger(app);
 
