@@ -1,0 +1,335 @@
+import React, { useRef, useEffect } from 'react';
+import * as d3 from 'd3';
+
+const OntologyTree = ({ rootNode, width = 1200, height = 800 }) => {
+  const svgRef = useRef();
+  const rootRef = useRef();
+  const zoomRef = useRef();
+
+  useEffect(() => {
+    if (!rootNode) return;
+
+    const svg = d3.select(svgRef.current);
+    svg.selectAll('*').remove();
+
+    const mainContainer = svg
+      .attr('width', width)
+      .attr('height', height);
+
+    const zoom = d3.zoom()
+      .scaleExtent([0.1, 3])
+      .on('zoom', (event) => {
+        container.attr('transform', event.transform);
+      });
+
+    mainContainer.call(zoom);
+    zoomRef.current = zoom;
+
+    const container = mainContainer
+      .append('g')
+      .attr('class', 'tree-container');
+    
+    if (!rootRef.current) {
+      rootRef.current = d3.hierarchy(rootNode, d => d.children);
+      rootRef.current.x0 = 0; 
+      rootRef.current.y0 = 0;
+      
+      if (rootRef.current.children) {
+        rootRef.current.children.forEach(collapse);
+      }
+    }
+
+    function collapse(d) {
+      if (d.children) {
+        d._children = d.children;
+        d._children.forEach(collapse);
+        d.children = null;
+      }
+    }
+
+    const treeLayout = d3.tree().nodeSize([28, 300]);
+
+    const update = (source) => {
+      const treeData = treeLayout(rootRef.current);
+      const nodes = treeData.descendants();
+      const links = treeData.links();
+
+      const node = container.selectAll('g.node')
+        .data(nodes, d => d.id || (d.id = ++i));
+
+      const nodeEnter = node.enter().append('g')
+        .attr('class', 'node')
+        .attr('transform', d => `translate(${source.y0},${source.x0})`)
+        .style('cursor', 'pointer')
+        .on('click', async (event, d) => {
+          event.stopPropagation();
+          
+          if (d.children) {
+            d._children = d.children;
+            d.children = null;
+          } else if (d._children) {
+            d.children = d._children;
+            d._children = null;
+          } else {
+            const topicName = d.data.name;
+            try {
+              const response = await fetch(`http://localhost:8000/topics/children/${encodeURIComponent(topicName)}`);
+              if (response.ok) {
+                const result = await response.json();
+                
+                if (result.children && result.children.length > 0) {
+                  const newChildren = result.children.map(child => ({
+                    name: child,
+                    children: null,
+                    _children: null,
+                  }));
+
+                  d.data.children = newChildren;
+                  d.children = d3.hierarchy({ children: newChildren }, node => node.children).children;
+                  
+                  if (d.children) {
+                    d.children.forEach(child => {
+                      child.parent = d;
+                      child.depth = d.depth + 1;
+                      child.x0 = d.x0;
+                      child.y0 = d.y0;
+                    });
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Error fetching children:', error);
+            }
+          }
+          
+          update(d);
+
+          if (source === rootRef.current && nodes.length > 0) {
+            const rootNode = nodes[0];
+            const centerX = width / 2 - rootNode.y;
+            const centerY = height / 2 - rootNode.x;
+
+            svg.transition()
+              .duration(750)
+              .call(zoomRef.current.transform, d3.zoomIdentity.translate(centerX, centerY));
+          }
+        });
+
+      nodeEnter.append('circle')
+        .attr('r', 1e-6)
+        .style('fill', d => d._children ? '#4CAF50' : d.children ? '#2196F3' : '#fff')
+        .style('stroke', '#333')
+        .style('stroke-width', '2px');
+
+      nodeEnter.append('text')
+        .attr('dy', '.35em')
+        .attr('x', d => d.children || d._children ? -13 : 13)
+        .style('text-anchor', d => d.data.name.toLowerCase() === 'computer science' ? 'end' : 'start + 20')        
+        .text(d => {
+          const name = d.data.name;
+          const match = name.match(/\[(\d+(?:,\d+)*)\]$/);
+          if (match) {
+            return name.replace(/\s*\[[\d,]+\]$/, '') + ` [${match[1]}]`;
+          }
+          return name;
+        })
+        .style('font-size', '12px')
+        .style('font-family', 'Arial, sans-serif')
+        .style('fill', '#333');
+
+      const nodeUpdate = nodeEnter.merge(node);
+
+      nodeUpdate.transition()
+        .duration(500)
+        .attr('transform', d => `translate(${d.y},${d.x})`);
+
+      nodeUpdate.select('circle')
+        .attr('r', 8)
+        .style('fill', d => d._children ? '#4CAF50' : d.children ? '#2196F3' : '#fff')
+        .style('stroke', '#333')
+        .style('stroke-width', '2px');
+
+      nodeUpdate.select('text')
+        .style('fill-opacity', 1);
+
+      const nodeExit = node.exit().transition()
+        .duration(500)
+        .attr('transform', d => `translate(${source.y},${source.x})`)
+        .remove();
+
+      nodeExit.select('circle')
+        .attr('r', 1e-6);
+
+      nodeExit.select('text')
+        .style('fill-opacity', 1e-6);
+
+      const link = container.selectAll('path.link')
+        .data(links, d => d.target.id);
+
+      const linkEnter = link.enter().insert('path', 'g')
+        .attr('class', 'link')
+        .attr('d', d => {
+          const o = {x: source.x0, y: source.y0};
+          return diagonal(o, o);
+        })
+        .style('fill', 'none')
+        .style('stroke', '#ccc')
+        .style('stroke-width', '2px');
+
+      linkEnter.merge(link).transition()
+        .duration(500)
+        .attr('d', d => diagonal(d.source, d.target));
+
+      link.exit().transition()
+        .duration(500)
+        .attr('d', d => {
+          const o = {x: source.x, y: source.y};
+          return diagonal(o, o);
+        })
+        .remove();
+
+      nodes.forEach(d => {
+        d.x0 = d.x;
+        d.y0 = d.y;
+      });
+    };
+
+    function diagonal(s, d) {
+      const path = `M ${s.y} ${s.x}
+                    C ${(s.y + d.y) / 2} ${s.x},
+                      ${(s.y + d.y) / 2} ${d.x},
+                      ${d.y} ${d.x}`;
+      return path;
+    }
+
+    let i = 0; 
+
+    update(rootRef.current);
+
+    setTimeout(() => {
+      const rootNode = rootRef.current;
+      const treeData = treeLayout(rootNode);
+      const nodes = treeData.descendants();
+
+      if (nodes.length > 0) {
+        const root = nodes[0];
+        const centerX = width / 2 - root.y;
+        const centerY = height / 2 - root.x;
+
+        svg.transition()
+          .duration(750)
+          .call(zoomRef.current.transform, d3.zoomIdentity.translate(centerX, centerY));
+      }
+    }, 0);
+
+  }, [rootNode, width, height]);
+
+  const centerTree = () => {
+    const svg = d3.select(svgRef.current);
+    const zoom = zoomRef.current;
+    
+    if (zoom && svg) {
+      const centerTransform = d3.zoomIdentity
+        .translate(width / 2, height / 2);
+      
+      svg.transition()
+        .duration(750)
+        .call(zoom.transform, centerTransform);
+    }
+  };
+
+  const resetZoom = () => {
+    const svg = d3.select(svgRef.current);
+    const zoom = zoomRef.current;
+    
+    if (zoom && svg) {
+      svg.transition()
+        .duration(750)
+        .call(zoom.transform, d3.zoomIdentity.translate(100, height / 2));
+    }
+  };
+
+  const zoomIn = () => {
+    const svg = d3.select(svgRef.current);
+    const zoom = zoomRef.current;
+    
+    if (zoom && svg) {
+      svg.transition()
+        .duration(300)
+        .call(zoom.scaleBy, 1.5);
+    }
+  };
+
+  const zoomOut = () => {
+    const svg = d3.select(svgRef.current);
+    const zoom = zoomRef.current;
+    
+    if (zoom && svg) {
+      svg.transition()
+        .duration(300)
+        .call(zoom.scaleBy, 0.67);
+    }
+  };
+
+  return (
+    <div className="w-full">
+      <div className="mb-4 flex gap-2 flex-wrap">
+        <button 
+          onClick={centerTree}
+          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
+        >
+          Center Tree
+        </button>
+        <button 
+          onClick={resetZoom}
+          className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors text-sm"
+        >
+          Reset Zoom
+        </button>
+        <button 
+          onClick={zoomIn}
+          className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm"
+        >
+          Zoom In (+)
+        </button>
+        <button 
+          onClick={zoomOut}
+          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm"
+        >
+          Zoom Out (-)
+        </button>
+      </div>
+      
+      <svg 
+        ref={svgRef} 
+        className="border border-gray-300 rounded-lg bg-white cursor-grab active:cursor-grabbing" 
+        style={{ width: '100%', height: `${height}px` }}
+      />
+      
+      <div className="text-sm text-gray-600 mt-2">
+        <div className="mb-2">
+          <strong>Controls:</strong> Click and drag to pan • Mouse wheel to zoom • Click nodes to expand/collapse
+        </div>
+        <div className="flex items-center gap-4 flex-wrap">
+          <span>Node Types:</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-green-500 border border-gray-800"></div>
+              <span className="text-xs">Has collapsed children</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-blue-500 border border-gray-800"></div>
+              <span className="text-xs">Has expanded children</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-white border border-gray-800"></div>
+              <span className="text-xs">Leaf node</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default OntologyTree;
