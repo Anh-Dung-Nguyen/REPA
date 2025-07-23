@@ -1,43 +1,32 @@
-// src/pages/ResearchAllFields.jsx
 import React, { useState, useEffect } from 'react';
-import Papa from 'papaparse';
-import OntologyGraph from '../components/OntologyGraph';
+import OntologyTree from '../components/OntologyTree';
 
 const ResearchAllFields = () => {
-  const [csvData, setCsvData] = useState([]);
+  const [treeData, setTreeData] = useState(null);
 
   useEffect(() => {
-    // Load CSV from public folder
-    fetch('/CSO.3.4.1.csv')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to load CSV file.');
-        }
-        return response.text();
-      })
-      .then(csvText => {
-        Papa.parse(csvText, {
-          header: false,
-          skipEmptyLines: true,
-          complete: (results) => {
-            const triples = results.data.map(row => ({
-              subject: row[0],
-              predicate: row[1],
-              object: row[2]
-            }));
-            setCsvData(triples);
-          }
-        });
+    fetch('http://localhost:8000/topics/children/computer science')
+      .then(res => res.json())
+      .then(data => {
+        const root = {
+          name: data.topic,
+          children: data.children.map(child => ({
+            name: child,
+            children: null,
+            _children: null
+          }))
+        };
+        setTreeData(root);
       })
       .catch(err => {
-        console.error('Error loading CSV:', err);
+        console.error("Error loading root topic:", err);
       });
   }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-3xl font-bold mb-4 text-center text-gray-800">Ontology Graph Viewer</h1>
-      <OntologyGraph data={csvData} width={1000} height={700} />
+      {treeData && <OntologyTree rootNode={treeData} width={1200} height={900} />}
     </div>
   );
 };
