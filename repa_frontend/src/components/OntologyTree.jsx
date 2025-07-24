@@ -1,7 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
+import SearchBarOntology from './SearchBarOntology';
 
-const OntologyTree = ({ rootNode, width = 1200, height = 800 }) => {
+const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, pathsToHighlight, searchTerm, setSearchTerm, onSearch }) => {
   const svgRef = useRef();
   const rootRef = useRef();
   const zoomRef = useRef();
@@ -29,14 +30,13 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800 }) => {
       .append('g')
       .attr('class', 'tree-container');
     
-    if (!rootRef.current) {
-      rootRef.current = d3.hierarchy(rootNode, d => d.children);
-      rootRef.current.x0 = 0; 
-      rootRef.current.y0 = 0;
-      
-      if (rootRef.current.children) {
-        rootRef.current.children.forEach(collapse);
-      }
+    // FIXED: Reset the tree state when rootNode changes
+    rootRef.current = d3.hierarchy(rootNode, d => d.children);
+    rootRef.current.x0 = 0; 
+    rootRef.current.y0 = 0;
+    
+    if (rootRef.current.children) {
+      rootRef.current.children.forEach(collapse);
     }
 
     function collapse(d) {
@@ -47,7 +47,7 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800 }) => {
       }
     }
 
-    const treeLayout = d3.tree().nodeSize([28, 300]);
+    const treeLayout = d3.tree().nodeSize([35, 300]);
 
     const update = (source) => {
       const treeData = treeLayout(rootRef.current);
@@ -117,14 +117,21 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800 }) => {
 
       nodeEnter.append('circle')
         .attr('r', 1e-6)
-        .style('fill', d => d._children ? '#4CAF50' : d.children ? '#2196F3' : '#fff')
+        .style('fill', d => {
+          const name = d.data.name.toLowerCase();
+          const inHighlight = pathsToHighlight?.some(path =>
+            path.map(p => p.toLowerCase()).includes(name)
+          );
+
+          return inHighlight ? '#FF9800' : d._children ? '#4CAF50' : d.children ? '#2196F3' : '#fff';
+        })
         .style('stroke', '#333')
         .style('stroke-width', '2px');
 
       nodeEnter.append('text')
         .attr('dy', '.35em')
         .attr('x', d => d.children || d._children ? -13 : 13)
-        .style('text-anchor', d => d.data.name.toLowerCase() === 'computer science' ? 'end' : 'start + 20')        
+        .style('text-anchor', d => d.children || d._children ? 'end' : 'start')
         .text(d => {
           const name = d.data.name;
           const match = name.match(/\[(\d+(?:,\d+)*)\]$/);
@@ -178,8 +185,21 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800 }) => {
 
       linkEnter.merge(link).transition()
         .duration(500)
-        .attr('d', d => diagonal(d.source, d.target));
-
+        .attr('d', d => diagonal(d.source, d.target))
+        .style('stroke', d => {
+          const src = d.source.data.name.toLowerCase();
+          const tgt = d.target.data.name.toLowerCase();
+          const isHighlighted = pathsToHighlight?.some(path => {
+            for (let i = 0; i < path.length - 1; i++) {
+              if (path[i].toLowerCase() === src && path[i + 1].toLowerCase() === tgt) {
+                return true;
+              }
+            }
+            return false;
+          });
+          return isHighlighted ? '#FF9800' : '#ccc';
+        });
+      
       link.exit().transition()
         .duration(500)
         .attr('d', d => {
@@ -222,7 +242,57 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800 }) => {
       }
     }, 0);
 
-  }, [rootNode, width, height]);
+    if (!pathsToHighlight || pathsToHighlight.length === 0) return;
+
+    const expandPath = async (path) => {
+      let current = rootRef.current;
+      
+      for (let i = 1; i < path.length; i++) {
+        const targetName = path[i];
+        let child = (current.children || current._children || []).find(
+          d => d.data.name.toLowerCase() === targetName.toLowerCase()
+        );
+
+        if (!child) {
+          const res = await fetch(`http://localhost:8000/topics/children/${encodeURIComponent(current.data.name)}`);
+          if (!res.ok) return;
+          const result = await res.json();
+
+          const newChildren = (result.children || []).map(name => ({
+            name,
+            children: null,
+            _children: null,
+          }));
+
+          current.data.children = newChildren;
+
+          current.children = d3.hierarchy({ children: newChildren }, d => d.children).children;
+          current.children.forEach(child => {
+            child.parent = current;
+            child.depth = current.depth + 1;
+            child.x0 = current.x0;
+            child.y0 = current.y0;
+          });
+
+          child = current.children.find(
+            d => d.data.name.toLowerCase() === targetName.toLowerCase()
+          );
+        }
+
+        if (!child) return;
+
+        current.children = current.children || [];
+        child._children = null;
+
+        current = child;
+      }
+
+      update(current);
+    };
+
+    pathsToHighlight.forEach(path => expandPath(path));
+
+  }, [rootNode, width, height, searchTarget, pathsToHighlight]); // FIXED: Added rootNode as dependency
 
   const centerTree = () => {
     const svg = d3.select(svgRef.current);
@@ -276,33 +346,41 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800 }) => {
       <div className="mb-4 flex gap-2 flex-wrap">
         <button 
           onClick={centerTree}
-          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
+          className="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
         >
           Center Tree
         </button>
         <button 
           onClick={resetZoom}
-          className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors text-sm"
+          className="px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
         >
           Reset Zoom
         </button>
         <button 
           onClick={zoomIn}
-          className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-sm"
+          className="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
         >
           Zoom In (+)
         </button>
         <button 
           onClick={zoomOut}
-          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm"
+          className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm"
         >
           Zoom Out (-)
         </button>
+
+        <div className='flex gap-2 items-center ml-auto'>
+          <SearchBarOntology 
+            searchTerm={searchTerm} 
+            setSearchTerm={setSearchTerm} 
+            onSearch={onSearch} 
+          />
+        </div>
       </div>
       
       <svg 
         ref={svgRef} 
-        className="border border-gray-300 rounded-lg bg-white cursor-grab active:cursor-grabbing" 
+        className="border rounded-lg bg-white shadow-md p-6 mb-6 cursor-grab active:cursor-grabbing" 
         style={{ width: '100%', height: `${height}px` }}
       />
       
