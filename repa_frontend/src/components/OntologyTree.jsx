@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 import SearchBarOntology from './SearchBarOntology';
 
@@ -6,6 +6,62 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
   const svgRef = useRef();
   const rootRef = useRef();
   const zoomRef = useRef();
+  const [tooltip, setTooltip] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    data: null,
+    loading: false
+  });
+
+  const fetchTopicStats = async (topicName) => {
+    try {
+      const response = await fetch(`http://localhost:8000/topics/topic_author_corpus_counts/${encodeURIComponent(topicName)}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching topic stats:', error);
+      return null;
+    }
+  };
+
+  const showTooltip = async (event, topicName) => {
+    const rect = event.target.getBoundingClientRect();
+    const svgRect = svgRef.current.getBoundingClientRect();
+    
+    setTooltip({
+      visible: true,
+      x: rect.right - svgRect.left + 10,
+      y: rect.top - svgRect.top,
+      data: null,
+      loading: true
+    });
+
+    const stats = await fetchTopicStats(topicName);
+    
+    setTooltip(prev => ({
+      ...prev,
+      data: stats,
+      loading: false
+    }));
+  };
+
+  const hideTooltip = () => {
+    setTooltip({
+      visible: false,
+      x: 0,
+      y: 0,
+      data: null,
+      loading: false
+    });
+  };
+
+  const handleViewDetails = (topicName) => {
+    window.location.href = `http://localhost:3000/research-fields/${encodeURIComponent(topicName)}`;
+  };
 
   useEffect(() => {
     if (!rootNode) return;
@@ -30,7 +86,6 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
       .append('g')
       .attr('class', 'tree-container');
     
-    // FIXED: Reset the tree state when rootNode changes
     rootRef.current = d3.hierarchy(rootNode, d => d.children);
     rootRef.current.x0 = 0; 
     rootRef.current.y0 = 0;
@@ -126,7 +181,12 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
           return inHighlight ? '#FF9800' : d._children ? '#4CAF50' : d.children ? '#2196F3' : '#fff';
         })
         .style('stroke', '#333')
-        .style('stroke-width', '2px');
+        .style('stroke-width', '2px')
+        .on('mouseenter', function(event, d) {
+          const cleanTopicName = d.data.name.replace(/\s*\[[\d,]+\]$/, '');
+          showTooltip(event, cleanTopicName);
+        })
+        .on('mouseleave', hideTooltip);
 
       nodeEnter.append('text')
         .attr('dy', '.35em')
@@ -142,7 +202,13 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
         })
         .style('font-size', '12px')
         .style('font-family', 'Arial, sans-serif')
-        .style('fill', '#333');
+        .style('fill', '#333')
+        .on('mouseenter', function(event, d) {
+          // Clean topic name by removing count annotations
+          const cleanTopicName = d.data.name.replace(/\s*\[[\d,]+\]$/, '');
+          showTooltip(event, cleanTopicName);
+        })
+        .on('mouseleave', hideTooltip);
 
       const nodeUpdate = nodeEnter.merge(node);
 
@@ -342,13 +408,13 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
       <div className="mb-4 flex gap-2 flex-wrap">
         <button 
           onClick={centerTree}
           className="px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
         >
-          Center Tree
+          Center
         </button>
         <button 
           onClick={resetZoom}
@@ -378,15 +444,61 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
         </div>
       </div>
       
-      <svg 
-        ref={svgRef} 
-        className="border rounded-lg bg-white shadow-md p-6 mb-6 cursor-grab active:cursor-grabbing" 
-        style={{ width: '100%', height: `${height}px` }}
-      />
+      <div className="relative">
+        <svg 
+          ref={svgRef} 
+          className="border rounded-lg bg-white shadow-md p-6 mb-6 cursor-grab active:cursor-grabbing" 
+          style={{ width: '100%', height: `${height}px` }}
+        />
+        
+        {tooltip.visible && (
+          <div 
+            className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-3 min-w-48 max-w-64"
+            style={{ 
+              left: `${tooltip.x}px`, 
+              top: `${tooltip.y}px`,
+              pointerEvents: 'auto'
+            }}
+          >
+            {tooltip.loading ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                <span className="ml-2 text-sm text-gray-600">Loading...</span>
+              </div>
+            ) : tooltip.data ? (
+              <div className="space-y-2">
+                <h4 className="font-semibold text-sm text-gray-800 border-b pb-1">
+                  {tooltip.data.topic}
+                </h4>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Authors:</span>
+                    <span className="font-medium text-blue-600">{tooltip.data.count_author.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Papers:</span>
+                    <span className="font-medium text-green-600">{tooltip.data.count_paper.toLocaleString()}</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => handleViewDetails(tooltip.data.topic)}
+                  className="w-full mt-2 px-3 py-1.5 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
+                >
+                  View Details
+                </button>
+              </div>
+            ) : (
+              <div className="text-sm text-red-500 py-2">
+                Failed to load data
+              </div>
+            )}
+          </div>
+        )}
+      </div>
       
       <div className="text-sm text-gray-600 mt-2">
         <div className="mb-2">
-          <strong>Controls:</strong> Click and drag to pan • Mouse wheel to zoom • Click nodes to expand/collapse
+          <strong>Controls:</strong> Click and drag to pan • Mouse wheel to zoom • Click nodes to expand/collapse • Hover nodes for statistics
         </div>
         <div className="flex items-center gap-4 flex-wrap">
           <span>Node Types:</span>
