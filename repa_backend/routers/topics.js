@@ -364,8 +364,9 @@ router.get("/paths/:name", (req, res) => {
 router.get('/topic_author_corpus_counts', async (req, res) => {
     try {
         const db = getDB();
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 28;
+
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.max(1, parseInt(req.query.limit) || 28);
         const skip = (page - 1) * limit;
 
         const allTopicsDocs = await db.collection("all_topics")
@@ -374,36 +375,35 @@ router.get('/topic_author_corpus_counts', async (req, res) => {
 
         const allTopicNames = allTopicsDocs.map(doc => doc.topic);
 
-        const authorCounts = await db.collection("author_topics").aggregate([
-            { $unwind: "$topics" },
-            { $match: { topics: { $in: allTopicNames } } },
-            { $group: { _id: "$topics", uniqueAuthors: { $addToSet: "$authorId" } } },
-            { $project: { topic: "$_id", count_author: { $size: "$uniqueAuthors" }, _id: 0 } }
-            ]).toArray();
+        const [authorCounts, corpusCounts] = await Promise.all([
+            db.collection("author_topics").aggregate([
+                { $unwind: "$topics" },
+                { $match: { topics: { $in: allTopicNames } } },
+                { $group: { _id: "$topics", uniqueAuthors: { $addToSet: "$authorId" } } },
+                { $project: { topic: "$_id", count_author: { $size: "$uniqueAuthors" }, _id: 0 } }
+            ]).toArray(),
 
-        const corpusCounts = await db.collection("corpus_topics").aggregate([
-            { $unwind: "$topics" },
-            { $match: { topics: { $in: allTopicNames } } },
-            { $group: { _id: "$topics", uniqueCorpusIds: { $addToSet: "$_id" } } },
-            { $project: { topic: "$_id", count_paper: { $size: "$uniqueCorpusIds" }, _id: 0 } }
-            ]).toArray();
+            db.collection("corpus_topics").aggregate([
+                { $unwind: "$topics" },
+                { $match: { topics: { $in: allTopicNames } } },
+                { $group: { _id: "$topics", uniqueCorpusIds: { $addToSet: "$_id" } } },
+                { $project: { topic: "$_id", count_paper: { $size: "$uniqueCorpusIds" }, _id: 0 } }
+            ]).toArray()
+        ]);
 
-        const countsMap = {};
-        allTopicNames.forEach(topic => {
-            countsMap[topic] = { topic, count_author: 0, count_paper: 0 };
+        const authorMap = new Map(authorCounts.map(({ topic, count_author }) => [topic, count_author]));
+        const corpusMap = new Map(corpusCounts.map(({ topic, count_paper }) => [topic, count_paper]));
+
+        const allTopicsWithTotal = allTopicNames.map(topic => {
+            const count_author = authorMap.get(topic) || 0;
+            const count_paper = corpusMap.get(topic) || 0;
+            return {
+                topic,
+                count_author,
+                count_paper,
+                total: count_author + count_paper
+            };
         });
-
-        authorCounts.forEach(({ topic, count_author }) => {
-            countsMap[topic].count_author = count_author;
-        });
-        corpusCounts.forEach(({ topic, count_paper }) => {
-            countsMap[topic].count_paper = count_paper;
-        });
-
-        let allTopicsWithTotal = Object.values(countsMap).map(item => ({
-            ...item,
-            total: item.count_author + item.count_paper
-        }));
 
         allTopicsWithTotal.sort((a, b) => b.total - a.total);
 
@@ -412,10 +412,10 @@ router.get('/topic_author_corpus_counts', async (req, res) => {
         const paginated = allTopicsWithTotal.slice(skip, skip + limit);
 
         res.json({
-            topics: paginated,
-            totalPages,
-            totalCount,
-            currentPage: page
+        topics: paginated,
+        totalPages,
+        totalCount,
+        currentPage: page
         });
 
     } catch (err) {
@@ -465,24 +465,24 @@ router.get('/topic_author_corpus_counts/:topic', async (req, res) => {
         const db = getDB();
         const topicName = decodeURIComponent(req.params.topic);
 
-        const authorResult = await db.collection("author_topics").aggregate([
-            { $unwind: "$topics" },
-            { $match: { topics: topicName } },
-            { $group: { _id: null, uniqueAuthors: { $addToSet: "$authorId" } } },
-            { $project: { count_author: { $size: "$uniqueAuthors" } } }
-        ]).toArray();
+        const [authorResult, corpusResult] = await Promise.all([
+            db.collection("author_topics").aggregate([
+                { $unwind: "$topics" },
+                { $match: { topics: topicName } },
+                { $group: { _id: null, uniqueAuthors: { $addToSet: "$authorId" } } },
+                { $project: { count_author: { $size: "$uniqueAuthors" } } }
+            ]).toArray(),
+
+            db.collection("corpus_topics").aggregate([
+                { $unwind: "$topics" },
+                { $match: { topics: topicName } },
+                { $group: { _id: null, uniqueCorpusIds: { $addToSet: "$_id" } } },
+                { $project: { count_paper: { $size: "$uniqueCorpusIds" } } }
+            ]).toArray()
+        ]);
 
         const count_author = authorResult.length > 0 ? authorResult[0].count_author : 0;
-
-        const corpusResult = await db.collection("corpus_topics").aggregate([
-            { $unwind: "$topics" },
-            { $match: { topics: topicName } },
-            { $group: { _id: null, uniqueCorpusIds: { $addToSet: "$_id" } } },
-            { $project: { count_paper: { $size: "$uniqueCorpusIds" } } }
-        ]).toArray();
-
         const count_paper = corpusResult.length > 0 ? corpusResult[0].count_paper : 0;
-
         const total = count_author + count_paper;
 
         res.json({
