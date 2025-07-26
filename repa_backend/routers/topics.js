@@ -205,8 +205,8 @@ router.get("/children/:name", (req, res) => {
  *   get:
  *     tags:
  *       - Topics
- *     summary: Get all topic paths from "computer science" to a given topic
- *     description: Returns all hierarchical paths that lead from the "computer science" root node to the specified topic. The paths are based on superTopicOf relationships.
+ *     summary: Get all hierarchical topic paths to a given topic
+ *     description: Returns all hierarchical paths that lead to the specified topic. The paths are based on superTopicOf relationships and may originate from multiple root nodes (not only "computer science").
  *     parameters:
  *       - in: path
  *         name: name
@@ -216,7 +216,7 @@ router.get("/children/:name", (req, res) => {
  *         description: The name of the topic (e.g., "fp tree")
  *     responses:
  *       200:
- *         description: List of all paths to the topic from "computer science"
+ *         description: List of all paths to the topic from any root node
  *         content:
  *           application/json:
  *             schema:
@@ -227,14 +227,14 @@ router.get("/children/:name", (req, res) => {
  *                   example: "fp tree"
  *                 paths:
  *                   type: array
- *                   description: An array of paths from "computer science" to the target topic
+ *                   description: An array of paths from root topics to the target topic
  *                   items:
  *                     type: array
  *                     items:
  *                       type: string
  *                       example: "association rule"
  *       404:
- *         description: No path found from "computer science" to the topic
+ *         description: No path found to the topic
  *         content:
  *           application/json:
  *             schema:
@@ -245,15 +245,16 @@ router.get("/children/:name", (req, res) => {
  *                   example: "unknown topic"
  *                 message:
  *                   type: string
- *                   example: "No paths found from computer science to this topic."
+ *                   example: "No paths found to this topic."
  */
 
 router.get("/paths/:name", (req, res) => {
     const targetName = req.params.name;
     const targetURI = topicToURI(targetName);
+    const visited = new Set();
+    const allPaths = [];
 
     const parentMap = new Map();
-
     triples.forEach(({ subject, object }) => {
         if (!parentMap.has(object)) {
             parentMap.set(object, []);
@@ -261,27 +262,17 @@ router.get("/paths/:name", (req, res) => {
         parentMap.get(object).push(subject);
     });
 
-    const visited = new Set();
-    const allPaths = [];
-
     const dfs = (nodeURI, path) => {
-        if (visited.has(nodeURI)) return;
-        visited.add(nodeURI);
-
+        if (visited.has(`${nodeURI}:${path.join(',')}`)) return;
+        visited.add(`${nodeURI}:${path.join(',')}`);
+        
         path.push(nodeURI);
-
         const parents = parentMap.get(nodeURI) || [];
 
-        if (parents.length === 0 || parents.includes(topicToURI("computer science"))) {
-            const fullPath = [...path]; 
-            fullPath.reverse();
+        if (parents.length === 0) {
+            const fullPath = [...path].reverse();
             const normalized = fullPath.map(uri => uriToTopicName(uri));
             const deduplicated = normalized.filter((name, i, arr) => i === 0 || name !== arr[i - 1]);
-
-            if (deduplicated[0] !== "computer science") {
-                deduplicated.unshift("computer science");
-            }
-
             allPaths.push(deduplicated);
         } else {
             parents.forEach(parent => {
@@ -294,8 +285,8 @@ router.get("/paths/:name", (req, res) => {
 
     if (allPaths.length === 0) {
         return res.status(404).json({
-            topic: targetName,
-            message: "No paths found from computer science to this topic."
+        topic: targetName,
+        message: "No paths found to this topic."
         });
     }
 
@@ -312,111 +303,18 @@ router.get("/paths/:name", (req, res) => {
  *     tags:
  *       - Topics
  *     summary: Get number of authors and papers per topic, sorted by total (authors + papers)
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Page number for pagination
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 28
- *         description: Number of topics per page
  *     responses:
- *       200:
- *         description: Paginated list of topics with counts
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 topics:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       topic:
- *                         type: string
- *                         example: AI
- *                       count_author:
- *                         type: integer
- *                         example: 150
- *                       count_paper:
- *                         type: integer
- *                         example: 300
- *                       total:
- *                         type: integer
- *                         example: 450
- *                 totalPages:
- *                   type: integer
- *                   example: 10
- *                 totalCount:
- *                   type: integer
- *                   example: 280
- *                 currentPage:
- *                   type: integer
- *                   example: 1
+ *          200:
+ *              description: List of papers
  */
 
 router.get('/topic_author_corpus_counts', async (req, res) => {
     try {
         const db = getDB();
-
-        const page = Math.max(1, parseInt(req.query.page) || 1);
-        const limit = Math.max(1, parseInt(req.query.limit) || 28);
-        const skip = (page - 1) * limit;
-
-        const allTopicsDocs = await db.collection("all_topics")
-            .find({}, { projection: { _id: 0, topic: 1 } })
+        const topic_author_corpus_counts = await db.collection("topic_author_corpus_counts")
+            .find({}, { projection: { _id: 0 } })
             .toArray();
-
-        const allTopicNames = allTopicsDocs.map(doc => doc.topic);
-
-        const [authorCounts, corpusCounts] = await Promise.all([
-            db.collection("author_topics").aggregate([
-                { $unwind: "$topics" },
-                { $match: { topics: { $in: allTopicNames } } },
-                { $group: { _id: "$topics", uniqueAuthors: { $addToSet: "$authorId" } } },
-                { $project: { topic: "$_id", count_author: { $size: "$uniqueAuthors" }, _id: 0 } }
-            ]).toArray(),
-
-            db.collection("corpus_topics").aggregate([
-                { $unwind: "$topics" },
-                { $match: { topics: { $in: allTopicNames } } },
-                { $group: { _id: "$topics", uniqueCorpusIds: { $addToSet: "$_id" } } },
-                { $project: { topic: "$_id", count_paper: { $size: "$uniqueCorpusIds" }, _id: 0 } }
-            ]).toArray()
-        ]);
-
-        const authorMap = new Map(authorCounts.map(({ topic, count_author }) => [topic, count_author]));
-        const corpusMap = new Map(corpusCounts.map(({ topic, count_paper }) => [topic, count_paper]));
-
-        const allTopicsWithTotal = allTopicNames.map(topic => {
-            const count_author = authorMap.get(topic) || 0;
-            const count_paper = corpusMap.get(topic) || 0;
-            return {
-                topic,
-                count_author,
-                count_paper,
-                total: count_author + count_paper
-            };
-        });
-
-        allTopicsWithTotal.sort((a, b) => b.total - a.total);
-
-        const totalCount = allTopicsWithTotal.length;
-        const totalPages = Math.ceil(totalCount / limit);
-        const paginated = allTopicsWithTotal.slice(skip, skip + limit);
-
-        res.json({
-        topics: paginated,
-        totalPages,
-        totalCount,
-        currentPage: page
-        });
+        res.json(topic_author_corpus_counts);
 
     } catch (err) {
         console.error("Error in topic_author_corpus_counts:", err);
@@ -441,23 +339,8 @@ router.get('/topic_author_corpus_counts', async (req, res) => {
  *     responses:
  *       200:
  *         description: Counts for the topic
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 topic:
- *                   type: string
- *                   example: AI
- *                 count_author:
- *                   type: integer
- *                   example: 150
- *                 count_paper:
- *                   type: integer
- *                   example: 300
- *                 total:
- *                   type: integer
- *                   example: 450
+ *       400:
+ *          description: Not found
  */
 
 router.get('/topic_author_corpus_counts/:topic', async (req, res) => {
@@ -465,32 +348,14 @@ router.get('/topic_author_corpus_counts/:topic', async (req, res) => {
         const db = getDB();
         const topicName = decodeURIComponent(req.params.topic);
 
-        const [authorResult, corpusResult] = await Promise.all([
-            db.collection("author_topics").aggregate([
-                { $unwind: "$topics" },
-                { $match: { topics: topicName } },
-                { $group: { _id: null, uniqueAuthors: { $addToSet: "$authorId" } } },
-                { $project: { count_author: { $size: "$uniqueAuthors" } } }
-            ]).toArray(),
+        const topic = await db.collection("topic_author_corpus_counts")
+            .findOne({topic: topicName}, {projection: {_id: 0}});
 
-            db.collection("corpus_topics").aggregate([
-                { $unwind: "$topics" },
-                { $match: { topics: topicName } },
-                { $group: { _id: null, uniqueCorpusIds: { $addToSet: "$_id" } } },
-                { $project: { count_paper: { $size: "$uniqueCorpusIds" } } }
-            ]).toArray()
-        ]);
-
-        const count_author = authorResult.length > 0 ? authorResult[0].count_author : 0;
-        const count_paper = corpusResult.length > 0 ? corpusResult[0].count_paper : 0;
-        const total = count_author + count_paper;
-
-        res.json({
-            topic: topicName,
-            count_author,
-            count_paper,
-            total
-        });
+        if (topic) {
+            res.json(topic);
+        } else {
+            res.status(404).json({error: "No stats found with the given topic"});
+        }
 
     } catch (err) {
         console.error("Error in topic_author_corpus_counts/:topic:", err);
