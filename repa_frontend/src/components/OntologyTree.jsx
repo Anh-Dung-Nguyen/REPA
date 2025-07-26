@@ -14,6 +14,8 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
     loading: false
   });
 
+  const tooltipTimeoutRef = useRef();
+
   const fetchTopicStats = async (topicName) => {
     try {
       const response = await fetch(`http://localhost:8000/topics/topic_author_corpus_counts/${encodeURIComponent(topicName)}`);
@@ -29,6 +31,10 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
   };
 
   const showTooltip = async (event, topicName) => {
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+    }
+
     const rect = event.target.getBoundingClientRect();
     const svgRect = svgRef.current.getBoundingClientRect();
     
@@ -50,13 +56,21 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
   };
 
   const hideTooltip = () => {
-    setTooltip({
-      visible: false,
-      x: 0,
-      y: 0,
-      data: null,
-      loading: false
-    });
+    tooltipTimeoutRef.current = setTimeout(() => {
+      setTooltip({
+        visible: false,
+        x: 0,
+        y: 0,
+        data: null,
+        loading: false
+      });
+    }, 150);
+  };
+
+  const cancelHideTooltip = () => {
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+    }
   };
 
   const handleViewDetails = (topicName) => {
@@ -204,7 +218,6 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
         .style('font-family', 'Arial, sans-serif')
         .style('fill', '#333')
         .on('mouseenter', function(event, d) {
-          // Clean topic name by removing count annotations
           const cleanTopicName = d.data.name.replace(/\s*\[[\d,]+\]$/, '');
           showTooltip(event, cleanTopicName);
         })
@@ -358,7 +371,7 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
 
     pathsToHighlight.forEach(path => expandPath(path));
 
-  }, [rootNode, width, height, searchTarget, pathsToHighlight]); // FIXED: Added rootNode as dependency
+  }, [rootNode, width, height, searchTarget, pathsToHighlight]); 
 
   const centerTree = () => {
     const svg = d3.select(svgRef.current);
@@ -459,6 +472,8 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
               top: `${tooltip.y}px`,
               pointerEvents: 'auto'
             }}
+            onMouseEnter={cancelHideTooltip}
+            onMouseLeave={hideTooltip}
           >
             {tooltip.loading ? (
               <div className="flex items-center justify-center py-4">
