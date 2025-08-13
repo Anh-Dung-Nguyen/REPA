@@ -444,4 +444,70 @@ router.get("/author/:author_id", async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /papers_with_annotations/authors_positions/{corpus_id}:
+ *   get:
+ *     tags:
+ *       - Papers with annotations
+ *     summary: Get authors with their position for a given corpusId
+ *     parameters:
+ *       - in: path
+ *         name: corpus_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The Corpus ID of the paper
+ *     responses:
+ *       200:
+ *         description: Authors with their positions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 corpusid:
+ *                   type: integer
+ *                 authors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       position:
+ *                         type: integer
+ *                       authorId:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *       404:
+ *         description: Paper not found
+ */
+router.get("/authors_positions/:corpus_id", async (req, res) => {
+  try {
+    const db = getDB();
+    const corpusId = parseInt(req.params.corpus_id, 10);
+
+    const paper = await db.collection("papers_with_annotations")
+      .findOne({ corpusid: corpusId }, { projection: { corpusid: 1, authors: 1, _id: 0 } });
+
+    if (!paper) {
+      return res.status(404).json({ error: "No paper found for the given corpusId" });
+    }
+
+    const authorsWithPositions = paper.authors.map((author, index) => ({
+      position: index + 1, // position starts at 1
+      authorId: author.authorId,
+      name: author.name
+    }));
+
+    res.json({
+      corpusid: paper.corpusid,
+      authors: authorsWithPositions
+    });
+  } catch (err) {
+    console.error("Error fetching authors with positions:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
