@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText, Users, BookType, User } from 'lucide-react';
+import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText, Users, BookType, User, TrendingUpDown } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ResearcherDetailPage = () => {
@@ -31,7 +31,7 @@ const ResearcherDetailPage = () => {
                 setResearcher(researcherResponse.data);
 
                 const papersResponse = await axios.get(`http://localhost:8000/authors_papers_annotations/author/${authorId}`);
-                const papers = Array.isArray(papersResponse.data?.papers)
+                let papers = Array.isArray(papersResponse.data?.papers)
                     ? papersResponse.data.papers.map(paper => ({
                         title: paper.title,
                         corpusid: paper.annotation.corpusid,
@@ -44,6 +44,25 @@ const ResearcherDetailPage = () => {
                         coAuthors: paper.authors || []
                     }))
                     : [];
+
+                // Fetch author position for each paper
+                papers = await Promise.all(papers.map(async (paper) => {
+                    try {
+                        const posRes = await axios.get(`http://localhost:8000/papers_with_annotations/authors_positions/${paper.corpusid}`);
+                        const found = posRes.data.authors.find(a => a.authorId === authorId);
+                        return {
+                            ...paper,
+                            authorPosition: found ? found.position : null
+                        };
+                    } catch (e) {
+                        console.error(`Error fetching author position for corpusid ${paper.corpusid}`, e);
+                        return {
+                            ...paper,
+                            authorPosition: null
+                        };
+                    }
+                }));
+
                 setResearcherPapers(papers);
                 
                 /*
@@ -559,6 +578,12 @@ const ResearcherDetailPage = () => {
                                                     <div className="flex items-center gap-1">
                                                         <Users size={14} />
                                                         <span>{paper.numberOfCoAuthors}</span>
+                                                    </div>
+                                                )}
+                                                {paper.authorPosition && (
+                                                    <div className = 'flex items-center gap-1'>
+                                                        <TrendingUpDown size = {14}/>
+                                                        <span>{`Position: ${paper.authorPosition}`}</span>
                                                     </div>
                                                 )}
                                             </div>
