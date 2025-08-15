@@ -583,7 +583,7 @@ const ResearcherDetailPage = () => {
                                                 {paper.authorPosition && (
                                                     <div className = 'flex items-center gap-1'>
                                                         <TrendingUpDown size = {14}/>
-                                                        <span>{`Position: ${paper.authorPosition}`}</span>
+                                                        <span>{`Position in publication: ${paper.authorPosition}`}</span>
                                                     </div>
                                                 )}
                                             </div>
