@@ -495,7 +495,7 @@ router.get("/authors_positions/:corpus_id", async (req, res) => {
     }
 
     const authorsWithPositions = paper.authors.map((author, index) => ({
-      position: index + 1, // position starts at 1
+      position: index + 1,
       authorId: author.authorId,
       name: author.name
     }));
