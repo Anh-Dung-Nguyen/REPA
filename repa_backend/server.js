@@ -15,6 +15,7 @@ const corpusSpecificTopicRouter = require("./routers/corpus_specific_topics");
 const impactRouter = require("./routers/impact");
 const allTopics = require("./routers/all_topics");
 const topicsRouter = require("./routers/topics");
+const journalDataRouter = require("./routers/journal_data");
 
 const setupSwagger = require('./swagger');
 
@@ -36,6 +37,7 @@ app.use("/corpus_specific_topics", corpusSpecificTopicRouter);
 app.use("/impact", impactRouter);
 app.use("/all_topics", allTopics);
 app.use("/topics", topicsRouter);
+app.use("/journal_data", journalDataRouter);
 
 setupSwagger(app);
 
