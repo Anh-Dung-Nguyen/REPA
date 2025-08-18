@@ -1,8 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, FileText, TrendingUp, User, Calendar, ExternalLink } from 'lucide-react';
+import { ArrowLeft, BookOpen, FileText, TrendingUp, User, Calendar, ExternalLink, ArrowUpNarrowWide } from 'lucide-react';
 import axios from 'axios';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
+async function fetchSjrQuartile(title) {
+    if (!title) return "No Data";
+    try {
+        const res = await axios.get(
+            `http://localhost:8000/journal_data/sjr?title=${encodeURIComponent(title)}`
+        );
+
+        if (Array.isArray(res.data) && res.data.length > 0) {
+            return res.data[0].SJR_Best_Quartile || "No Data";
+        }
+        return "No Data";
+    } catch (err) {
+        if (err.response && err.response.status === 404) {
+            return "No Data";
+        }
+        console.warn("SJR fetch failed for:", title, err.message);
+        return "No Data";
+    }
+}
 
 const SpecificFieldDetailPage = () => {
     const { topicName } = useParams();
@@ -72,6 +92,17 @@ const SpecificFieldDetailPage = () => {
                 );
                 const validPapers = paperDetails.filter(Boolean);
                 setPaperList(validPapers);
+
+                const papersWithSjr = await Promise.all(
+                    validPapers.map(async (paper) => {
+                        const sjrQuartile = await fetchSjrQuartile(paper.title);
+                        return {
+                            ...paper,
+                            sjrQuartile
+                        };
+                    })
+                );
+                setPaperList(papersWithSjr);
 
                 const topicsMap = {};
                 await Promise.all(
@@ -408,6 +439,13 @@ const SpecificFieldDetailPage = () => {
                                                                 <div className="flex items-center gap-1">
                                                                     <FileText size={14} />
                                                                     <span>{paper.venue}</span>
+                                                                </div>
+                                                            )}
+
+                                                            {paper.sjrQuartile && (
+                                                                <div className = 'flex items-center gap-1'>
+                                                                    <ArrowUpNarrowWide size = {14} />
+                                                                    <span>SJR: {paper.sjrQuartile}</span>
                                                                 </div>
                                                             )}
                                                         </div>
