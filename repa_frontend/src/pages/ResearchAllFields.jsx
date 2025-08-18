@@ -36,8 +36,6 @@ const ResearchAllFields = () => {
         };
 
         setTreeData(root);
-        setHighlightPaths([]);
-        setSearchTarget('');
       })
       .catch(err => {
         console.error("Error loading topic tree:", err);
