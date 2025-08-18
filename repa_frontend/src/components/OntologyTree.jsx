@@ -6,6 +6,8 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
   const svgRef = useRef();
   const rootRef = useRef();
   const zoomRef = useRef();
+  const [highlightPaths, setHighlightPaths] = useState([]);
+
   const [tooltip, setTooltip] = useState({
     visible: false,
     x: 0,
@@ -76,6 +78,46 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
   const handleViewDetails = (topicName) => {
     window.location.href = `http://localhost:3000/research-fields/${encodeURIComponent(topicName)}`;
   };
+
+  /*
+  const handleSearch = async (term) => {
+    if (!term) return;
+    try {
+      const res = await fetch(`http://localhost:8000/topics/paths/${encodeURIComponent(term)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.paths && data.paths.length > 0) {
+          const newPaths = data.paths;
+          setHighlightPaths(newPaths);
+
+          const newRootName = newPaths[0][0];
+
+          if (!rootRef.current || rootRef.current.data.name.toLowerCase() !== newRootName.toLowerCase()) {
+            const rootRes = await fetch(`http://localhost:8000/topics/children/${encodeURIComponent(newRootName)}`);
+            let rootChildren = [];
+            if (rootRes.ok) {
+              const rootData = await rootRes.json();
+              rootChildren = (rootData.children || []).map(child => ({ name: child }));
+            }
+
+            const newRoot = {
+              name: newRootName,
+              children: rootChildren,
+            };
+
+            rootRef.current = d3.hierarchy(newRoot, d => d.children);
+            rootRef.current.x0 = 0;
+            rootRef.current.y0 = 0;
+
+            d3.select(svgRef.current).selectAll('*').remove();
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching topic path: ", error);
+    }
+  };
+  */
 
   useEffect(() => {
     if (!rootNode) return;
@@ -188,7 +230,7 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
         .attr('r', 1e-6)
         .style('fill', d => {
           const name = d.data.name.toLowerCase();
-          const inHighlight = pathsToHighlight?.some(path =>
+          const inHighlight = highlightPaths?.some(path =>
             path.map(p => p.toLowerCase()).includes(name)
           );
 
@@ -206,6 +248,8 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
         .attr('dy', '.35em')
         .attr('x', d => d.children || d._children ? -13 : 13)
         .style('text-anchor', d => d.children || d._children ? 'end' : 'start')
+        .attr('x', d => (d === rootRef.current ? -13 : 13))
+        .style('text-anchor', d => (d === rootRef.current ? 'end' : 'start'))
         .text(d => {
           const name = d.data.name;
           const match = name.match(/\[(\d+(?:,\d+)*)\]$/);
@@ -238,6 +282,11 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
       nodeUpdate.select('text')
         .style('fill-opacity', 1);
 
+      nodeUpdate.select('text')
+        .attr('x', d => (d === rootRef.current ? -13 : 13))
+        .style('text-anchor', d => (d === rootRef.current ? 'end' : 'start'))
+        .style('fill-opacity', 1);
+
       const nodeExit = node.exit().transition()
         .duration(500)
         .attr('transform', d => `translate(${source.y},${source.x})`)
@@ -268,7 +317,7 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
         .style('stroke', d => {
           const src = d.source.data.name.toLowerCase();
           const tgt = d.target.data.name.toLowerCase();
-          const isHighlighted = pathsToHighlight?.some(path => {
+          const isHighlighted = highlightPaths?.some(path => {
             for (let i = 0; i < path.length - 1; i++) {
               if (path[i].toLowerCase() === src && path[i + 1].toLowerCase() === tgt) {
                 return true;
@@ -321,7 +370,7 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
       }
     }, 0);
 
-    if (!pathsToHighlight || pathsToHighlight.length === 0) return;
+    if (!highlightPaths || highlightPaths.length === 0) return;
 
     const expandPath = async (path) => {
       let current = rootRef.current;
@@ -367,11 +416,21 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
       }
 
       update(current);
+
+      update(rootRef.current);
     };
 
-    pathsToHighlight.forEach(path => expandPath(path));
+    highlightPaths.forEach(path => expandPath(path));
 
-  }, [rootNode, width, height, searchTarget, pathsToHighlight]); 
+    (async () => {
+      for (const path of highlightPaths) {
+        await expandPath(path);
+      }
+
+      update(rootRef.current);
+    })();
+
+  }, [rootNode, width, height, searchTarget, pathsToHighlight, highlightPaths]); 
 
   const centerTree = () => {
     const svg = d3.select(svgRef.current);
