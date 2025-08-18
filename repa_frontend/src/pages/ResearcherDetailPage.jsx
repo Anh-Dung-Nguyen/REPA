@@ -1,8 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText, Users, BookType, User, TrendingUpDown } from 'lucide-react';
+import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText, Users, BookType, User, TrendingUpDown, ArrowUpNarrowWide } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+
+async function fetchSjrQuartile(title) {
+    if (!title) return "No Data";
+    try {
+        const res = await axios.get(
+            `http://localhost:8000/journal_data/sjr?title=${encodeURIComponent(title)}`
+        );
+
+        if (Array.isArray(res.data) && res.data.length > 0) {
+            return res.data[0].SJR_Best_Quartile || "No Data";
+        }
+        return "No Data";
+    } catch (err) {
+        if (err.response && err.response.status === 404) {
+            return "No Data";
+        }
+        console.warn("SJR fetch failed for:", title, err.message);
+        return "No Data";
+    }
+}
 
 const ResearcherDetailPage = () => {
     const { authorId } = useParams();
@@ -50,15 +70,18 @@ const ResearcherDetailPage = () => {
                     try {
                         const posRes = await axios.get(`http://localhost:8000/papers_with_annotations/authors_positions/${paper.corpusid}`);
                         const found = posRes.data.authors.find(a => a.authorId === authorId);
+                        const sjrQuartile = await fetchSjrQuartile(paper.title);
                         return {
                             ...paper,
-                            authorPosition: found ? found.position : null
+                            authorPosition: found ? found.position : null,
+                            sjrQuartile: sjrQuartile || "No Data"
                         };
                     } catch (e) {
                         console.error(`Error fetching author position for corpusid ${paper.corpusid}`, e);
                         return {
                             ...paper,
-                            authorPosition: null
+                            authorPosition: null,
+                            sjrQuartile: "No Data"
                         };
                     }
                 }));
@@ -584,6 +607,12 @@ const ResearcherDetailPage = () => {
                                                     <div className = 'flex items-center gap-1'>
                                                         <TrendingUpDown size = {14}/>
                                                         <span>{`Position in publication: ${paper.authorPosition}`}</span>
+                                                    </div>
+                                                )}
+                                                {paper.sjrQuartile && (
+                                                    <div className = 'flex items-center gap-1'>
+                                                        <ArrowUpNarrowWide size = {14} />
+                                                        <span>SJR: {paper.sjrQuartile}</span>
                                                     </div>
                                                 )}
                                             </div>
