@@ -49,8 +49,15 @@ const ResearchAllFields = () => {
 
     const res = await fetch(`http://localhost:8000/topics/paths/${encodeURIComponent(searchTerm)}`);
     const json = await res.json();
-    if (json.paths) {
-      setHighlightPaths(json.paths);
+    if (json.paths && json.paths.length > 0) {
+      const newPaths = json.paths;
+      const newRootName = newPaths[0][0];
+
+      if (selectedRoot.toLowerCase() !== newRootName.toLowerCase()) {
+        setSelectedRoot(newRootName);
+      }
+
+      setHighlightPaths(newPaths);
       setSearchTarget(searchTerm);
     }
   };
