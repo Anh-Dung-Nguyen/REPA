@@ -10,7 +10,7 @@ const SearchBarOntology = ({ searchTerm, setSearchTerm, onSearch }) => (
         className="w-full pl-9 pr-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"                    
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        onKeyPress={(e) => e.key === "Enter" && onSearch()} 
+        onKeyPress={(e) => e.key === "Enter" && onSearch(searchTerm)} 
       />
     </div>
 );
