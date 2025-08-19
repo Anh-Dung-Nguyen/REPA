@@ -16,6 +16,7 @@ const impactRouter = require("./routers/impact");
 const allTopics = require("./routers/all_topics");
 const topicsRouter = require("./routers/topics");
 const journalDataRouter = require("./routers/journal_data");
+const corpusTopicRouter = require("./routers/corpus_topics");
 
 const setupSwagger = require('./swagger');
 
@@ -38,6 +39,7 @@ app.use("/impact", impactRouter);
 app.use("/all_topics", allTopics);
 app.use("/topics", topicsRouter);
 app.use("/journal_data", journalDataRouter);
+app.use("/corpus_topics", corpusTopicRouter);
 
 setupSwagger(app);
 
