@@ -251,6 +251,16 @@ router.get("/children/:name", (req, res) => {
 router.get("/paths/:name", (req, res) => {
     const targetName = req.params.name;
     const targetURI = topicToURI(targetName);
+
+    const exists = triples.some(t => t.subject === targetURI || t.object === targetURI);
+
+    if (!exists) {
+        return res.status(404).json({
+            topic: targetName,
+            message: "No paths found to this topic."
+        });
+    }
+
     const visited = new Set();
     const allPaths = [];
 
@@ -285,8 +295,8 @@ router.get("/paths/:name", (req, res) => {
 
     if (allPaths.length === 0) {
         return res.status(404).json({
-        topic: targetName,
-        message: "No paths found to this topic."
+            topic: targetName,
+            message: "No paths found to this topic."
         });
     }
 
