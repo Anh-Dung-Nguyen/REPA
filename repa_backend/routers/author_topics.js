@@ -29,6 +29,125 @@ router.get("/", async (req, res) => {
 
 /**
  * @swagger
+ * /author_topics/group_by_topic/{topic}:
+ *   get:
+ *     tags:
+ *       - Author with topics
+ *     summary: Get paginated authorIds for a topic
+ *     parameters:
+ *       - in: path
+ *         name: topic
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The topic name to filter by
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *           minimum: 1
+ *         description: Page number (starts from 1)
+ *       - in: query
+ *         name: pageSize
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *           minimum: 1
+ *         description: Number of items per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of authorIds for the topic
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 topic:
+ *                   type: string
+ *                   example: "deep learning"
+ *                 authorIds:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["12345", "67890", "112233"]
+ *                 total:
+ *                   type: integer
+ *                   description: Total number of authorIds
+ *                   example: 120
+ *                 page:
+ *                   type: integer
+ *                   description: Current page number
+ *                   example: 1
+ *                 pageSize:
+ *                   type: integer
+ *                   description: Number of items per page
+ *                   example: 10
+ *       404:
+ *         description: Topic not found
+ *       500:
+ *         description: Internal server error
+ */
+
+// GET /author_topics/group_by_topic/:topic?page=1&pageSize=10
+router.get('/group_by_topic/:topic', async (req, res) => {
+  try {
+    const db = getDB();
+    const topic = req.params.topic;
+    const page = Number.parseInt(req.query.page, 10) > 0 ? Number(req.query.page) : 1;
+    const pageSize = Number.parseInt(req.query.pageSize, 10) > 0 ? Number(req.query.pageSize) : 10;
+
+    // Defensive cap (optional): avoids extreme requests that can hurt the DB
+    const MAX_PAGE_SIZE = 1000;
+    const safePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+
+    const pipeline = [
+      { $match: { topics: topic } },              // uses index on topics if present
+      { $group: { _id: "$authorId" } },           // distinct authorIds without $addToSet
+      { $sort: { _id: 1 } },                      // stable sort for consistent pagination
+      {
+        $facet: {
+          data: [
+            { $skip: (page - 1) * safePageSize },
+            { $limit: safePageSize },
+            { $project: { _id: 0, authorId: "$_id" } }
+          ],
+          total: [
+            { $count: "count" }                   // total distinct authorIds (server-side)
+          ]
+        }
+      }
+    ];
+
+    const [agg] = await db
+      .collection('author_topics')
+      .aggregate(pipeline, { allowDiskUse: true, maxTimeMS: 60_000 })
+      .toArray();
+
+    const total = (agg.total[0]?.count) || 0;
+    const authorIds = agg.data.map(d => d.authorId);
+
+    if (total === 0) {
+      return res.status(404).json({ error: 'Topic not found' });
+    }
+
+    res.json({
+      topic,
+      authorIds,
+      total,
+      page,
+      pageSize: safePageSize
+    });
+  } catch (error) {
+    console.error('Error fetching authors by topic:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * @swagger
  * /author_topics/{author_id}:
  *     get:
  *         tags:
