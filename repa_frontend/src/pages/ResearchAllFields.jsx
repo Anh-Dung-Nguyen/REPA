@@ -45,9 +45,27 @@ const ResearchAllFields = () => {
   const handleSearch = async () => {
     if (!searchTerm) return;
 
-    const res = await fetch(`http://localhost:8000/topics/paths/${encodeURIComponent(searchTerm)}`);
-    const json = await res.json();
-    if (json.paths && json.paths.length > 0) {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/topics/paths/${encodeURIComponent(searchTerm)}`
+      );
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          alert(`No paths found for "${searchTerm}".`);
+        } else {
+          alert(`Error: ${res.status} ${res.statusText}`);
+        }
+        return;
+      }
+
+      const json = await res.json();
+
+      if (!json.paths || json.paths.length === 0) {
+        alert(`No paths found for "${searchTerm}".`);
+        return;
+      }
+
       const newPaths = json.paths;
       const newRootName = newPaths[0][0];
 
@@ -57,27 +75,33 @@ const ResearchAllFields = () => {
 
       setHighlightPaths(newPaths);
       setSearchTarget(searchTerm);
+
+    } catch (err) {
+      console.error("Error fetching paths:", err);
+      alert("Something went wrong while searching. Please try again.");
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-4 text-center text-gray-800">Ontology Graph Viewer</h1>
+      <h1 className="text-3xl font-semibold mb-4 text-center text-gray-800">Ontology Graph Viewer</h1>
 
       <div className="mb-6 text-center">
-        <label htmlFor="rootSelector" className="mr-2">Select Root Topic:</label>
-        <select
-          id="rootSelector"
-          className="p-2 border border-gray-300 rounded"
-          value={selectedRoot}
-          onChange={e => setSelectedRoot(e.target.value)}
-        >
+        <div className="flex flex-wrap justify-center gap-2">
           {rootTopics.map((topic, index) => (
-            <option key={index} value={topic}>
+            <button
+              key={index}
+              onClick={() => setSelectedRoot(topic)}
+              className={`px-2 py-1 rounded-lg border transition ${
+                selectedRoot.toLowerCase() === topic.toLowerCase()
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-200"
+              }`}
+            >
               {topic.charAt(0).toUpperCase() + topic.slice(1)}
-            </option>
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
       {treeData && (
