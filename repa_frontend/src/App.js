@@ -11,6 +11,7 @@ import ResearchSpecificFields from './pages/ResearchSpecificFields';
 import SpecificFieldDetailPage from './pages/SpecificFieldDetailPage';
 import ResearcherDetailPage from './pages/ResearcherDetailPage';
 import ResearchAllFields from './pages/ResearchAllFields';
+import FieldDetailPage from './pages/FieldDetailPage';
 
 function App() {
   const location = useLocation();
@@ -85,6 +86,7 @@ function App() {
           <Route path = "/researchers" element = {<Researchers />} />
           <Route path = "/research-specific-fields" element = {<ResearchSpecificFields />} />
           <Route path = "/research-fields" element = {<ResearchAllFields />} />
+          <Route path = "/research-fields/:topicName" element = {<FieldDetailPage />} />
           <Route path = "/about" element = {<About />} />
           <Route path = "/researchers/:authorId" element = {<ResearcherDetailPage />} />
           <Route path = "*" element = {<NotFound />} /> 
