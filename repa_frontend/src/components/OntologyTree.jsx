@@ -1,11 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 import SearchBarOntology from './SearchBarOntology';
+import { useNavigate } from 'react-router-dom';
 
 const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, pathsToHighlight, searchTerm, setSearchTerm, onSearch }) => {
   const svgRef = useRef();
   const rootRef = useRef();
   const zoomRef = useRef();
+  const navigate = useNavigate();
 
   const [tooltip, setTooltip] = useState({
     visible: false,
@@ -75,7 +77,84 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
   };
 
   const handleViewDetails = (topicName) => {
-    window.location.href = `http://localhost:3000/research-fields/${encodeURIComponent(topicName)}`;
+    navigate(`/research-fields/${encodeURIComponent(topicName)}`);
+  };
+
+  const findNodeByName = (node, targetName) => {
+    const normalizedTarget = targetName.toLowerCase();
+    const normalizedCurrent = node.data.name.toLowerCase();
+    
+    if (normalizedCurrent === normalizedTarget) {
+      return node;
+    }
+    
+    if (node.children) {
+      for (const child of node.children) {
+        const found = findNodeByName(child, targetName);
+        if (found) return found;
+      }
+    }
+    
+    if (node._children) {
+      for (const child of node._children) {
+        const found = findNodeByName(child, targetName);
+        if (found) return found;
+      }
+    }
+    
+    return null;
+  };
+
+  const fetchAndAddChildren = async (node) => {
+    try {
+      if (node.children || node._children) {
+        return true;
+      }
+
+      console.log(`Fetching children for: ${node.data.name}`);
+      const response = await fetch(`http://localhost:8000/topics/children/${encodeURIComponent(node.data.name)}`);
+      if (!response.ok) {
+        console.warn(`Failed to fetch children for ${node.data.name}: ${response.status}`);
+        return false;
+      }
+      
+      const result = await response.json();
+      if (!result.children || result.children.length === 0) {
+        console.log(`No children found for ${node.data.name}`);
+        return false;
+      }
+
+      console.log(`Found ${result.children.length} children for ${node.data.name}:`, result.children);
+
+      const newChildren = result.children.map(child => ({
+        name: child,
+        children: null,
+        _children: null,
+      }));
+
+      node.data.children = newChildren;
+      
+      const childHierarchy = d3.hierarchy({ children: newChildren }, d => d.children);
+      const newHierarchyChildren = childHierarchy.children;
+      
+      if (newHierarchyChildren) {
+        newHierarchyChildren.forEach((child, index) => {
+          child.parent = node;
+          child.depth = node.depth + 1;
+          child.x0 = node.x0;
+          child.y0 = node.y0;
+          child.id = `${node.id || 'root'}_${index}`;
+        });
+        
+        node.children = newHierarchyChildren;
+        node._children = null;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error(`Error fetching children for ${node.data.name}:`, error);
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -141,35 +220,7 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
             d.children = d._children;
             d._children = null;
           } else {
-            const topicName = d.data.name;
-            try {
-              const response = await fetch(`http://localhost:8000/topics/children/${encodeURIComponent(topicName)}`);
-              if (response.ok) {
-                const result = await response.json();
-                
-                if (result.children && result.children.length > 0) {
-                  const newChildren = result.children.map(child => ({
-                    name: child,
-                    children: null,
-                    _children: null,
-                  }));
-
-                  d.data.children = newChildren;
-                  d.children = d3.hierarchy({ children: newChildren }, node => node.children).children;
-                  
-                  if (d.children) {
-                    d.children.forEach(child => {
-                      child.parent = d;
-                      child.depth = d.depth + 1;
-                      child.x0 = d.x0;
-                      child.y0 = d.y0;
-                    });
-                  }
-                }
-              }
-            } catch (error) {
-              console.error('Error fetching children:', error);
-            }
+            await fetchAndAddChildren(d);
           }
           
           update(d);
@@ -234,7 +285,14 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
 
       nodeUpdate.select('circle')
         .attr('r', 8)
-        .style('fill', d => d._children ? '#4CAF50' : d.children ? '#2196F3' : '#fff')
+        .style('fill', d => {
+          const name = d.data.name.toLowerCase();
+          const inHighlight = pathsToHighlight?.some(path =>
+            path.map(p => p.toLowerCase()).includes(name)
+          );
+
+          return inHighlight ? '#FF9800' : d._children ? '#4CAF50' : d.children ? '#2196F3' : '#fff';
+        })
         .style('stroke', '#333')
         .style('stroke-width', '2px');
 
@@ -332,58 +390,74 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
     if (!pathsToHighlight || pathsToHighlight.length === 0) return;
 
     const expandPath = async (path) => {
-      let current = rootRef.current;
+      let currentNode = rootRef.current;
       
       for (let i = 1; i < path.length; i++) {
-        const targetName = path[i];
-        let child = (current.children || current._children || []).find(
-          d => d.data.name.toLowerCase() === targetName.toLowerCase()
-        );
-
-        if (!child) {
-          const res = await fetch(`http://localhost:8000/topics/children/${encodeURIComponent(current.data.name)}`);
-          if (!res.ok) return;
-          const result = await res.json();
-
-          const newChildren = (result.children || []).map(name => ({
-            name,
-            children: null,
-            _children: null,
-          }));
-
-          current.data.children = newChildren;
-
-          current.children = d3.hierarchy({ children: newChildren }, d => d.children).children;
-          current.children.forEach(child => {
-            child.parent = current;
-            child.depth = current.depth + 1;
-            child.x0 = current.x0;
-            child.y0 = current.y0;
-          });
-
-          child = current.children.find(
-            d => d.data.name.toLowerCase() === targetName.toLowerCase()
+        const targetName = path[i].toLowerCase();
+        
+        if (!currentNode.children && !currentNode._children) {
+          const success = await fetchAndAddChildren(currentNode);
+          if (!success) {
+            console.warn(`Failed to fetch children for ${currentNode.data.name}`);
+            return;
+          }
+        } else if (currentNode._children && !currentNode.children) {
+          currentNode.children = currentNode._children;
+          currentNode._children = null;
+        }
+        
+        let targetChild = null;
+        if (currentNode.children) {
+          targetChild = currentNode.children.find(
+            child => child.data.name.toLowerCase() === targetName
           );
         }
-
-        if (!child) return;
-
-        current.children = current.children || [];
-        child._children = null;
-
-        current = child;
+        
+        if (!targetChild) {
+          const success = await fetchAndAddChildren(currentNode);
+          if (success && currentNode.children) {
+            targetChild = currentNode.children.find(
+              child => child.data.name.toLowerCase() === targetName
+            );
+          }
+        }
+        
+        if (!targetChild) {
+          console.warn(`Could not find child "${path[i]}" under parent "${currentNode.data.name}"`);
+          return;
+        }
+        
+        currentNode = targetChild;
+        
+        update(rootRef.current);
+        
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
+    };
 
-      update(current);
+    const expandAllPaths = async () => {
+      console.log('Starting to expand paths:', pathsToHighlight);
+      
+      for (let i = 0; i < pathsToHighlight.length; i++) {
+        const path = pathsToHighlight[i];
+        console.log(`Expanding path ${i + 1}/${pathsToHighlight.length}:`, path);
+        
+        try {
+          await expandPath(path);
+        } catch (error) {
+          console.error(`Error expanding path ${path}:`, error);
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      console.log('All paths expanded, final update');
       update(rootRef.current);
     };
 
-    (async () => {
-      for (const path of pathsToHighlight) {
-        await expandPath(path);
-      }
-      update(rootRef.current);
-    })();
+    setTimeout(() => {
+      expandAllPaths();
+    }, 200);
 
   }, [rootNode, width, height, searchTarget, pathsToHighlight]); 
 
@@ -543,6 +617,10 @@ const OntologyTree = ({ rootNode, width = 1200, height = 800, searchTarget, path
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded-full bg-white border border-gray-800"></div>
               <span className="text-xs">Leaf node</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-orange-500 border border-gray-800"></div>
+              <span className="text-xs">Highlighted path</span>
             </div>
           </div>
         </div>
