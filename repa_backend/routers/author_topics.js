@@ -91,59 +91,57 @@ router.get("/", async (req, res) => {
  *         description: Internal server error
  */
 
-// GET /author_topics/group_by_topic/:topic?page=1&pageSize=10
 router.get('/group_by_topic/:topic', async (req, res) => {
-  try {
-    const db = getDB();
-    const topic = req.params.topic;
-    const page = Number.parseInt(req.query.page, 10) > 0 ? Number(req.query.page) : 1;
-    const pageSize = Number.parseInt(req.query.pageSize, 10) > 0 ? Number(req.query.pageSize) : 10;
+    try {
+        const db = getDB();
+        const topic = req.params.topic;
+        const page = Number.parseInt(req.query.page, 10) > 0 ? Number(req.query.page) : 1;
+        const pageSize = Number.parseInt(req.query.pageSize, 10) > 0 ? Number(req.query.pageSize) : 10;
 
-    // Defensive cap (optional): avoids extreme requests that can hurt the DB
-    const MAX_PAGE_SIZE = 1000;
-    const safePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+        const MAX_PAGE_SIZE = 1000;
+        const safePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
 
-    const pipeline = [
-      { $match: { topics: topic } },              // uses index on topics if present
-      { $group: { _id: "$authorId" } },           // distinct authorIds without $addToSet
-      { $sort: { _id: 1 } },                      // stable sort for consistent pagination
-      {
-        $facet: {
-          data: [
-            { $skip: (page - 1) * safePageSize },
-            { $limit: safePageSize },
-            { $project: { _id: 0, authorId: "$_id" } }
-          ],
-          total: [
-            { $count: "count" }                   // total distinct authorIds (server-side)
-          ]
+        const pipeline = [
+            { $match: { topics: topic } },              
+            { $group: { _id: "$authorId" } },          
+            { $sort: { _id: 1 } },                 
+            {
+                $facet: {
+                    data: [
+                        { $skip: (page - 1) * safePageSize },
+                        { $limit: safePageSize },
+                        { $project: { _id: 0, authorId: "$_id" } }
+                    ],
+                    total: [
+                        { $count: "count" }                  
+                    ]
+                }
+            }
+        ];
+
+        const [agg] = await db
+            .collection('author_topics')
+            .aggregate(pipeline, { allowDiskUse: true, maxTimeMS: 60_000 })
+            .toArray();
+
+        const total = (agg.total[0]?.count) || 0;
+        const authorIds = agg.data.map(d => d.authorId);
+
+        if (total === 0) {
+            return res.status(404).json({ error: 'Topic not found' });
         }
-      }
-    ];
 
-    const [agg] = await db
-      .collection('author_topics')
-      .aggregate(pipeline, { allowDiskUse: true, maxTimeMS: 60_000 })
-      .toArray();
-
-    const total = (agg.total[0]?.count) || 0;
-    const authorIds = agg.data.map(d => d.authorId);
-
-    if (total === 0) {
-      return res.status(404).json({ error: 'Topic not found' });
+        res.json({
+            topic,
+            authorIds,
+            total,
+            page,
+            pageSize: safePageSize
+        });
+    } catch (error) {
+        console.error('Error fetching authors by topic:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-
-    res.json({
-      topic,
-      authorIds,
-      total,
-      page,
-      pageSize: safePageSize
-    });
-  } catch (error) {
-    console.error('Error fetching authors by topic:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
 });
 
 /**
