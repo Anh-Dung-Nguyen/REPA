@@ -95,46 +95,51 @@ router.get('/group_by_topic/:topic', async (req, res) => {
     try {
         const db = getDB();
         const topic = req.params.topic;
+        const page = Number.parseInt(req.query.page, 10) > 0 ? Number(req.query.page) : 1;
+        const pageSize = Number.parseInt(req.query.pageSize, 10) > 0 ? Number(req.query.pageSize) : 10;
 
-        const page = parseInt(req.query.page) || 1;
-        const pageSize = parseInt(req.query.pageSize) || 10;
+        const MAX_PAGE_SIZE = 1000;
+        const safePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
 
-        const result = await db.collection('corpus_topics').aggregate([
-            { $match: { topics: topic } },
+        const pipeline = [
+            { $match: { topics: topic } },                  
+            { $group: { _id: "$corpusId" } },               
+            { $sort: { _id: 1 } },                          
             {
-                $group: {
-                    _id: topic,
-                    corpusIds: { $addToSet: "$corpusId" }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    topic: "$_id",
-                    corpusIds: 1
+                $facet: {
+                    data: [
+                        { $skip: (page - 1) * safePageSize },
+                        { $limit: safePageSize },
+                        { $project: { _id: 0, corpusId: "$_id" } }
+                    ],
+                    total: [
+                        { $count: "count" }
+                    ]
                 }
             }
-        ]).toArray();
+        ];
 
-        if (!result.length) {
+        const [agg] = await db
+            .collection('corpus_topics')
+            .aggregate(pipeline, { allowDiskUse: true, maxTimeMS: 60_000 })
+            .toArray();
+
+        const total = (agg.total[0]?.count) || 0;
+        const corpusIds = agg.data.map(d => d.corpusId);
+
+        if (total === 0) {
             return res.status(404).json({ error: 'Topic not found' });
         }
 
-        const allCorpusIds = result[0].corpusIds;
-        const total = allCorpusIds.length;
-
-        const start = (page - 1) * pageSize;
-        const paginatedCorpusIds = allCorpusIds.slice(start, start + pageSize);
-
         res.json({
             topic,
-            corpusIds: paginatedCorpusIds,
+            corpusIds,
             total,
             page,
-            pageSize
+            pageSize: safePageSize
         });
     } catch (error) {
-        console.error('Error fetching corpus by topic:', error.message);
+        console.error('Error fetching corpus by topic:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -197,67 +202,60 @@ router.get('/group_by_topic/:topic/stats', async (req, res) => {
         const db = getDB();
         const topic = req.params.topic;
 
-        const result = await db.collection('corpus_topics').aggregate([
+        const cursor = db.collection('corpus_topics').aggregate([
             { $match: { topics: topic } },
-            {
-                $group: {
-                    _id: topic,
-                    corpusIds: { $addToSet: "$corpusId" }
-                }
-            }
-        ]).toArray();
+            { $group: { _id: "$corpusId" } },
+            { $project: { _id: 0, corpusId: "$_id" } }
+        ], { allowDiskUse: true, maxTimeMS: 60_000 });
 
-        if (!result.length) {
+        const corpusIds = [];
+        for await (const doc of cursor) {
+            corpusIds.push(doc.corpusId);
+        }
+
+        if (!corpusIds.length) {
             return res.status(404).json({ error: 'Topic not found' });
         }
 
-        const corpusIds = result[0].corpusIds;
-
-        if (!corpusIds.length) {
-            return res.json({
-                topic,
-                corpusCount: 0,
-                averagePages: 0,
-                totalCitations: 0,
-                totalReferences: 0,
-                details: []
-            });
-        }
-
-        const papers = await db.collection('papers_with_annotations').find(
-            { corpusid: { $in: corpusIds } },
-            { projection: { corpusid: 1, year: 1, citationcount: 1, referencecount: 1, "journal.pages": 1 } }
-        ).toArray();
-
+        const BATCH_SIZE = 5000;
         let totalPages = 0;
         let totalCitations = 0;
         let totalReferences = 0;
-        let details = [];
+        const details = [];
 
-        for (const paper of papers) {
-            let pagesCount = 0;
-            if (paper.journal && paper.journal.pages) {
-                const pages = paper.journal.pages.split('-');
-                if (pages.length === 2) {
-                    const start = parseInt(pages[0], 10);
-                    const end = parseInt(pages[1], 10);
-                    if (!isNaN(start) && !isNaN(end) && end >= start) {
-                        pagesCount = end - start + 1;
+        for (let i = 0; i < corpusIds.length; i += BATCH_SIZE) {
+            const batchIds = corpusIds.slice(i, i + BATCH_SIZE);
+
+            const papers = await db.collection('papers_with_annotations').find(
+                { corpusid: { $in: batchIds } },
+                { projection: { corpusid: 1, year: 1, citationcount: 1, referencecount: 1, "journal.pages": 1 } }
+            ).toArray();
+
+            for (const paper of papers) {
+                let pagesCount = 0;
+                if (paper.journal && paper.journal.pages) {
+                    const pages = paper.journal.pages.split('-');
+                    if (pages.length === 2) {
+                        const start = parseInt(pages[0], 10);
+                        const end = parseInt(pages[1], 10);
+                        if (!isNaN(start) && !isNaN(end) && end >= start) {
+                            pagesCount = end - start + 1;
+                        }
                     }
                 }
+
+                totalPages += pagesCount;
+                totalCitations += paper.citationcount || 0;
+                totalReferences += paper.referencecount || 0;
+
+                details.push({
+                    corpusId: paper.corpusid,
+                    year: paper.year || null,
+                    pages: pagesCount,
+                    citationCount: paper.citationcount || 0,
+                    referenceCount: paper.referencecount || 0
+                });
             }
-
-            totalPages += pagesCount;
-            totalCitations += paper.citationcount || 0;
-            totalReferences += paper.referencecount || 0;
-
-            details.push({
-                corpusId: paper.corpusid,
-                year: paper.year || null,
-                pages: pagesCount,
-                citationCount: paper.citationcount || 0,
-                referenceCount: paper.referencecount || 0
-            });
         }
 
         const averagePages = details.length ? totalPages / details.length : 0;
@@ -271,7 +269,7 @@ router.get('/group_by_topic/:topic/stats', async (req, res) => {
             details
         });
     } catch (error) {
-        console.error('Error fetching corpus stats:', error.message);
+        console.error('Error fetching corpus stats:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
