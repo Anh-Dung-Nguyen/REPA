@@ -332,6 +332,17 @@ const ResearcherDetailPage = () => {
                             Research Fields
                         </button>
                         <button
+                            onClick={() => setActiveTab('all_topics')}
+                            className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors ${
+                            activeTab === 'topics'
+                                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                            }`}
+                        >
+                            <FileText size={18} />
+                            Research All Fields
+                        </button>
+                        <button
                             onClick={() => setActiveTab('coauthors')}
                             className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors ${
                                 activeTab === 'coauthors'
@@ -679,6 +690,44 @@ const ResearcherDetailPage = () => {
                 {activeTab === 'topics' && (
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Research Topics</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {specificTopics.map((topic, index) => (
+                                <div 
+                                    key={index} 
+                                    className="bg-gray-50 rounded-lg p-4 border-l-4 border-indigo-500 flex flex-col justify-between cursor-pointer"
+                                    onClick={() => handleTopicClick(topic)}
+                                >
+                                    <h4 className="font-medium text-gray-800 capitalize mb-2 hover:text-indigo-500">{topic.name}</h4>
+                                    <div className="flex flex-col text-sm text-gray-600">
+                                        {topic.hindex !== 'N/A' && (
+                                            <div className="flex items-center">
+                                                <Award size={14} className="mr-1 text-indigo-600" />
+                                                <span>H-Index: {topic.hindex}</span>
+                                            </div>
+                                        )}
+                                        {topic.impactFactor !== 'N/A' && (
+                                            <div className="flex items-center">
+                                                <TrendingUp size={14} className="mr-1 text-indigo-500" />
+                                                <span>Impact: {topic.impactFactor}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        {specificTopics.length === 0 && (
+                            <div className="text-center py-12">
+                                <FileText size={48} className="text-gray-400 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-gray-800 mb-2">No Topics Found</h3>
+                                <p className="text-gray-600">No specific research topics have been identified for this researcher.</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {activeTab === 'all_topics' && (
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Research All Topics</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {specificTopics.map((topic, index) => (
                                 <div 
