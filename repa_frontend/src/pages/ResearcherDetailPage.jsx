@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, User2, BookOpen, Award, Quote, ExternalLink, TrendingUp, Calendar, FileText, Users, BookType, User, TrendingUpDown, ArrowUpNarrowWide } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import OntologyTopic from "../components/OntologyTopic";
 
 async function fetchSjrQuartile(title) {
     if (!title) return "No Data";
@@ -38,6 +39,7 @@ const ResearcherDetailPage = () => {
     const [impactPerTopic, setImpactPerTopic] = useState({});
     const [impactGroupTopic, setImpactGroupTopic] = useState({});
     // const [coAuthorsCitationsEvolution, setCoAuthorsCitationsEvolution] = useState([]);
+    const [allTopics, setAllTopics] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -100,6 +102,9 @@ const ResearcherDetailPage = () => {
 
                 const impactGroupTopicResponse = await axios.get(`http://localhost:8000/impact/impact_group_topic/${authorId}`);
                 setImpactGroupTopic(impactGroupTopicResponse.data?.impact_factor || "N/A");
+
+                const authorTopicsResponse = await axios.get(`http://localhost:8000/author_topics/${authorId}`);
+                setAllTopics(authorTopicsResponse.data?.[0]?.topics || []);
 
             } catch (error) {
                 console.error("Error fetching researcher data:", error);
@@ -726,42 +731,14 @@ const ResearcherDetailPage = () => {
                 )}
 
                 {activeTab === 'all_topics' && (
-                    <div className="bg-white rounded-lg shadow-md p-6">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Research All Topics</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {specificTopics.map((topic, index) => (
-                                <div 
-                                    key={index} 
-                                    className="bg-gray-50 rounded-lg p-4 border-l-4 border-indigo-500 flex flex-col justify-between cursor-pointer"
-                                    onClick={() => handleTopicClick(topic)}
-                                >
-                                    <h4 className="font-medium text-gray-800 capitalize mb-2 hover:text-indigo-500">{topic.name}</h4>
-                                    <div className="flex flex-col text-sm text-gray-600">
-                                        {topic.hindex !== 'N/A' && (
-                                            <div className="flex items-center">
-                                                <Award size={14} className="mr-1 text-indigo-600" />
-                                                <span>H-Index: {topic.hindex}</span>
-                                            </div>
-                                        )}
-                                        {topic.impactFactor !== 'N/A' && (
-                                            <div className="flex items-center">
-                                                <TrendingUp size={14} className="mr-1 text-indigo-500" />
-                                                <span>Impact: {topic.impactFactor}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        {specificTopics.length === 0 && (
-                            <div className="text-center py-12">
-                                <FileText size={48} className="text-gray-400 mx-auto mb-4" />
-                                <h3 className="text-lg font-medium text-gray-800 mb-2">No Topics Found</h3>
-                                <p className="text-gray-600">No specific research topics have been identified for this researcher.</p>
-                            </div>
-                        )}
-                    </div>
-                )}
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+      Ontology of Author’s Topics
+    </h3>
+    <OntologyTopic topics={allTopics} />
+  </div>
+)}
+
 
                 {activeTab === 'coauthors' && (
                     <div className="bg-white rounded-lg shadow-md">
