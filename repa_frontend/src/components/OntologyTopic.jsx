@@ -1,57 +1,52 @@
-// components/OntologyTopic.jsx
-import React, { useEffect, useState } from "react";
-import OntologyTree from "./OntologyTree";
-import { filterOntologyTree } from "../utils/filterOntologyTree";
+import React from 'react';
+import ResearcherOntologyTree from './ResearcherOntologyTree';
 
-const OntologyTopic = ({ topics }) => {
-  const [rootNode, setRootNode] = useState(null);
-  const [loading, setLoading] = useState(true);
+const OntologyTopic = ({ topics = [] }) => {
+  const validTopics = topics
+    .filter(topic => topic && topic.trim())
+    .map(topic => typeof topic === 'string' ? topic.trim() : String(topic).trim());
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!topics || topics.length === 0) {
-        setRootNode(null);
-        setLoading(false);
-        return;
-      }
+  console.log('OntologyTopic received topics:', validTopics);
 
-      setLoading(true);
-      try {
-        // convert topics list to lowercase set
-        const authorTopics = new Set(topics.map(t => t.toLowerCase()));
-
-        // fetch ontology children of "computer science"
-        const rootRes = await fetch(
-          `http://localhost:8000/topics/children/computer%20science`
-        );
-        const ontology = await rootRes.json();
-
-        // filter ontology down to author topics
-        const pruned = filterOntologyTree(
-          { name: "computer science", children: ontology.children || [] },
-          authorTopics
-        );
-
-        setRootNode(pruned);
-      } catch (e) {
-        console.error("Failed to fetch ontology:", e);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [topics]);
-
-  if (loading) {
-    return <div className="p-6 text-center">Loading ontology…</div>;
+  if (!validTopics || validTopics.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-gray-500 mb-4">No topics available for this researcher</div>
+        <p className="text-sm text-gray-400">
+          The researcher needs to have specific topics assigned to display the ontology tree.
+        </p>
+      </div>
+    );
   }
 
-  if (!rootNode) {
-    return <div className="p-6 text-center">No ontology available for this author.</div>;
-  }
-
-  return <OntologyTree rootNode={rootNode} width={1200} height={800} />;
+  return (
+    <div className="w-full">
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+          Research Topics Ontology
+        </h3>
+        <p className="text-sm text-gray-600">
+          This visualization shows the hierarchical relationship from Computer Science to each of the researcher's specific topics.
+          Only the relevant paths are displayed, filtering out unrelated branches.
+        </p>
+      </div>
+      
+      <ResearcherOntologyTree 
+        topics={validTopics}
+        width={1200}
+        height={700}
+      />
+      
+      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+        <h4 className="font-medium text-blue-800 mb-2">Understanding the Ontology</h4>
+        <ul className="text-sm text-blue-700 space-y-1">
+          <li>• <strong>Green Nodes:</strong> The researcher's specific topics (highlighted with bold border)</li>
+          <li>• <strong>White Nodes:</strong> Other topics in the path (Computer Science root and intermediate topics)</li>
+          <li>• <strong>Orange Links:</strong> The direct paths from Computer Science to each research topic</li>
+        </ul>
+      </div>
+    </div>
+  );
 };
 
 export default OntologyTopic;
