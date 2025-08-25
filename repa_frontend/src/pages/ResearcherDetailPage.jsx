@@ -731,14 +731,13 @@ const ResearcherDetailPage = () => {
                 )}
 
                 {activeTab === 'all_topics' && (
-  <div className="bg-white rounded-lg shadow-md p-6">
-    <h3 className="text-lg font-semibold text-gray-800 mb-4">
-      Ontology of Author’s Topics
-    </h3>
-    <OntologyTopic topics={allTopics} />
-  </div>
-)}
-
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                            Ontology of Author’s Topics
+                        </h3>
+                        <OntologyTopic topics={allTopics} />
+                    </div>
+                )}
 
                 {activeTab === 'coauthors' && (
                     <div className="bg-white rounded-lg shadow-md">
