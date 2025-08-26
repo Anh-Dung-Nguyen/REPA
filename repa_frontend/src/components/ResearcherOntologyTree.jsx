@@ -19,6 +19,7 @@ const ResearcherOntologyTree = ({ topics = [], width = 1200, height = 800 }) => 
 
   const tooltipTimeoutRef = useRef();
   const statsCache = useRef({});
+  const pendingRequests = useRef(new Set());
 
   const cleanTopics = topics
     .map((topic) =>
@@ -27,48 +28,68 @@ const ResearcherOntologyTree = ({ topics = [], width = 1200, height = 800 }) => 
     .filter((topic) => topic && topic !== "computer science");
 
   const fetchTopicStats = async (topicName) => {
-    if (statsCache.current[topicName]) {
-      return statsCache.current[topicName];
+    const normalizedName = topicName.toLowerCase();
+    
+    if (statsCache.current[normalizedName]) {
+      return statsCache.current[normalizedName];
     }
+    
+    if (pendingRequests.current.has(normalizedName)) {
+      return null;
+    }
+    
+    pendingRequests.current.add(normalizedName);
+    
     try {
       const response = await fetch(
         `http://localhost:8000/topics/topic_author_corpus_counts/${encodeURIComponent(
-          topicName
+          normalizedName
         )}`
       );
       if (response.ok) {
         const data = await response.json();
-        statsCache.current[topicName] = data;
+        statsCache.current[normalizedName] = data;
         return data;
       }
       return null;
     } catch (error) {
       console.error("Error fetching topic stats:", error);
       return null;
+    } finally {
+      pendingRequests.current.delete(normalizedName);
     }
   };
 
   const showTooltip = async (event, topicName) => {
-    if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+      tooltipTimeoutRef.current = null;
+    }
 
     const rect = event.target.getBoundingClientRect();
     const svgRect = svgRef.current.getBoundingClientRect();
 
-    setTooltip((prev) => ({
-      ...prev,
+    const normalizedName = topicName.toLowerCase();
+    
+    const cachedData = statsCache.current[normalizedName];
+    const isPending = pendingRequests.current.has(normalizedName);
+    
+    setTooltip({
       visible: true,
       x: rect.right - svgRect.left + 10,
       y: rect.top - svgRect.top,
-      loading: true,
-      data: null,
-    }));
+      loading: !cachedData && !isPending,
+      data: cachedData || null,
+    });
 
-    const stats = await fetchTopicStats(topicName.toLowerCase());
-    setTooltip((prev) => ({
-      ...prev,
-      data: stats,
-      loading: false,
-    }));
+    if (!cachedData && !isPending) {
+      const stats = await fetchTopicStats(topicName);
+      setTooltip((prev) => ({
+        ...prev,
+        data: stats,
+        loading: false,
+      }));
+    }
   };
 
   const hideTooltip = () => {
@@ -84,7 +105,10 @@ const ResearcherOntologyTree = ({ topics = [], width = 1200, height = 800 }) => 
   };
 
   const cancelHideTooltip = () => {
-    if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+      tooltipTimeoutRef.current = null;
+    }
   };
 
   const fetchAllPaths = async () => {
@@ -179,6 +203,8 @@ const ResearcherOntologyTree = ({ topics = [], width = 1200, height = 800 }) => 
     fetchAllPaths();
   }, [topics]);
 
+  const currentTransformRef = useRef(d3.zoomIdentity.translate(100, height / 2));
+
   useEffect(() => {
     if (!treeData) return;
 
@@ -192,6 +218,7 @@ const ResearcherOntologyTree = ({ topics = [], width = 1200, height = 800 }) => 
       .scaleExtent([0.1, 3])
       .on("zoom", (event) => {
         container.attr("transform", event.transform);
+        currentTransformRef.current = event.transform;
       });
 
     mainContainer.call(zoom);
@@ -255,6 +282,7 @@ const ResearcherOntologyTree = ({ topics = [], width = 1200, height = 800 }) => 
       })
       .style("stroke", "#333")
       .style("stroke-width", "2px")
+      .style("cursor", "pointer")
       .on("mouseenter", (event, d) => showTooltip(event, d.data.name))
       .on("mouseleave", hideTooltip);
 
@@ -268,9 +296,13 @@ const ResearcherOntologyTree = ({ topics = [], width = 1200, height = 800 }) => 
       .style("font-weight", "normal")
       .style("font-family", "Arial, sans-serif")
       .style("fill", "#333")
-      .on("mouseenter", (event, d) => showTooltip(event, d.data.name))
-      .on("mouseleave", hideTooltip);
-  }, [treeData, highlightPaths, cleanTopics, width, height]);
+      .style("cursor", "pointer")
+      .style("pointer-events", "none");
+
+    container.attr("transform", currentTransformRef.current);
+    svg.call(zoom.transform, currentTransformRef.current);
+
+  }, [treeData, width, height]); 
 
   const centerTree = () => {
     const svg = d3.select(svgRef.current);
@@ -278,6 +310,7 @@ const ResearcherOntologyTree = ({ topics = [], width = 1200, height = 800 }) => 
 
     if (zoom && svg) {
       const centerTransform = d3.zoomIdentity.translate(width / 2, height / 2);
+      currentTransformRef.current = centerTransform;
       svg.transition().duration(750).call(zoom.transform, centerTransform);
     }
   };
@@ -287,10 +320,12 @@ const ResearcherOntologyTree = ({ topics = [], width = 1200, height = 800 }) => 
     const zoom = zoomRef.current;
 
     if (zoom && svg) {
+      const resetTransform = d3.zoomIdentity.translate(100, height / 2);
+      currentTransformRef.current = resetTransform;
       svg
         .transition()
         .duration(750)
-        .call(zoom.transform, d3.zoomIdentity.translate(100, height / 2));
+        .call(zoom.transform, resetTransform);
     }
   };
 
@@ -311,6 +346,14 @@ const ResearcherOntologyTree = ({ topics = [], width = 1200, height = 800 }) => 
       svg.transition().duration(300).call(zoom.scaleBy, 0.67);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+    };
+  }, []);
 
   if (loading) {
     return (
