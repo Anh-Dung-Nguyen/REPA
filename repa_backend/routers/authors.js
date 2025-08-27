@@ -3,8 +3,14 @@ const router = express.Router();
 const axios = require("axios");
 const { getDB } = require("../db");
 const NodeCache = require("node-cache");
+const crypto = require("crypto");
 
 const topicsCache = new NodeCache({ stdTTL: 3600});
+const hashCache = new NodeCache({ stdTTL: 7200});
+
+const createSearchHash = (text) => {
+    return crypto.createHash('md5').update(text.toLowerCase().trim()).digest('hex');
+};
 
 /**
  * @swagger
@@ -12,7 +18,7 @@ const topicsCache = new NodeCache({ stdTTL: 3600});
  *     get:
  *         tags:
  *             - Authors
- *         summary: Get a paginated list of authors (optionally filtered by name)
+ *         summary: Get a paginated list of authors (optionally filtered by name, authorId, or topic)
  *         parameters:
  *           - in: query
  *             name: page
@@ -29,6 +35,16 @@ const topicsCache = new NodeCache({ stdTTL: 3600});
  *             schema:
  *                 type: string
  *             description: Filter authors by name (case-insensitive, partial match)
+ *           - in: query
+ *             name: authorId
+ *             schema:
+ *                 type: string
+ *             description: Filter authors by exact author ID
+ *           - in: query
+ *             name: topic
+ *             schema:
+ *                 type: string
+ *             description: Filter authors by topic
  *         responses:
  *             200:
  *               description: Paginated list of authors
@@ -60,21 +76,105 @@ router.get("/", async (req, res) => {
         const skip = (page - 1) * limit;
 
         const name = req.query.name?.trim();
-        const query = name ? { name: { $regex: new RegExp(name, "i") } } : {};
+        const authorId = req.query.authorId?.trim();
+        const topic = req.query.topic?.trim();
 
-        const [authors, total] = await Promise.all([
-            db.collection("authors")
-                .find(query, { projection: { _id: 0, authorid: 1, name: 1, hindex: 1, papercount: 1, citationcount: 1 } })
-                .skip(skip).limit(limit).toArray(),
-            db.collection("authors").countDocuments(query)
-        ]);
+        let query = {};
+        let authorIds = [];
 
-        const authorIds = authors.map(a => a.authorid);
+        if (authorId) {
+            query = { authorid: authorId };
+        } else if (name) {
+            const searchHash = createSearchHash(name);
+            const cacheKey = `name_search_${searchHash}`;
+            
+            let cachedResults = hashCache.get(cacheKey);
+            if (!cachedResults) {
+                const nameResults = await db.collection("authors").aggregate([
+                    {
+                        $match: {
+                            name: { $regex: new RegExp(name, "i") }
+                        }
+                    },
+                    { $project: { authorid: 1, _id: 0 } },
+                    { $limit: 10000 }
+                ]).toArray();
+                
+                cachedResults = nameResults.map(r => r.authorid);
+                hashCache.set(cacheKey, cachedResults);
+            }
+            
+            if (cachedResults.length === 0) {
+                return res.json({
+                    page, limit, total: 0, totalPages: 0, authors: []
+                });
+            }
+            
+            authorIds = cachedResults;
+            query = { authorid: { $in: authorIds } };
+        } else if (topic) {
+            try {
+                const topicResults = await axios.get(`http://localhost:8000/author_topics/group_by_topic`, {
+                    params: { topic: topic }
+                });
+                
+                if (!topicResults.data || !topicResults.data.authors) {
+                    return res.json({
+                        page, limit, total: 0, totalPages: 0, authors: []
+                    });
+                }
+                
+                authorIds = topicResults.data.authors.map(a => a.authorId);
+                if (authorIds.length === 0) {
+                    return res.json({
+                        page, limit, total: 0, totalPages: 0, authors: []
+                    });
+                }
+                
+                query = { authorid: { $in: authorIds } };
+            } catch (error) {
+                console.error('Error fetching authors by topic:', error);
+                return res.status(500).json({ error: "Error filtering by topic" });
+            }
+        }
+
+        let authors, total;
+        
+        if (Object.keys(query).length === 0) {
+            [authors, total] = await Promise.all([
+                db.collection("authors")
+                    .find({}, { projection: { _id: 0, authorid: 1, name: 1, hindex: 1, papercount: 1, citationcount: 1 } })
+                    .skip(skip).limit(limit).toArray(),
+                db.collection("authors").countDocuments({})
+            ]);
+        } else {
+            if (name && authorIds.length > 0) {
+                const relevantIds = authorIds.slice(skip, skip + limit);
+                authors = await db.collection("authors")
+                    .find(
+                        { authorid: { $in: relevantIds } },
+                        { projection: { _id: 0, authorid: 1, name: 1, hindex: 1, papercount: 1, citationcount: 1 } }
+                    ).toArray();
+                
+                const idToAuthor = new Map(authors.map(a => [a.authorid, a]));
+                authors = relevantIds.map(id => idToAuthor.get(id)).filter(Boolean);
+                total = authorIds.length;
+            } else {
+                [authors, total] = await Promise.all([
+                    db.collection("authors")
+                        .find(query, { projection: { _id: 0, authorid: 1, name: 1, hindex: 1, papercount: 1, citationcount: 1 } })
+                        .skip(skip).limit(limit).toArray(),
+                    db.collection("authors").countDocuments(query)
+                ]);
+            }
+        }
+
+        const authorIdList = authors.map(a => a.authorid);
 
         const latestPapers = await db.collection("papers_with_annotations").aggregate([
-            { $match: { "authors.authorId": { $in: authorIds } } },
+            { $match: { "authors.authorId": { $in: authorIdList } } },
             { $unwind: "$authors" },
-            { $match: { "authors.authorId": { $in: authorIds } } },
+            { $match: { "authors.authorId": { $in: authorIdList } } },
             { $sort: { updated: -1 } },
             {
                 $group: {
@@ -85,29 +185,26 @@ router.get("/", async (req, res) => {
         ]).toArray();
         const paperMap = new Map(latestPapers.map(r => [r._id, r.latestTitle]));
 
-        const topicsMap = new Map();
-        await Promise.all(authorIds.map(async (id) => {
-            let topics = topicsCache.get(id);
-            if (!topics) {
-                try {
-                    const res = await axios.get(`http://localhost:8000/author_specific_topics/filtered_author_paper_topics/author/${id}`);
-                    topics = res.data.flatMap(p => p.topics || []);
-                    topics = Array.from(new Set(topics)).sort();
-                    topicsCache.set(id, topics);
-                } catch (e) {
-                    console.error(`Failed to fetch topics for authorId=${id}:`, e.message);
-                    topics = [];
-                }
+        const topicsDocs = await db.collection("author_topics")
+            .find({ authorId: { $in: authorIdList } })
+            .toArray();
+
+        const topicsMap = new Map(
+            topicsDocs.map(doc => [doc.authorId, doc.topics || []])
+        );
+
+        authorIdList.forEach(id => {
+            if (!topicsMap.has(id)) {
+                topicsMap.set(id, []);
             }
-            topicsMap.set(id, topics);
-        }));
+        });
 
         const papers = await db.collection("papers_with_annotations")
-            .find({ "authors.authorId": { $in: authorIds } }, { projection: { authors: 1 } })
+            .find({ "authors.authorId": { $in: authorIdList } }, { projection: { authors: 1 } })
             .toArray();
 
         const coauthorMap = new Map();
-        for (const authorId of authorIds) {
+        for (const authorId of authorIdList) {
             coauthorMap.set(authorId, new Set());
         }
         for (const paper of papers) {
@@ -147,8 +244,8 @@ router.get("/", async (req, res) => {
             return {
                 ...author,
                 latest_paper_title: latestTitle,
-                specific_topics: topics.map(capitalizeFirst),
-                specific_topics_count: topics.length,
+                topic: topics.map(capitalizeFirst).join(", "),
+                topic_count: topics.length,
                 unique_coauthors_count: coauthors.length,
                 coauthors
             };
@@ -334,14 +431,14 @@ router.get("/:author_id/coauthors", async (req, res) => {
  *     get:
  *         tags:
  *             - Authors
- *         summary: Search authors by name
+ *         summary: Search authors by name or author ID with hash optimization
  *         parameters:
  *           - in: query
- *             name: name
+ *             name: query
  *             schema:
  *                 type: string
  *             required: true
- *             description: The name of the author to search for
+ *             description: The name or author ID to search for
  *         responses:
  *             200:
  *                 description: List of matched authors
@@ -356,69 +453,87 @@ router.get("/:author_id/coauthors", async (req, res) => {
 router.get("/search", async (req, res) => {
     try {
         const db = getDB();
-        const { name } = req.query;
-
-        if (!name || name.trim() === "") {
-            return res.status(400).json({ error: "Missing or empty 'name' query parameter" });
+        const { query: searchQuery } = req.query;
+        
+        if (!searchQuery || searchQuery.trim() === "") {
+            return res.status(400).json({ error: "Missing or empty 'query' parameter" });
         }
-
-        const cacheKey = `authors_search_${name.trim().toLowerCase()}`;
-        const cached = topicsCache.get(cacheKey);
+        
+        const trimmedQuery = searchQuery.trim();
+        const searchHash = createSearchHash(trimmedQuery);
+        const cacheKey = `authors_search_${searchHash}`;
+        const cached = hashCache.get(cacheKey);
+        
         if (cached) {
             return res.json({ authors: cached });
         }
-
-        const regex = new RegExp(name.trim(), "i");
-        const authors = await db.collection("authors")
-            .find({ name: { $regex: regex } }, { projection: { _id: 0 } })
-            .limit(50)
-            .toArray();
-
+        
+        let authors = [];
+        
+        if (/^[a-zA-Z0-9]+$/.test(trimmedQuery)) {
+            const exactMatch = await db.collection("authors")
+                .findOne({ authorid: trimmedQuery }, { projection: { _id: 0 } });
+            if (exactMatch) {
+                authors = [exactMatch];
+            }
+        }
+        
+        if (authors.length === 0) {
+            const pipeline = [
+                {
+                    $match: {
+                        name: { $regex: new RegExp(trimmedQuery, "i") }
+                    }
+                },
+                { $project: { _id: 0 } },
+                { $limit: 50 },
+                { $sort: { hindex: -1, citationcount: -1 } }
+            ];
+            authors = await db.collection("authors").aggregate(pipeline).toArray();
+        }
+        
         const enrichedAuthors = await Promise.all(authors.map(async (author) => {
             const authorId = author.authorid;
-
-            const [latestPaper, specificTopicEntry, papers] = await Promise.all([
-                db.collection("papers_with_annotations")
-                    .find({ "authors.authorId": authorId })
-                    .sort({ updated: -1 })
-                    .limit(1)
-                    .project({ _id: 0, title: 1 })
-                    .next(),
-                db.collection("author_specific_topics")
-                    .findOne({ authorId: authorId }, { projection: { _id: 0, topics: 1 } }),
-                db.collection("papers_with_annotations")
-                    .find({ "authors.authorId": authorId }, { projection: { authors: 1 } })
-                    .toArray()
-            ]);
-
+            
+            const papers = await db.collection("papers_with_annotations")
+                .find({ "authors.authorId": authorId }, { projection: { authors: 1, title: 1 } })
+                .toArray();
+            
+            const latestPaper = papers.length > 0 ? papers[0] : null;
+            
             const coauthorSet = new Set();
-            papers.forEach(paper => {
-                if (paper.authors) {
-                    paper.authors.forEach(a => {
-                        if (a.authorId !== authorId) {
-                            coauthorSet.add(a.authorId);
-                        }
-                    });
-                }
-            });
-
+            if (papers && Array.isArray(papers)) {
+                papers.forEach(paper => {
+                    if (paper.authors && Array.isArray(paper.authors)) {
+                        paper.authors.forEach(a => {
+                            if (a.authorId && a.authorId !== authorId) {
+                                coauthorSet.add(a.authorId);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            const specificTopicEntry = await db.collection("author_topics")
+                .findOne({ authorId: authorId });
+            
             function capitalizeFirstLetter(string) {
                 return string.charAt(0).toUpperCase() + string.slice(1);
             }
-
+            
             return {
                 ...author,
                 latest_paper_title: latestPaper?.title || null,
-                specific_topic: specificTopicEntry?.topics 
+                topic: specificTopicEntry?.topics
                     ? capitalizeFirstLetter(specificTopicEntry.topics.join(", "))
                     : null,
                 unique_coauthors_count: coauthorSet.size
             };
         }));
-
-        topicsCache.set(cacheKey, enrichedAuthors);
-
+        
+        hashCache.set(cacheKey, enrichedAuthors);
         res.json({ authors: enrichedAuthors });
+        
     } catch (err) {
         console.error("Error searching authors:", err);
         res.status(500).json({ error: "Internal server error" });
