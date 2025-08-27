@@ -14,7 +14,7 @@ const ResearcherCard = ({ researcher, onViewDetails, onCompare }) => (
             </div>
             <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900">{researcher.name}</h3>
-                <p className="text-sm text-gray-500 line-clamp-2">{researcher.specific_topic}</p>
+                <p className="text-sm text-gray-500 line-clamp-2">{researcher.topic}</p>
             </div>
         </div>
 
