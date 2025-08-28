@@ -1,8 +1,16 @@
 import React from "react";
-import { Eye, BarChart3 } from "lucide-react";
+import { Eye, BarChart3, Check } from "lucide-react";
 
-const ResearcherCard = ({ researcher, onViewDetails, onCompare }) => (
-    <div className="bg-white rounded-2xl shadow hover:shadow-xl transition-shadow p-6 flex flex-col h-full border border-gray-100">
+const ResearcherCard = ({ 
+    researcher, 
+    onViewDetails, 
+    onCompare,
+    isSelectedForComparison = false,
+    canSelectForComparison = true
+}) => (
+    <div className={`bg-white rounded-2xl shadow hover:shadow-xl transition-shadow p-6 flex flex-col h-full border-2 ${
+        isSelectedForComparison ? 'border-blue-500 bg-blue-50' : 'border-gray-100'
+    }`}>
         <div className="flex items-center gap-4 mb-4">
             <div className="relative flex-shrink-0">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-semibold text-xl shadow-inner">
@@ -40,10 +48,26 @@ const ResearcherCard = ({ researcher, onViewDetails, onCompare }) => (
             </button>
             <button
                 onClick={() => onCompare(researcher)}
-                className="flex-1 inline-flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2 px-4 rounded-xl transition-colors shadow-sm"
+                disabled={!canSelectForComparison && !isSelectedForComparison}
+                className={`flex-1 inline-flex items-center justify-center gap-2 text-sm font-medium py-2 px-4 rounded-xl transition-colors shadow-sm ${
+                    isSelectedForComparison
+                        ? 'bg-blue-100 hover:bg-blue-200 text-blue-700'
+                        : canSelectForComparison
+                            ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                            : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                }`}
             >
-                <BarChart3 className="h-4 w-4" />
-                Compare
+                {isSelectedForComparison ? (
+                    <>
+                        <Check className="h-4 w-4" />
+                        Selected
+                    </>
+                ) : (
+                    <>
+                        <BarChart3 className="h-4 w-4" />
+                        Compare
+                    </>
+                )}
             </button>
         </div>
     </div>
