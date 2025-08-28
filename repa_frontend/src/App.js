@@ -12,6 +12,7 @@ import SpecificFieldDetailPage from './pages/SpecificFieldDetailPage';
 import ResearcherDetailPage from './pages/ResearcherDetailPage';
 import ResearchAllFields from './pages/ResearchAllFields';
 import FieldDetailPage from './pages/FieldDetailPage';
+import ResearcherComparison from './pages/ResearcherComparison';
 
 function App() {
   const location = useLocation();
@@ -89,6 +90,7 @@ function App() {
           <Route path = "/research-fields/:topicName" element = {<FieldDetailPage />} />
           <Route path = "/about" element = {<About />} />
           <Route path = "/researchers/:authorId" element = {<ResearcherDetailPage />} />
+          <Route path = "/compare/:authorId1/:authorId2" element = {<ResearcherComparison />} />
           <Route path = "*" element = {<NotFound />} /> 
           <Route path = "/research-specific-fields/:topicName" element = {<SpecificFieldDetailPage/>} />
         </Routes>
