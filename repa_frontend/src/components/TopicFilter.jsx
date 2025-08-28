@@ -1,59 +1,40 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Filter, X } from 'lucide-react';
-import debounce from 'lodash.debounce';
-import axios from 'axios';
+import React, { useState } from 'react';
+import { Filter, X, Search } from 'lucide-react';
 
 const TopicFilter = ({ selectedTopic, onTopicSelect, onTopicClear }) => {
-    const [topicSearch, setTopicSearch] = useState('');
-    const [topics, setTopics] = useState([]);
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [topicInput, setTopicInput] = useState('');
 
-    const debouncedTopicSearch = useCallback(
-        debounce(async (searchTerm) => {
-            if (!searchTerm.trim()) {
-                setTopics([]);
-                return;
-            }
-            
-            setLoading(true);
-            try {
-                const response = await axios.get('http://localhost:8000/all_topic', {
-                    params: { search: searchTerm, limit: 20 }
-                });
-                setTopics(response.data.topics || []);
-            } catch (error) {
-                console.error('Error fetching topics:', error);
-                setTopics([]);
-            } finally {
-                setLoading(false);
-            }
-        }, 300), []
-    );
-
-    useEffect(() => {
-        if (topicSearch) {
-            debouncedTopicSearch(topicSearch);
-            setShowDropdown(true);
-        } else {
-            setTopics([]);
-            setShowDropdown(false);
+    const handleTopicSubmit = (e) => {
+        e.preventDefault();
+        const topic = topicInput.trim();
+        if (topic) {
+            onTopicSelect(topic);
+            setTopicInput('');
         }
-        
-        return debouncedTopicSearch.cancel;
-    }, [topicSearch, debouncedTopicSearch]);
-
-    const handleTopicSelect = (topic) => {
-        onTopicSelect(topic);
-        setTopicSearch('');
-        setShowDropdown(false);
     };
 
     const handleTopicClear = () => {
         onTopicClear();
-        setTopicSearch('');
-        setShowDropdown(false);
+        setTopicInput('');
     };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleTopicSubmit(e);
+        }
+    };
+
+    const commonTopics = [
+        'machine learning',
+        'deep learning',
+        'artificial intelligence',
+        'computer vision',
+        'natural language processing',
+        'neural networks',
+        'data mining',
+        'algorithms'
+    ];
 
     return (
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
@@ -63,37 +44,31 @@ const TopicFilter = ({ selectedTopic, onTopicSelect, onTopicClear }) => {
                     <span className="text-sm font-medium text-gray-700">Filter by Topic:</span>
                 </div>
                 
-                <div className="flex-1 relative">
-                    <input
-                        type="text"
-                        placeholder="Search topics..."
-                        value={topicSearch}
-                        onChange={(e) => setTopicSearch(e.target.value)}
-                        onFocus={() => topicSearch && setShowDropdown(true)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                    />
-                    
-                    {showDropdown && (
-                        <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
-                            {loading ? (
-                                <div className="p-3 text-center text-gray-500">
-                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent mx-auto"></div>
-                                </div>
-                            ) : topics.length > 0 ? (
-                                topics.map((topic, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => handleTopicSelect(topic)}
-                                        className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm"
-                                    >
-                                        {topic}
-                                    </button>
-                                ))
-                            ) : topicSearch ? (
-                                <div className="p-3 text-center text-gray-500 text-sm">No topics found</div>
-                            ) : null}
+                <div className="flex-1">
+                    <form onSubmit={handleTopicSubmit} className="flex gap-2">
+                        <div className="flex-1 relative">
+                            <input
+                                type="text"
+                                placeholder="Enter topic name (e.g., 'deep learning', 'machine learning')..."
+                                value={topicInput}
+                                onChange={(e) => setTopicInput(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                            />
                         </div>
-                    )}
+                        <button
+                            type="submit"
+                            disabled={!topicInput.trim()}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${
+                                topicInput.trim()
+                                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                            }`}
+                        >
+                            <Search className="h-4 w-4" />
+                            Search
+                        </button>
+                    </form>
                 </div>
 
                 {selectedTopic && (
@@ -108,6 +83,23 @@ const TopicFilter = ({ selectedTopic, onTopicSelect, onTopicClear }) => {
                     </div>
                 )}
             </div>
+
+            {!selectedTopic && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                    <p className="text-xs text-gray-500 mb-2">Popular topics:</p>
+                    <div className="flex flex-wrap gap-2">
+                        {commonTopics.map((topic) => (
+                            <button
+                                key={topic}
+                                onClick={() => onTopicSelect(topic)}
+                                className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+                            >
+                                {topic}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
