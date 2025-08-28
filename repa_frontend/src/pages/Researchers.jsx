@@ -5,6 +5,7 @@ import axios from 'axios';
 import TopicFilter from '../components/TopicFilter';
 import SearchBar from '../components/SearchBar';
 import ResearcherCard from '../components/ResearcherCard';
+import { X, Users } from 'lucide-react';
 
 const Researchers = () => {
     const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Researchers = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalAuthors, setTotalAuthors] = useState(0);
+    const [selectedForComparison, setSelectedForComparison] = useState([]);
     const AUTHORS_PER_PAGE = 21;
 
     useEffect(() => {
@@ -53,7 +55,6 @@ const Researchers = () => {
             try {
                 let results = [];
 
-                // Case 1: Search only
                 if (searchTerm.trim() && !selectedTopic) {
                     console.log('Performing search only for:', searchTerm);
                     const searchResponse = await axios.get('http://localhost:8000/authors/search', {
@@ -65,7 +66,6 @@ const Researchers = () => {
                     setTotalAuthors(results.length);
                 }
                 
-                // Case 2: Topic filter only (with server-side pagination)
                 else if (!searchTerm.trim() && selectedTopic) {
                     console.log('Performing topic filter only for:', selectedTopic, 'page:', currentPage);
                     const topicResponse = await axios.get(
@@ -86,7 +86,6 @@ const Researchers = () => {
                         setTotalPages(calculatedTotalPages);
                         setTotalAuthors(total);
 
-                        // Fetch author details for the current page
                         const authorDetailsPromises = authorIds.map(async (authorId) => {
                             try {
                                 const authorResponse = await axios.get(`http://localhost:8000/authors/${authorId}`);
@@ -105,11 +104,9 @@ const Researchers = () => {
                     }
                 }
                 
-                // Case 3: Combined search and topic filter (client-side combination)
                 else if (searchTerm.trim() && selectedTopic) {
                     console.log('Performing combined filter - search:', searchTerm, 'topic:', selectedTopic);
                     
-                    // Step 1: Get all authors matching the search term
                     const searchResponse = await axios.get('http://localhost:8000/authors/search', {
                         params: { query: searchTerm }
                     });
@@ -117,12 +114,10 @@ const Researchers = () => {
                     console.log('Search results count:', searchResults.length);
 
                     if (searchResults.length > 0) {
-                        // Step 2: Get ALL authors for the selected topic (no pagination to get complete list)
                         let allTopicAuthorIds = [];
                         let page = 1;
                         let hasMorePages = true;
 
-                        // Fetch all pages of the topic to get complete author list
                         while (hasMorePages) {
                             try {
                                 const topicResponse = await axios.get(
@@ -130,7 +125,7 @@ const Researchers = () => {
                                     {
                                         params: { 
                                             page: page, 
-                                            pageSize: 1000 // Large page size to minimize requests
+                                            pageSize: 1000 
                                         }
                                     }
                                 );
@@ -140,7 +135,6 @@ const Researchers = () => {
                                 if (authorIds && authorIds.length > 0) {
                                     allTopicAuthorIds.push(...authorIds);
                                     
-                                    // Check if we've got all authors
                                     if (allTopicAuthorIds.length >= total) {
                                         hasMorePages = false;
                                     } else {
@@ -158,8 +152,6 @@ const Researchers = () => {
                         console.log('Total topic authorIds fetched:', allTopicAuthorIds.length);
                         
                         if (allTopicAuthorIds.length > 0) {
-                            // Step 3: Filter search results to only include those who work on the selected topic
-                            // Convert both to strings for comparison to avoid type mismatch
                             const topicAuthorIdsSet = new Set(allTopicAuthorIds.map(id => String(id)));
                             
                             results = searchResults.filter(author => {
@@ -181,7 +173,6 @@ const Researchers = () => {
                         results = [];
                     }
 
-                    // For combined search, use client-side pagination (no server pagination)
                     setTotalPages(1);
                     setTotalAuthors(results.length);
                 }
@@ -209,7 +200,30 @@ const Researchers = () => {
     };
 
     const handleCompare = (researcher) => {
-        console.log('Compare researcher:', researcher.name);
+        const isAlreadySelected = selectedForComparison.some(
+            selected => selected.authorid === researcher.authorid
+        );
+
+        if (isAlreadySelected) {
+            setSelectedForComparison(prev => 
+                prev.filter(selected => selected.authorid !== researcher.authorid)
+            );
+        } else {
+            if (selectedForComparison.length < 2) {
+                setSelectedForComparison(prev => [...prev, researcher]);
+            }
+        }
+    };
+
+    const handleStartComparison = () => {
+        if (selectedForComparison.length === 2) {
+            const [researcher1, researcher2] = selectedForComparison;
+            navigate(`/compare/${researcher1.authorid}/${researcher2.authorid}`);
+        }
+    };
+
+    const handleClearComparison = () => {
+        setSelectedForComparison([]);
     };
 
     const handleTopicSelect = (topic) => {
@@ -231,6 +245,47 @@ const Researchers = () => {
         setCurrentPage(newPage);
     };
 
+    const renderComparisonBar = () => {
+        if (selectedForComparison.length === 0) return null;
+
+        return (
+            <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 min-w-[400px]">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Users size={20} className="text-blue-600" />
+                        <div>
+                            <p className="text-sm font-medium text-gray-800">
+                                {selectedForComparison.length === 1 
+                                    ? "Select another researcher to compare"
+                                    : `Comparing ${selectedForComparison.length} researchers`
+                                }
+                            </p>
+                            <p className="text-xs text-gray-600">
+                                {selectedForComparison.map(r => r.name).join(" vs ")}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {selectedForComparison.length === 2 && (
+                            <button
+                                onClick={handleStartComparison}
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium"
+                            >
+                                Compare
+                            </button>
+                        )}
+                        <button
+                            onClick={handleClearComparison}
+                            className="text-gray-500 hover:text-gray-700"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderAuthors = (list) => (
         list.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
@@ -240,6 +295,12 @@ const Researchers = () => {
                         researcher={author}
                         onViewDetails={handleViewDetails}
                         onCompare={handleCompare}
+                        isSelectedForComparison={selectedForComparison.some(
+                            selected => selected.authorid === author.authorid
+                        )}
+                        canSelectForComparison={selectedForComparison.length < 2 || 
+                            selectedForComparison.some(selected => selected.authorid === author.authorid)
+                        }
                     />
                 ))}
             </div>
@@ -251,7 +312,6 @@ const Researchers = () => {
     );
 
     const renderPagination = () => {
-        // Only show pagination for topic-only filter (which has server-side pagination)
         if (searchTerm || totalPages <= 1) return null;
         
         return (
@@ -358,6 +418,8 @@ const Researchers = () => {
                     {renderPagination()}
                 </>
             )}
+
+            {renderComparisonBar()}
         </div>
     );
 };
