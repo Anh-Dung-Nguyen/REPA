@@ -36,8 +36,8 @@ const ResearcherDetailPage = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [showAllTopics] = useState(false);
     const [hindexPerTopic, setHindexPerTopic] = useState([]);
-    const [impactPerTopic, setImpactPerTopic] = useState({});
-    const [impactGroupTopic, setImpactGroupTopic] = useState({});
+    // const [impactPerTopic, setImpactPerTopic] = useState({});
+    // const [impactGroupTopic, setImpactGroupTopic] = useState({});
     // const [coAuthorsCitationsEvolution, setCoAuthorsCitationsEvolution] = useState([]);
     const [allTopics, setAllTopics] = useState([]);
 
@@ -99,9 +99,11 @@ const ResearcherDetailPage = () => {
 
                 const hindexPerTopicResponse = await axios.get(`http://localhost:8000/authors/hindex_per_topic/${authorId}`);
                 setHindexPerTopic(hindexPerTopicResponse.data?.hindexPerTopic || []);
-
+                
+                /*
                 const impactGroupTopicResponse = await axios.get(`http://localhost:8000/impact/impact_group_topic/${authorId}`);
                 setImpactGroupTopic(impactGroupTopicResponse.data?.impact_factor || "N/A");
+                */
 
                 const authorTopicsResponse = await axios.get(`http://localhost:8000/author_topics/${authorId}`);
                 setAllTopics(authorTopicsResponse.data?.[0]?.topics || []);
@@ -117,6 +119,7 @@ const ResearcherDetailPage = () => {
         fetchData();
     }, [authorId]);
 
+    /*
     useEffect(() => {
         const fetchImpactFactors = async () => {
             if (!researcher?.specific_topic) return;
@@ -143,6 +146,7 @@ const ResearcherDetailPage = () => {
 
         fetchImpactFactors();
     }, [researcher]);
+    */
 
     const handlePaperClick = async (paper) => {
         if (!paper?.corpusid) {
@@ -212,12 +216,12 @@ const ResearcherDetailPage = () => {
             const lowerCaseTopic = trimmedTopic.toLowerCase();
 
             const hindexData = hindexPerTopic.find(item => item.topic.toLowerCase() === lowerCaseTopic);
-            const impact = impactPerTopic[lowerCaseTopic];
+            // const impact = impactPerTopic[lowerCaseTopic];
 
             return {
                 name: trimmedTopic,
                 hindex: hindexData ? hindexData.hindex : 'N/A',
-                impactFactor: impact !== undefined ? impact.toFixed(2) : 'N/A'
+                // impactFactor: impact !== undefined ? impact.toFixed(2) : 'N/A'
             };
         }).filter(topic => Boolean(topic.name))
         : [];
@@ -363,7 +367,7 @@ const ResearcherDetailPage = () => {
 
                 {activeTab === 'overview' && (
                     <div className="space-y-6">
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="bg-white rounded-lg shadow-md p-4 border-t-4 border-blue-500 hover:scale-105 transition-transform">
                                 <div className="text-2xl font-bold text-blue-600">{researcher.papercount || 'N/A'}</div>
                                 <div className="text-sm text-gray-600">Papers Published</div>
@@ -380,10 +384,13 @@ const ResearcherDetailPage = () => {
                                 <div className="text-2xl font-bold text-orange-600">{researcher.unique_coauthors_count || coAuthors.length}</div>
                                 <div className="text-sm text-gray-600">Collaborators</div>
                             </div>
+
+                            {/* 
                             <div className="bg-white rounded-lg shadow-md p-4 border-t-4 border-yellow-500 hover:scale-105 transition-transform">
                                 <div className="text-2xl font-bold text-yellow-600">{impactGroupTopic.toFixed(2)}</div>
                                 <div className="text-sm text-gray-600">Research Fields' Impact Factor</div>
                             </div>
+                            */}
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
