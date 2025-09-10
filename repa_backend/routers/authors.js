@@ -450,17 +450,195 @@ router.get("/:author_id/coauthors", async (req, res) => {
  *                         type: object
  */
 
-router.get("/search", async (req, res) => {
+let searchIndexesInitialized = false;
+
+async function initializeSearchIndexes() {
+    if (searchIndexesInitialized) return;
+    
     try {
         const db = getDB();
-        const { query: searchQuery } = req.query;
+        console.log("Creating database indexes for large-scale search...");
+        
+        const indexOperations = [
+            db.collection("authors").createIndex(
+                { name: "text" },
+                { 
+                    name: "author_name_text_idx",
+                    background: true,
+                    weights: { name: 1 }
+                }
+            ),
+            
+            db.collection("authors").createIndex(
+                { hindex: -1, citationcount: -1, papercount: -1 },
+                { name: "author_metrics_idx", background: true }
+            ),
+            
+            db.collection("authors").createIndex(
+                { authorid: 1 },
+                { name: "author_id_idx", background: true, unique: true }
+            ),
+            
+            db.collection("papers_with_annotations").createIndex(
+                { "authors.authorId": 1, updated: -1 },
+                { name: "papers_author_date_idx", background: true }
+            ),
+            
+            db.collection("author_topics").createIndex(
+                { authorId: 1 },
+                { name: "author_topics_idx", background: true }
+            )
+        ];
+        
+        await Promise.all(indexOperations.map(op => 
+            op.catch(error => {
+                if (!error.message.includes('already exists')) {
+                    console.warn("Index creation warning:", error.message);
+                }
+            })
+        ));
+        
+        searchIndexesInitialized = true;
+        console.log("Database indexes initialized successfully");
+        
+    } catch (error) {
+        console.error("Error initializing search indexes:", error);
+    }
+}
+
+function calculateNameSimilarity(query, name) {
+    const queryLower = query.toLowerCase().trim();
+    const nameLower = name.toLowerCase().trim();
+    
+    // Exact match
+    if (nameLower === queryLower) return 100;
+    
+    // Starts with query
+    if (nameLower.startsWith(queryLower)) return 95;
+    
+    // Contains query as whole word
+    const queryWords = queryLower.split(/\s+/);
+    const nameWords = nameLower.split(/\s+/);
+    
+    // Check if all query words are present in name
+    const allWordsMatch = queryWords.every(qWord => 
+        nameWords.some(nWord => nWord === qWord)
+    );
+    if (allWordsMatch) return 90;
+    
+    // Check if all query words start any name words
+    const allWordsStartMatch = queryWords.every(qWord => 
+        nameWords.some(nWord => nWord.startsWith(qWord))
+    );
+    if (allWordsStartMatch) return 85;
+    
+    // Partial word matching
+    const partialMatches = queryWords.filter(qWord => 
+        nameWords.some(nWord => nWord.includes(qWord))
+    ).length;
+    
+    if (partialMatches === queryWords.length) return 80;
+    if (partialMatches > 0) return 50 + (partialMatches / queryWords.length) * 25;
+    
+    // Contains query as substring
+    if (nameLower.includes(queryLower)) return 60;
+    
+    return 0;
+}
+
+async function enrichAuthorData(authorIds) {
+    const db = getDB();
+    
+    // Get latest papers
+    const latestPapers = await db.collection("papers_with_annotations").aggregate([
+        { $match: { "authors.authorId": { $in: authorIds } } },
+        { $unwind: "$authors" },
+        { $match: { "authors.authorId": { $in: authorIds } } },
+        { $sort: { updated: -1 } },
+        {
+            $group: {
+                _id: "$authors.authorId",
+                latestTitle: { $first: "$title" }
+            }
+        }
+    ]).toArray();
+    
+    // Get topics
+    const topicsData = await db.collection("author_topics")
+        .find(
+            { authorId: { $in: authorIds } },
+            { projection: { authorId: 1, topics: 1, _id: 0 } }
+        )
+        .toArray();
+    
+    // Fixed coauthor count calculation
+    const coauthorCounts = await db.collection("papers_with_annotations").aggregate([
+        { $match: { "authors.authorId": { $in: authorIds } } },
+        { $unwind: "$authors" },
+        {
+            $group: {
+                _id: "$_id", // Group by paper ID
+                authors: { $addToSet: "$authors.authorId" },
+                targetAuthors: {
+                    $addToSet: {
+                        $cond: [
+                            { $in: ["$authors.authorId", authorIds] },
+                            "$authors.authorId",
+                            "$$REMOVE"
+                        ]
+                    }
+                }
+            }
+        },
+        { $unwind: "$targetAuthors" }, // Unwind target authors
+        {
+            $group: {
+                _id: "$targetAuthors", // Group by target author
+                allCoauthors: { $addToSet: "$authors" } // Collect all coauthor sets
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                coauthorCount: {
+                    $subtract: [
+                        { $size: { $setUnion: "$allCoauthors" } }, // Unique coauthors across all papers
+                        1 // Subtract the author themselves
+                    ]
+                }
+            }
+        }
+    ]).toArray();
+    
+    const papersMap = new Map(latestPapers.map(p => [p._id, p.latestTitle]));
+    const topicsMap = new Map(topicsData.map(t => [
+        t.authorId, 
+        t.topics ? t.topics.slice(0, 5).map(topic => 
+            topic.charAt(0).toUpperCase() + topic.slice(1)
+        ).join(", ") : null
+    ]));
+    const coauthorMap = new Map(coauthorCounts.map(c => [c._id, c.coauthorCount]));
+    
+    return { papersMap, topicsMap, coauthorMap };
+}
+
+router.get("/search", async (req, res) => {
+    try {
+        if (!searchIndexesInitialized) {
+            await initializeSearchIndexes();
+        }
+        
+        const db = getDB();
+        const { query: searchQuery, limit = 50 } = req.query; // Increased default limit
         
         if (!searchQuery || searchQuery.trim() === "") {
             return res.status(400).json({ error: "Missing or empty 'query' parameter" });
         }
         
         const trimmedQuery = searchQuery.trim();
-        const searchHash = createSearchHash(trimmedQuery);
+        const searchLimit = Math.min(parseInt(limit) || 50, 100); // Increased max limit
+        
+        const searchHash = createSearchHash(trimmedQuery + "_" + searchLimit);
         const cacheKey = `authors_search_${searchHash}`;
         const cached = hashCache.get(cacheKey);
         
@@ -470,73 +648,175 @@ router.get("/search", async (req, res) => {
         
         let authors = [];
         
+        // Check for exact author ID match first
         if (/^[a-zA-Z0-9]+$/.test(trimmedQuery)) {
             const exactMatch = await db.collection("authors")
-                .findOne({ authorid: trimmedQuery }, { projection: { _id: 0 } });
+                .findOne(
+                    { authorid: trimmedQuery }, 
+                    { projection: { _id: 0 } }
+                );
             if (exactMatch) {
-                authors = [exactMatch];
+                authors = [{ ...exactMatch, similarityScore: 100 }];
             }
         }
         
         if (authors.length === 0) {
-            const pipeline = [
-                {
-                    $match: {
-                        name: { $regex: new RegExp(trimmedQuery, "i") }
+            let searchResults = [];
+            
+            // Try text search first (for better full-text matching)
+            try {
+                searchResults = await db.collection("authors").find(
+                    { $text: { $search: `"${trimmedQuery}"` } }, // Use phrase search for better exact matching
+                    { 
+                        projection: { _id: 0 },
+                        score: { $meta: "textScore" }
                     }
-                },
-                { $project: { _id: 0 } },
-                { $limit: 50 },
-                { $sort: { hindex: -1, citationcount: -1 } }
-            ];
-            authors = await db.collection("authors").aggregate(pipeline).toArray();
-        }
-        
-        const enrichedAuthors = await Promise.all(authors.map(async (author) => {
-            const authorId = author.authorid;
-            
-            const papers = await db.collection("papers_with_annotations")
-                .find({ "authors.authorId": authorId }, { projection: { authors: 1, title: 1 } })
+                )
+                .sort({ score: { $meta: "textScore" }, hindex: -1 })
+                .limit(searchLimit * 2) // Get more results initially
                 .toArray();
+                
+                console.log(`Phrase text search found ${searchResults.length} results`);
+                
+                // If phrase search doesn't return enough results, try regular text search
+                if (searchResults.length < searchLimit) {
+                    const additionalResults = await db.collection("authors").find(
+                        { $text: { $search: trimmedQuery } },
+                        { 
+                            projection: { _id: 0 },
+                            score: { $meta: "textScore" }
+                        }
+                    )
+                    .sort({ score: { $meta: "textScore" }, hindex: -1 })
+                    .limit(searchLimit * 2)
+                    .toArray();
+                    
+                    // Merge results, avoiding duplicates
+                    const existingIds = new Set(searchResults.map(a => a.authorid));
+                    additionalResults.forEach(author => {
+                        if (!existingIds.has(author.authorid)) {
+                            searchResults.push(author);
+                        }
+                    });
+                    
+                    console.log(`Combined text search found ${searchResults.length} results`);
+                }
+                
+            } catch (error) {
+                console.log("Text search failed, falling back to regex:", error.message);
+            }
             
-            const latestPaper = papers.length > 0 ? papers[0] : null;
+            // Always add regex search for partial matching
+            const escapedQuery = trimmedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             
-            const coauthorSet = new Set();
-            if (papers && Array.isArray(papers)) {
-                papers.forEach(paper => {
-                    if (paper.authors && Array.isArray(paper.authors)) {
-                        paper.authors.forEach(a => {
-                            if (a.authorId && a.authorId !== authorId) {
-                                coauthorSet.add(a.authorId);
-                            }
-                        });
+            // Multiple regex patterns for better matching
+            const regexPatterns = [
+                new RegExp(`\\b${escapedQuery}\\b`, "i"), // Word boundaries
+                new RegExp(`^${escapedQuery}`, "i"), // Starts with
+                new RegExp(escapedQuery, "i") // Contains
+            ];
+            
+            for (const pattern of regexPatterns) {
+                const regexResults = await db.collection("authors").find(
+                    { name: { $regex: pattern } },
+                    { projection: { _id: 0 } }
+                )
+                .sort({ hindex: -1, citationcount: -1 })
+                .limit(searchLimit * 2)
+                .toArray();
+                
+                const existingIds = new Set(searchResults.map(a => a.authorid));
+                regexResults.forEach(author => {
+                    if (!existingIds.has(author.authorid)) {
+                        searchResults.push(author);
                     }
                 });
             }
             
-            const specificTopicEntry = await db.collection("author_topics")
-                .findOne({ authorId: authorId });
+            console.log(`Final combined search found ${searchResults.length} results`);
             
-            function capitalizeFirstLetter(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
-            }
-            
-            return {
-                ...author,
-                latest_paper_title: latestPaper?.title || null,
-                topic: specificTopicEntry?.topics
-                    ? capitalizeFirstLetter(specificTopicEntry.topics.join(", "))
-                    : null,
-                unique_coauthors_count: coauthorSet.size
-            };
+            // Calculate similarity and filter
+            authors = searchResults
+                .map(author => ({
+                    ...author,
+                    similarityScore: calculateNameSimilarity(trimmedQuery, author.name)
+                }))
+                .filter(author => author.similarityScore > 20) // Lowered threshold
+                .sort((a, b) => {
+                    // First sort by similarity score
+                    const scoreDiff = b.similarityScore - a.similarityScore;
+                    if (Math.abs(scoreDiff) > 10) return scoreDiff;
+                    
+                    // Then by h-index
+                    const hindexDiff = (b.hindex || 0) - (a.hindex || 0);
+                    if (hindexDiff !== 0) return hindexDiff;
+                    
+                    // Finally by citation count
+                    return (b.citationcount || 0) - (a.citationcount || 0);
+                })
+                .slice(0, searchLimit);
+        }
+        
+        if (authors.length === 0) {
+            return res.json({ authors: [] });
+        }
+        
+        // Enrich with additional data
+        const authorIds = authors.map(a => a.authorid);
+        const { papersMap, topicsMap, coauthorMap } = await enrichAuthorData(authorIds);
+        
+        const enrichedAuthors = authors.map(author => ({
+            ...author,
+            latest_paper_title: papersMap.get(author.authorid) || null,
+            topic: topicsMap.get(author.authorid) || null,
+            unique_coauthors_count: coauthorMap.get(author.authorid) || 0,
+            similarityScore: undefined // Remove from final response
         }));
         
-        hashCache.set(cacheKey, enrichedAuthors);
+        hashCache.set(cacheKey, enrichedAuthors, 1800);
+        
         res.json({ authors: enrichedAuthors });
         
     } catch (err) {
-        console.error("Error searching authors:", err);
+        console.error("Error in scalable author search:", err);
         res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+router.get("/search/status", async (req, res) => {
+    try {
+        const db = getDB();
+        
+        const [authorCount, paperCount] = await Promise.all([
+            db.collection("authors").estimatedDocumentCount(),
+            db.collection("papers_with_annotations").estimatedDocumentCount()
+        ]);
+        
+        const authorIndexes = await db.collection("authors").indexes();
+        const hasTextIndex = authorIndexes.some(idx => idx.name === "author_name_text_idx");
+        
+        res.json({
+            searchOptimized: searchIndexesInitialized,
+            hasTextIndex,
+            collections: {
+                authors: authorCount,
+                papers: paperCount
+            },
+            indexCount: authorIndexes.length,
+            cacheSize: hashCache.keys().length
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to get status" });
+    }
+});
+
+router.post("/search/create-indexes", async (req, res) => {
+    try {
+        await initializeSearchIndexes();
+        res.json({ message: "Search indexes created successfully" });
+    } catch (error) {
+        console.error("Error creating indexes:", error);
+        res.status(500).json({ error: "Failed to create indexes" });
     }
 });
 
